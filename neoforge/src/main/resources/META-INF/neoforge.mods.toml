@@ -32,3 +32,10 @@ side = "BOTH"
 # versionRange = "[1.0,)"
 # ordering = "NONE"
 # side = "BOTH"
+
+[[dependencies.roadweaver]]
+modId = "cloth_config"
+type = "optional"
+versionRange = "[15.0,)"
+ordering = "NONE"
+side = "CLIENT"
