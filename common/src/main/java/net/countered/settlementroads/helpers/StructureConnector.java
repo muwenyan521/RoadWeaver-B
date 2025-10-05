@@ -2,9 +2,9 @@ package net.countered.settlementroads.helpers;
 
 import net.countered.settlementroads.SettlementRoads;
 import net.countered.settlementroads.config.ModConfig;
-import net.countered.settlementroads.persistence.attachments.WorldDataAttachment;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
+import net.countered.settlementroads.persistence.WorldDataProvider;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,35 +18,37 @@ public class StructureConnector {
     private static final Logger LOGGER = LoggerFactory.getLogger(SettlementRoads.MOD_ID);
     public static Queue<Records.StructureConnection> cachedStructureConnections = new ArrayDeque<>();
     
-    public static void cacheNewConnection(ServerWorld serverWorld, boolean locateAtPlayer) {
-        StructureLocator.locateConfiguredStructure(serverWorld, 1, locateAtPlayer);
-        List<BlockPos> villagePosList = serverWorld.getAttached(WorldDataAttachment.STRUCTURE_LOCATIONS).structureLocations();
+    public static void cacheNewConnection(ServerLevel serverLevel, boolean locateAtPlayer) {
+        StructureLocator.locateConfiguredStructure(serverLevel, 1, locateAtPlayer);
+        WorldDataProvider dataProvider = WorldDataProvider.getInstance();
+        List<BlockPos> villagePosList = dataProvider.getStructureLocations(serverLevel).structureLocations();
         if (villagePosList == null || villagePosList.size() < 2) {
             return;
         }
-        createNewStructureConnection(serverWorld);
+        createNewStructureConnection(serverLevel);
     }
 
-    private static void createNewStructureConnection(ServerWorld serverWorld) {
-        List<BlockPos> villagePosList = serverWorld.getAttached(WorldDataAttachment.STRUCTURE_LOCATIONS).structureLocations();
+    private static void createNewStructureConnection(ServerLevel serverLevel) {
+        WorldDataProvider dataProvider = WorldDataProvider.getInstance();
+        List<BlockPos> villagePosList = dataProvider.getStructureLocations(serverLevel).structureLocations();
         BlockPos latestVillagePos = villagePosList.get(villagePosList.size() - 1);
-        Records.StructureLocationData structureLocationData = serverWorld.getAttached(WorldDataAttachment.STRUCTURE_LOCATIONS);
+        Records.StructureLocationData structureLocationData = dataProvider.getStructureLocations(serverLevel);
         List<BlockPos> worldStructureLocations = structureLocationData.structureLocations();
 
         BlockPos closestVillage = findClosestStructure(latestVillagePos, worldStructureLocations);
 
         if (closestVillage != null) {
             List<Records.StructureConnection> connections = new ArrayList<>(
-                    serverWorld.getAttachedOrCreate(WorldDataAttachment.CONNECTED_STRUCTURES, ArrayList::new)
+                    dataProvider.getStructureConnections(serverLevel)
             );
             if (!connectionExists(connections, latestVillagePos, closestVillage)) {
                 Records.StructureConnection structureConnection = new Records.StructureConnection(latestVillagePos, closestVillage);
                 connections.add(structureConnection);
-                serverWorld.setAttached(WorldDataAttachment.CONNECTED_STRUCTURES, connections);
+                dataProvider.setStructureConnections(serverLevel, connections);
                 cachedStructureConnections.add(structureConnection);
                 LOGGER.debug("Created connection between {} and {} (distance: {} blocks)", 
                     latestVillagePos, closestVillage, 
-                    Math.sqrt(latestVillagePos.getSquaredDistance(closestVillage)));
+                    Math.sqrt(latestVillagePos.distSqr(closestVillage)));
             }
         }
     }
@@ -67,7 +69,7 @@ public class StructureConnector {
 
         for (BlockPos village : allVillages) {
             if (!village.equals(currentVillage)) {
-                double distance = currentVillage.getSquaredDistance(village);
+                double distance = currentVillage.distSqr(village);
                 if (distance < minDistance) {
                     minDistance = distance;
                     closestVillage = village;
