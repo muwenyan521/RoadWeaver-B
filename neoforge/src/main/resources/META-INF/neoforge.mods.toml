@@ -1,0 +1,34 @@
+# NeoForge Mods.toml 配置文件
+modLoader = "javafml"
+loaderVersion = "[4,)"
+license = "MIT"
+
+[[mods]]
+modId = "roadweaver"
+version = "1.0.0"
+displayName = "RoadWeaver"
+authors = "Countered"
+description = '''Automatically generates roads between structures like villages'''
+logoFile = "icon.png"
+
+[[dependencies.roadweaver]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21.1,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.roadweaver]]
+modId = "minecraft"
+type = "required"
+versionRange = "[1.21.1,1.22)"
+ordering = "NONE"
+side = "BOTH"
+
+# 可选依赖 - MidnightLib (如果可用)
+# [[dependencies.settlementroads]]
+# modId = "midnightlib"
+# type = "optional"
+# versionRange = "[1.0,)"
+# ordering = "NONE"
+# side = "BOTH"

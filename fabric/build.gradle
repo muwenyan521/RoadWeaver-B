@@ -1,0 +1,97 @@
+import net.darkhax.curseforgegradle.TaskPublishCurseForge
+
+plugins {
+	id 'fabric-loom' version '1.9-SNAPSHOT'
+	id 'maven-publish'
+	id "com.modrinth.minotaur" version "2.+"
+	id 'net.darkhax.curseforgegradle' version '1.1.15'
+}
+
+base {
+	archivesName = "${rootProject.name}-fabric"
+}
+
+repositories {
+	maven {
+		url = "https://api.modrinth.com/maven"
+	}
+}
+
+fabricApi {
+	configureDataGeneration {
+		client = true
+	}
+}
+
+dependencies {
+	// Minecraft 和映射
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+	
+	// Fabric Loader
+	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	
+	// Fabric API
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	
+	// MidnightLib (嵌入)
+	modImplementation include("maven.modrinth:midnightlib:${project.midnightlib_version}")
+}
+
+processResources {
+	inputs.property "version", project.version
+
+	filesMatching("fabric.mod.json") {
+		expand "version": project.version
+	}
+}
+
+jar {
+	from("${rootProject.projectDir}/LICENSE") {
+		rename { "${it}_${base.archivesName.get()}"}
+	}
+}
+
+// Modrinth 发布配置
+modrinth {
+	token = System.getenv("MODRINTH_TOKEN")
+	projectId = "countereds-settlement-roads"
+	versionNumber = "${project.version}"
+	versionType = "release"
+	uploadFile = remapJar
+	gameVersions = ["1.21.1"]
+	loaders = ["fabric"]
+	changelog = file("${rootProject.projectDir}/changelog.md").text
+	versionName = "RoadWeaver ${project.version} (Fabric)"
+	dependencies {
+		embedded.project "midnightlib"
+	}
+}
+
+// CurseForge 发布配置
+tasks.register("curseforge", TaskPublishCurseForge) {
+	apiToken = System.getenv("CURSEFORGE_TOKEN")
+	def projectId = "1140708"
+
+	def mainFile = upload(projectId, remapJar)
+	mainFile.changelog = file("${rootProject.projectDir}/changelog.md")
+	mainFile.changelogType = "markdown"
+	mainFile.displayName = "RoadWeaver ${project.version} (Fabric)"
+	mainFile.releaseType = "release"
+	mainFile.addGameVersion("Fabric")
+	mainFile.addGameVersion("1.21.1")
+	mainFile.addEmbedded("midnightlib")
+}
+
+// Maven 发布
+publishing {
+	publications {
+		create("mavenJava", MavenPublication) {
+			artifactId = "${rootProject.name}-fabric"
+			from components.java
+		}
+	}
+	repositories {
+		// 添加发布仓库
+	}
+}

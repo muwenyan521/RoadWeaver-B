@@ -2,5 +2,11 @@
 /run/
 /build/
 /.gradle/
-/fabric/
-/forge/
+
+# 子项目构建产物
+/fabric/build/
+/fabric/run/
+/fabric/.gradle/
+/neoforge/build/
+/neoforge/run/
+/neoforge/.gradle/
