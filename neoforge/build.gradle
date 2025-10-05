@@ -1,41 +1,23 @@
 plugins {
-	id 'net.neoforged.moddev' version '2.0.28-beta'
-	id 'maven-publish'
+	id 'com.gradleup.shadow' version '8.3.6'
 }
 
-base {
-	archivesName = "${rootProject.name}-neoforge"
+architectury {
+	platformSetupLoomIde()
+	neoForge()
 }
 
-// NeoForge 配置
-neoForge {
-	// NeoForge 版本 - 1.21.1
-	version = "21.1.169"
-	
-	// 验证访问转换器
-	validateAccessTransformers = true
-	
-	// 运行配置
-	runs {
-		client {
-			client()
-		}
-		
-		server {
-			server()
-		}
-		
-		data {
-			data()
-		}
-	}
-	
-	// 模组配置
-	mods {
-		roadweaver {
-			sourceSet sourceSets.main
-		}
-	}
+loom {
+	// 访问转换器配置
+	accessWidenerPath = project(':common').loom.accessWidenerPath
+}
+
+configurations {
+	common
+	shadowCommon // Don't use shadow from the shadow plugin since it conflicts with Loom.
+	compileClasspath.extendsFrom common
+	runtimeClasspath.extendsFrom common
+	developmentNeoForge.extendsFrom common
 }
 
 // 添加生成的资源到主资源集
@@ -49,8 +31,16 @@ repositories {
 }
 
 dependencies {
-	// Cloth Config API for NeoForge
-	implementation "me.shedaniel.cloth:cloth-config-neoforge:15.0.140"
+	// Common 模块
+	common(project(path: ":common", configuration: "namedElements")) { transitive false }
+	shadowCommon(project(path: ":common", configuration: "transformProductionNeoForge")) { transitive = false }
+	
+	// Architectury API
+	modImplementation("dev.architectury:architectury-neoforge:13.0.8")
+	
+	// Cloth Config API for NeoForge (可选)
+	modCompileOnly "me.shedaniel.cloth:cloth-config-neoforge:15.0.140"
+	modRuntimeOnly "me.shedaniel.cloth:cloth-config-neoforge:15.0.140"
 }
 
 // 处理资源文件
@@ -75,7 +65,21 @@ tasks.named('processResources', ProcessResources).configure {
 	}
 }
 
+shadowJar {
+	exclude "architectury.common.json"
+	exclude "fabric.mod.json"
+	configurations = [project.configurations.shadowCommon]
+	archiveClassifier.set("dev-shadow")
+}
+
+remapJar {
+	inputFile.set shadowJar.archiveFile
+	dependsOn shadowJar
+	archiveClassifier.set(null)
+}
+
 jar {
+	archiveClassifier.set("dev")
 	from("${rootProject.projectDir}/LICENSE") {
 		rename { "${it}_${base.archivesName.get()}"}
 	}
@@ -90,6 +94,18 @@ jar {
 			'Implementation-Vendor'   : 'Countered',
 			'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
 		])
+	}
+}
+
+sourcesJar {
+	def commonSources = project(':common').sourcesJar
+	dependsOn commonSources
+	from commonSources.archiveFile.map { zipTree(it) }
+}
+
+components.java {
+	withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
+		skip()
 	}
 }
 

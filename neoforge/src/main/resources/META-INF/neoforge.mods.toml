@@ -34,6 +34,13 @@ side = "BOTH"
 # side = "BOTH"
 
 [[dependencies.roadweaver]]
+modId = "architectury"
+type = "required"
+versionRange = "[13.0,)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.roadweaver]]
 modId = "cloth_config"
 type = "optional"
 versionRange = "[15.0,)"

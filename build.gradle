@@ -1,6 +1,13 @@
 // 根项目配置 - 多模块项目
 plugins {
 	id 'java'
+	id 'dev.architectury.loom' version '1.11-SNAPSHOT' apply false
+	id 'architectury-plugin' version '3.4-SNAPSHOT'
+}
+
+// Architectury 配置
+architectury {
+	minecraft = '1.21.1'
 }
 
 // 全局配置
@@ -12,6 +19,23 @@ allprojects {
 // 子项目通用配置
 subprojects {
 	apply plugin: 'java'
+	apply plugin: 'dev.architectury.loom'
+	apply plugin: 'architectury-plugin'
+	apply plugin: 'maven-publish'
+	
+	base {
+		archivesName = "${rootProject.name}-${project.name}"
+	}
+	
+	repositories {
+		maven { url = 'https://maven.shedaniel.me/' }
+		maven { url = 'https://maven.terraformersmc.com/' }
+	}
+	
+	dependencies {
+		minecraft "com.mojang:minecraft:1.21.1"
+		mappings loom.officialMojangMappings()
+	}
 	
 	java {
 		toolchain {
