@@ -44,20 +44,22 @@ public class ClothConfigScreen {
         ConfigCategory preGeneration = builder.getOrCreateCategory(
                 Component.translatable("config.roadweaver.category.pregeneration"));
         
-        preGeneration.addEntry(entryBuilder.startIntSlider(
+        preGeneration.addEntry(entryBuilder.startIntField(
                 Component.translatable("config.roadweaver.initialLocatingCount"),
-                ModConfig.SERVER.initialLocatingCount.get(),
-                1, 20)
+                ModConfig.SERVER.initialLocatingCount.get())
                 .setDefaultValue(7)
+                .setMin(1)
+                .setMax(20)
                 .setTooltip(Component.translatable("config.roadweaver.initialLocatingCount.tooltip"))
                 .setSaveConsumer(ModConfig.SERVER.initialLocatingCount::set)
                 .build());
         
-        preGeneration.addEntry(entryBuilder.startIntSlider(
+        preGeneration.addEntry(entryBuilder.startIntField(
                 Component.translatable("config.roadweaver.maxConcurrentRoadGeneration"),
-                ModConfig.SERVER.maxConcurrentRoadGeneration.get(),
-                1, 10)
+                ModConfig.SERVER.maxConcurrentRoadGeneration.get())
                 .setDefaultValue(3)
+                .setMin(1)
+                .setMax(10)
                 .setTooltip(Component.translatable("config.roadweaver.maxConcurrentRoadGeneration.tooltip"))
                 .setSaveConsumer(ModConfig.SERVER.maxConcurrentRoadGeneration::set)
                 .build());
@@ -66,11 +68,12 @@ public class ClothConfigScreen {
         ConfigCategory roads = builder.getOrCreateCategory(
                 Component.translatable("config.roadweaver.category.roads"));
         
-        roads.addEntry(entryBuilder.startIntSlider(
+        roads.addEntry(entryBuilder.startIntField(
                 Component.translatable("config.roadweaver.averagingRadius"),
-                ModConfig.SERVER.averagingRadius.get(),
-                0, 5)
+                ModConfig.SERVER.averagingRadius.get())
                 .setDefaultValue(1)
+                .setMin(0)
+                .setMax(5)
                 .setTooltip(Component.translatable("config.roadweaver.averagingRadius.tooltip"))
                 .setSaveConsumer(ModConfig.SERVER.averagingRadius::set)
                 .build());
@@ -91,29 +94,32 @@ public class ClothConfigScreen {
                 .setSaveConsumer(ModConfig.SERVER.allowNatural::set)
                 .build());
         
-        roads.addEntry(entryBuilder.startIntSlider(
+        roads.addEntry(entryBuilder.startIntField(
                 Component.translatable("config.roadweaver.structureDistanceFromRoad"),
-                ModConfig.SERVER.structureDistanceFromRoad.get(),
-                3, 8)
+                ModConfig.SERVER.structureDistanceFromRoad.get())
                 .setDefaultValue(4)
+                .setMin(3)
+                .setMax(8)
                 .setTooltip(Component.translatable("config.roadweaver.structureDistanceFromRoad.tooltip"))
                 .setSaveConsumer(ModConfig.SERVER.structureDistanceFromRoad::set)
                 .build());
         
-        roads.addEntry(entryBuilder.startIntSlider(
+        roads.addEntry(entryBuilder.startIntField(
                 Component.translatable("config.roadweaver.maxHeightDifference"),
-                ModConfig.SERVER.maxHeightDifference.get(),
-                3, 10)
+                ModConfig.SERVER.maxHeightDifference.get())
                 .setDefaultValue(5)
+                .setMin(3)
+                .setMax(10)
                 .setTooltip(Component.translatable("config.roadweaver.maxHeightDifference.tooltip"))
                 .setSaveConsumer(ModConfig.SERVER.maxHeightDifference::set)
                 .build());
         
-        roads.addEntry(entryBuilder.startIntSlider(
+        roads.addEntry(entryBuilder.startIntField(
                 Component.translatable("config.roadweaver.maxTerrainStability"),
-                ModConfig.SERVER.maxTerrainStability.get(),
-                2, 10)
+                ModConfig.SERVER.maxTerrainStability.get())
                 .setDefaultValue(4)
+                .setMin(2)
+                .setMax(10)
                 .setTooltip(Component.translatable("config.roadweaver.maxTerrainStability.tooltip"))
                 .setSaveConsumer(ModConfig.SERVER.maxTerrainStability::set)
                 .build());
