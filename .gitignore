@@ -10,3 +10,7 @@
 /neoforge/build/
 /neoforge/run/
 /neoforge/.gradle/
+/neoforge/bin/
+/forge/build/
+/forge/run/
+/forge/.gradle/
