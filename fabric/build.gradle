@@ -32,9 +32,10 @@ fabricApi {
 }
 
 dependencies {
-	// Common 模块
-	common(project(path: ":common", configuration: "namedElements")) { transitive false }
-	shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
+	// Common 模块 - 添加源代码到编译路径
+	implementation project(":common")
+	common(project(path: ":common", configuration: "namedElements")) { transitive = false }
+	shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive = false }
 	
 	// Fabric Loader
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"

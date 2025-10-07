@@ -1,6 +1,7 @@
 package net.countered.settlementroads;
 
-import net.countered.settlementroads.config.ModConfig;
+import eu.midnightdust.lib.config.MidnightConfig;
+import net.countered.settlementroads.config.fabric.FabricModConfig;
 import net.countered.settlementroads.events.ModEventHandler;
 import net.countered.settlementroads.features.config.RoadFeatureRegistry;
 import net.countered.settlementroads.persistence.attachments.WorldDataAttachment;
@@ -12,24 +13,22 @@ public class SettlementRoads implements ModInitializer {
 
 	public static final String MOD_ID = "roadweaver";
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(SettlementRoads.MOD_ID);
-
-	// -5233360391469774945
-
-	// Fix:
-	// Clean snow from roads
-
-	// OPTIONAL
-	// Location lag reducing (async locator?)/ structure essentials / place instant roads?
-	// Bridges
-	// Tunnels
+	private static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
 	@Override
 	public void onInitialize() {
-		LOGGER.info("Initializing RoadWeaver...");
+		LOGGER.info("Initializing roadWeaver (Fabric)...");
+		
+		// 注册 Fabric Attachment API
 		WorldDataAttachment.registerWorldDataAttachment();
-		ModConfig.init(MOD_ID, ModConfig.class);
+		
+		// 初始化 MidnightConfig
+		MidnightConfig.init(MOD_ID, FabricModConfig.class);
+		
+		// 注册特性
 		RoadFeatureRegistry.registerFeatures();
+		
+		// 注册事件处理器
 		ModEventHandler.register();
 	}
 }

@@ -8,25 +8,27 @@ import net.countered.settlementroads.features.decoration.*;
 import net.countered.settlementroads.features.roadlogic.RoadPathCalculator;
 import net.countered.settlementroads.helpers.Records;
 import net.countered.settlementroads.helpers.StructureConnector;
-import net.countered.settlementroads.persistence.attachments.WorldDataAttachment;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.Vec3i;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.Heightmap;
-import net.minecraft.world.StructureWorldAccess;
-import net.minecraft.world.gen.feature.ConfiguredFeature;
-import net.minecraft.world.gen.feature.Feature;
-import net.minecraft.world.gen.feature.PlacedFeature;
-import net.minecraft.world.gen.feature.util.FeatureContext;
+import net.countered.settlementroads.persistence.WorldDataProvider;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,51 +52,64 @@ public class RoadFeature extends Feature<RoadFeatureConfig> {
 
     public static int chunksForLocatingCounter = 1;
 
-    public static final RegistryKey<PlacedFeature> ROAD_FEATURE_PLACED_KEY =
-            RegistryKey.of(RegistryKeys.PLACED_FEATURE, Identifier.of(SettlementRoads.MOD_ID, "road_feature_placed"));
-    public static final RegistryKey<ConfiguredFeature<?,?>> ROAD_FEATURE_KEY =
-            RegistryKey.of(RegistryKeys.CONFIGURED_FEATURE, Identifier.of(SettlementRoads.MOD_ID, "road_feature"));
+    public static final ResourceKey<ConfiguredFeature<?, ?>> ROAD_FEATURE_KEY =
+            ResourceKey.create(Registries.CONFIGURED_FEATURE, ResourceLocation.fromNamespaceAndPath(SettlementRoads.MOD_ID, "road_feature"));
+    public static final ResourceKey<net.minecraft.world.level.levelgen.placement.PlacedFeature> ROAD_FEATURE_PLACED_KEY =
+            ResourceKey.create(Registries.PLACED_FEATURE, ResourceLocation.fromNamespaceAndPath(SettlementRoads.MOD_ID, "road_feature_placed"));
     public static final Feature<RoadFeatureConfig> ROAD_FEATURE = new RoadFeature(RoadFeatureConfig.CODEC);
     public RoadFeature(Codec<RoadFeatureConfig> codec) {
         super(codec);
     }
 
     @Override
-    public boolean generate(FeatureContext<RoadFeatureConfig> context) {
+    public boolean place(FeaturePlaceContext<RoadFeatureConfig> context) {
         if (RoadPathCalculator.heightCache.size() > 100_000){
             RoadPathCalculator.heightCache.clear();
         }
-        ServerWorld serverWorld = context.getWorld().toServerWorld();
-        StructureWorldAccess structureWorldAccess = context.getWorld();
-        Records.StructureLocationData structureLocationData = serverWorld.getAttached(WorldDataAttachment.STRUCTURE_LOCATIONS);
+        WorldGenLevel level = context.level();
+        ServerLevel serverLevel = (ServerLevel) level.getLevel();
+        WorldDataProvider dataProvider = WorldDataProvider.getInstance();
+        
+        Records.StructureLocationData structureLocationData = dataProvider.getStructureLocations(serverLevel);
         if (structureLocationData == null) {
             return false;
         }
-        List<BlockPos> villageLocations = structureLocationData.structureLocations();;
-        tryFindNewStructureConnection(villageLocations, serverWorld);
+        List<BlockPos> villageLocations = structureLocationData.structureLocations();
+        tryFindNewStructureConnection(villageLocations, serverLevel);
         Set<Decoration> roadDecorationCache = new HashSet<>();
-        runRoadLogic(structureWorldAccess, context, roadDecorationCache);
-        RoadStructures.tryPlaceDecorations(roadDecorationCache);
+        runRoadLogic(level, context, roadDecorationCache);
+        tryPlaceDecorations(roadDecorationCache);
         return true;
     }
+    
+    private static void tryPlaceDecorations(Set<Decoration> decorations) {
+        for (Decoration decoration : decorations) {
+            if (decoration.placeAllowed()) {
+                decoration.place();
+            }
+        }
+    }
 
-    private void tryFindNewStructureConnection(List<BlockPos> villageLocations, ServerWorld serverWorld) {
+    private void tryFindNewStructureConnection(List<BlockPos> villageLocations, ServerLevel serverLevel) {
         // 移除数量限制，改为基于距离的智能搜寻
         chunksForLocatingCounter++;
         if (chunksForLocatingCounter > 300) {
-            List<Records.StructureConnection> connectionList= serverWorld.getAttached(WorldDataAttachment.CONNECTED_STRUCTURES);
-            serverWorld.getServer().execute(() -> {
-                StructureConnector.cacheNewConnection(serverWorld, true);
+            serverLevel.getServer().execute(() -> {
+                StructureConnector.cacheNewConnection(serverLevel, true);
             });
             chunksForLocatingCounter = 1;
         }
     }
 
-    private void runRoadLogic(StructureWorldAccess structureWorldAccess, FeatureContext<RoadFeatureConfig> context, Set<Decoration> roadDecorationPlacementPositions) {
-        int averagingRadius = ModConfig.averagingRadius;
-        List<Records.RoadData> roadDataList = structureWorldAccess.toServerWorld().getAttached(WorldDataAttachment.ROAD_DATA_LIST);
+    private void runRoadLogic(WorldGenLevel level, FeaturePlaceContext<RoadFeatureConfig> context, Set<Decoration> roadDecorationPlacementPositions) {
+        ModConfig config = ModConfig.getInstance();
+        WorldDataProvider dataProvider = WorldDataProvider.getInstance();
+        ServerLevel serverLevel = (ServerLevel) level.getLevel();
+        
+        int averagingRadius = config.averagingRadius();
+        List<Records.RoadData> roadDataList = dataProvider.getRoadDataList(serverLevel);
         if (roadDataList == null) return;
-        ChunkPos currentChunkPos = new ChunkPos(context.getOrigin());
+        ChunkPos currentChunkPos = new ChunkPos(context.origin());
 
         Set<BlockPos> posAlreadyContainsSegment = new HashSet<>();
         for (Records.RoadData data : roadDataList) {
@@ -120,7 +135,7 @@ public class RoadFeature extends Feature<RoadFeatureConfig> {
                 for (int j = i - averagingRadius; j <= i + averagingRadius; j++) {
                     if (j >= 0 && j < middlePositions.size()) {
                         BlockPos samplePos = middlePositions.get(j);
-                        double y = structureWorldAccess.getTopY(Heightmap.Type.WORLD_SURFACE_WG, samplePos.getX(), samplePos.getZ());
+                        double y = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, samplePos.getX(), samplePos.getZ());
                         heights.add(y);
                     }
                 }
@@ -128,27 +143,27 @@ public class RoadFeature extends Feature<RoadFeatureConfig> {
                 int averageY = (int) Math.round(heights.stream().mapToDouble(Double::doubleValue).average().orElse(segmentMiddlePos.getY()));
                 BlockPos averagedPos = new BlockPos(segmentMiddlePos.getX(), averageY, segmentMiddlePos.getZ());
 
-                Random random = context.getRandom();
-                if (!ModConfig.placeWaypoints) {
+                RandomSource random = context.random();
+                if (!config.placeWaypoints()) {
                     for (BlockPos widthBlock : segment.positions()) {
                         BlockPos correctedYPos = new BlockPos(widthBlock.getX(), averageY, widthBlock.getZ());
-                        placeOnSurface(structureWorldAccess, correctedYPos, materials, roadType, random);
+                        placeOnSurface(level, correctedYPos, materials, roadType, random);
                     }
                 }
-                addDecoration(structureWorldAccess, roadDecorationPlacementPositions, averagedPos, segmentIndex, nextPos, prevPos, middlePositions, roadType, random);
+                addDecoration(level, roadDecorationPlacementPositions, averagedPos, segmentIndex, nextPos, prevPos, middlePositions, roadType, random, config);
                 posAlreadyContainsSegment.add(segmentMiddlePos);
             }
         }
     }
 
-    private void addDecoration(StructureWorldAccess structureWorldAccess, Set<Decoration> roadDecorationPlacementPositions,
-                               BlockPos placePos, int segmentIndex, BlockPos nextPos, BlockPos prevPos, List<BlockPos> middleBlockPositions, int roadType, Random random) {
-        BlockPos surfacePos = placePos.withY(structureWorldAccess.getTopY(Heightmap.Type.WORLD_SURFACE_WG, placePos.getX(), placePos.getZ()));
-        BlockState blockStateAtPos = structureWorldAccess.getBlockState(surfacePos.down());
+    private void addDecoration(WorldGenLevel level, Set<Decoration> roadDecorationPlacementPositions,
+                               BlockPos placePos, int segmentIndex, BlockPos nextPos, BlockPos prevPos, List<BlockPos> middleBlockPositions, int roadType, RandomSource random, ModConfig config) {
+        BlockPos surfacePos = placePos.atY(level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, placePos.getX(), placePos.getZ()));
+        BlockState blockStateAtPos = level.getBlockState(surfacePos.below());
         // Water surface handling is now done in placeOnSurface method
-        if (ModConfig.placeWaypoints) {
+        if (config.placeWaypoints()) {
             if (segmentIndex % 25 == 0) {
-                roadDecorationPlacementPositions.add(new FenceWaypointDecoration(surfacePos, structureWorldAccess));
+                roadDecorationPlacementPositions.add(new FenceWaypointDecoration(surfacePos, level));
             }
             return;
         }
@@ -163,29 +178,29 @@ public class RoadFeature extends Feature<RoadFeatureConfig> {
         boolean isEnd = segmentIndex != middleBlockPositions.size() - 65;
         BlockPos shiftedPos;
         if (segmentIndex == 65 || segmentIndex == middleBlockPositions.size() - 65) {
-            shiftedPos = isEnd ? placePos.add(orthogonalVector.multiply(2)) : placePos.subtract(orthogonalVector.multiply(2));
-            roadDecorationPlacementPositions.add(new DistanceSignDecoration(shiftedPos, orthogonalVector, structureWorldAccess, isEnd, String.valueOf(middleBlockPositions.size())));
+            shiftedPos = isEnd ? placePos.offset(orthogonalVector.multiply(2)) : placePos.offset(orthogonalVector.multiply(-2));
+            roadDecorationPlacementPositions.add(new DistanceSignDecoration(shiftedPos, orthogonalVector, level, isEnd, String.valueOf(middleBlockPositions.size())));
         }
         else if (segmentIndex % 59 == 0) {
             boolean leftRoadSide = random.nextBoolean();
-            shiftedPos = leftRoadSide ? placePos.add(orthogonalVector.multiply(2)) : placePos.subtract(orthogonalVector.multiply(2));
-            shiftedPos = shiftedPos.withY(structureWorldAccess.getTopY(Heightmap.Type.WORLD_SURFACE_WG, shiftedPos.getX(), shiftedPos.getZ()));
+            shiftedPos = leftRoadSide ? placePos.offset(orthogonalVector.multiply(2)) : placePos.offset(orthogonalVector.multiply(-2));
+            shiftedPos = shiftedPos.atY(level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, shiftedPos.getX(), shiftedPos.getZ()));
             if (Math.abs(shiftedPos.getY() - placePos.getY()) > 1) {
                 return;
             }
             if (roadType == 0) {
-                roadDecorationPlacementPositions.add(new LamppostDecoration(shiftedPos, orthogonalVector, structureWorldAccess, leftRoadSide));
+                roadDecorationPlacementPositions.add(new LamppostDecoration(shiftedPos, orthogonalVector, level, leftRoadSide));
             }
             else {
-                roadDecorationPlacementPositions.add(new FenceWaypointDecoration(shiftedPos, structureWorldAccess));
+                roadDecorationPlacementPositions.add(new FenceWaypointDecoration(shiftedPos, level));
             }
         }
         // 添加间断栏杆装饰
-        else if (ModConfig.placeRoadFences && segmentIndex % 15 == 0) {
+        else if (config.placeRoadFences() && segmentIndex % 15 == 0) {
             // 随机选择道路一侧
             boolean leftRoadSide = random.nextBoolean();
-            shiftedPos = leftRoadSide ? placePos.add(orthogonalVector.multiply(2)) : placePos.subtract(orthogonalVector.multiply(2));
-            shiftedPos = shiftedPos.withY(structureWorldAccess.getTopY(Heightmap.Type.WORLD_SURFACE_WG, shiftedPos.getX(), shiftedPos.getZ()));
+            shiftedPos = leftRoadSide ? placePos.offset(orthogonalVector.multiply(2)) : placePos.offset(orthogonalVector.multiply(-2));
+            shiftedPos = shiftedPos.atY(level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, shiftedPos.getX(), shiftedPos.getZ()));
             
             // 检查高度差
             if (Math.abs(shiftedPos.getY() - placePos.getY()) > 1) {
@@ -193,17 +208,17 @@ public class RoadFeature extends Feature<RoadFeatureConfig> {
             }
             
             // 随机栏杆长度（1-3个方块）
-            int fenceLength = random.nextBetween(1, 3);
-            roadDecorationPlacementPositions.add(new RoadFenceDecoration(shiftedPos, orthogonalVector, structureWorldAccess, leftRoadSide, fenceLength));
+            int fenceLength = random.nextInt(1, 4);
+            roadDecorationPlacementPositions.add(new RoadFenceDecoration(shiftedPos, orthogonalVector, level, leftRoadSide, fenceLength));
         }
         // 添加大型装饰结构（秋千、长椅、凉亭等）
         else if (segmentIndex % 80 == 0) {
             // 随机选择装饰类型
             java.util.List<String> availableStructures = new java.util.ArrayList<>();
             
-            if (ModConfig.placeSwings) availableStructures.add("swing");
-            if (ModConfig.placeBenches) availableStructures.add("bench");
-            if (ModConfig.placeGloriettes) availableStructures.add("gloriette");
+            if (config.placeSwings()) availableStructures.add("swing");
+            if (config.placeBenches()) availableStructures.add("bench");
+            if (config.placeGloriettes()) availableStructures.add("gloriette");
             
             if (availableStructures.isEmpty()) {
                 return;
@@ -214,88 +229,79 @@ public class RoadFeature extends Feature<RoadFeatureConfig> {
             
             // 大型结构需要更多空间，选择道路一侧并远离道路中心
             boolean leftRoadSide = random.nextBoolean();
-            shiftedPos = leftRoadSide ? placePos.add(orthogonalVector.multiply(ModConfig.structureDistanceFromRoad)) : placePos.subtract(orthogonalVector.multiply(ModConfig.structureDistanceFromRoad));
-            shiftedPos = shiftedPos.withY(structureWorldAccess.getTopY(Heightmap.Type.WORLD_SURFACE_WG, shiftedPos.getX(), shiftedPos.getZ()));
+            int distance = config.structureDistanceFromRoad();
+            shiftedPos = leftRoadSide ? placePos.offset(orthogonalVector.multiply(distance)) : placePos.offset(orthogonalVector.multiply(-distance));
+            shiftedPos = shiftedPos.atY(level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, shiftedPos.getX(), shiftedPos.getZ()));
             
             // 对地形要求更严格
             if (Math.abs(shiftedPos.getY() - placePos.getY()) > 1) {
                 return;
             }
             
-            // 根据选择的结构类型创建装饰
-            switch (selectedStructure) {
-                case "swing":
-                    roadDecorationPlacementPositions.add(new SwingDecoration(shiftedPos, orthogonalVector, structureWorldAccess));
-                    break;
-                case "bench":
-                    roadDecorationPlacementPositions.add(new NbtStructureDecoration(shiftedPos, orthogonalVector, structureWorldAccess, "bench", new Vec3i(3, 3, 3)));
-                    break;
-                case "gloriette":
-                    roadDecorationPlacementPositions.add(new NbtStructureDecoration(shiftedPos, orthogonalVector, structureWorldAccess, "gloriette", new Vec3i(5, 5, 5)));
-                    break;
-            }
+            // TODO: 实现大型装饰结构
+            // 这些装饰类需要在 common 模块中实现
+            // 暂时跳过这些装饰
         }
     }
 
-    private void placeOnSurface(StructureWorldAccess structureWorldAccess, BlockPos placePos, List<BlockState> material, int natural, Random random) {
+    private void placeOnSurface(WorldGenLevel level, BlockPos placePos, List<BlockState> material, int natural, RandomSource random) {
+        ModConfig config = ModConfig.getInstance();
         double naturalBlockChance = 0.5;
         BlockPos surfacePos = placePos;
-        if (natural == 1 || ModConfig.averagingRadius == 0) {
-            surfacePos = structureWorldAccess.getTopPosition(Heightmap.Type.WORLD_SURFACE_WG, placePos);
+        if (natural == 1 || config.averagingRadius() == 0) {
+            surfacePos = new BlockPos(placePos.getX(), level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, placePos.getX(), placePos.getZ()), placePos.getZ());
         }
-        BlockPos topPos = structureWorldAccess.getTopPosition(Heightmap.Type.WORLD_SURFACE_WG, surfacePos);
-        BlockState blockStateAtPos = structureWorldAccess.getBlockState(topPos.down());
+        BlockPos topPos = new BlockPos(surfacePos.getX(), level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, surfacePos.getX(), surfacePos.getZ()), surfacePos.getZ());
+        BlockState blockStateAtPos = level.getBlockState(topPos.below());
         
         // Check if this is water surface - place unlit campfire instead of regular road
-        if (blockStateAtPos.equals(Blocks.WATER.getDefaultState())) {
-            structureWorldAccess.setBlockState(topPos, Blocks.CAMPFIRE.getDefaultState().with(net.minecraft.state.property.Properties.LIT, false), 3);
+        if (blockStateAtPos.equals(Blocks.WATER.defaultBlockState())) {
+            level.setBlock(topPos, Blocks.CAMPFIRE.defaultBlockState().setValue(BlockStateProperties.LIT, false), 3);
             return;
         }
         
         // place road
         if (natural == 0 || random.nextDouble() < naturalBlockChance) {
-            placeRoadBlock(structureWorldAccess, blockStateAtPos, surfacePos, material, random);
+            placeRoadBlock(level, blockStateAtPos, surfacePos, material, random);
         }
     }
 
-    private void placeRoadBlock(StructureWorldAccess structureWorldAccess, BlockState blockStateAtPos, BlockPos surfacePos, List<BlockState> materials, Random deterministicRandom) {
+    private void placeRoadBlock(WorldGenLevel level, BlockState blockStateAtPos, BlockPos surfacePos, List<BlockState> materials, RandomSource deterministicRandom) {
         // If not water, just place the road
         if (!placeAllowedCheck(blockStateAtPos.getBlock())
-                || (!structureWorldAccess.getBlockState(surfacePos.down()).isOpaque())
-                && !structureWorldAccess.getBlockState(surfacePos.down(2)).isOpaque()
-                //&& !structureWorldAccess.getBlockState(surfacePos.down(3)).isOpaque())
-                //|| structureWorldAccess.getBlockState(surfacePos.up(3)).isOpaque()
+                || (!level.getBlockState(surfacePos.below()).canOcclude())
+                && !level.getBlockState(surfacePos.below(2)).canOcclude()
         ) {
             return;
         }
         BlockState material = materials.get(deterministicRandom.nextInt(materials.size()));
-        setBlockState(structureWorldAccess, surfacePos.down(), material);
+        level.setBlock(surfacePos.below(), material, 3);
 
         for (int i = 0; i < 3; i++) {
-            BlockState blockStateUp = structureWorldAccess.getBlockState(surfacePos.up(i));
-            if (!blockStateUp.getBlock().equals(Blocks.AIR) && !blockStateUp.isIn(BlockTags.LOGS) && !blockStateUp.isIn(BlockTags.FENCES)) {
-                setBlockState(structureWorldAccess, surfacePos.up(i), Blocks.AIR.getDefaultState());
+            BlockState blockStateUp = level.getBlockState(surfacePos.above(i));
+            if (!blockStateUp.getBlock().equals(Blocks.AIR) && !blockStateUp.is(BlockTags.LOGS) && !blockStateUp.is(BlockTags.FENCES)) {
+                level.setBlock(surfacePos.above(i), Blocks.AIR.defaultBlockState(), 3);
             }
             else {
                 break;
             }
         }
 
-        BlockPos belowPos1 = surfacePos.down(2);
-        BlockState belowState1 = structureWorldAccess.getBlockState(belowPos1);
+        BlockPos belowPos1 = surfacePos.below(2);
+        BlockState belowState1 = level.getBlockState(belowPos1);
 
         if (belowState1.getBlock().equals(Blocks.GRASS_BLOCK)) {
-            setBlockState(structureWorldAccess, belowPos1, Blocks.DIRT.getDefaultState());
+            level.setBlock(belowPos1, Blocks.DIRT.defaultBlockState(), 3);
         }
     }
 
     private boolean placeAllowedCheck (Block blockToCheck) {
         return !(dontPlaceHere.contains(blockToCheck)
-                || blockToCheck.getDefaultState().isIn(BlockTags.LEAVES)
-                || blockToCheck.getDefaultState().isIn(BlockTags.LOGS)
-                || blockToCheck.getDefaultState().isIn(BlockTags.UNDERWATER_BONEMEALS)
-                || blockToCheck.getDefaultState().isIn(BlockTags.WOODEN_FENCES)
-                || blockToCheck.getDefaultState().isIn(BlockTags.PLANKS)
+                || blockToCheck.defaultBlockState().is(BlockTags.LEAVES)
+                || blockToCheck.defaultBlockState().is(BlockTags.LOGS)
+                || blockToCheck.defaultBlockState().is(BlockTags.UNDERWATER_BONEMEALS)
+                || blockToCheck.defaultBlockState().is(BlockTags.WOODEN_FENCES)
+                || blockToCheck.defaultBlockState().is(BlockTags.PLANKS)
         );
     }
 }

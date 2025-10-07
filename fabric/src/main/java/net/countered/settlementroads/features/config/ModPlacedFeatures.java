@@ -2,11 +2,13 @@ package net.countered.settlementroads.features.config;
 
 import net.countered.settlementroads.SettlementRoads;
 import net.countered.settlementroads.features.RoadFeature;
-import net.minecraft.registry.Registerable;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.world.Heightmap;
-import net.minecraft.world.gen.feature.PlacedFeature;
-import net.minecraft.world.gen.placementmodifier.HeightmapPlacementModifier;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.data.worldgen.BootstrapContext;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.level.levelgen.placement.HeightmapPlacement;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,13 +18,13 @@ public class ModPlacedFeatures {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SettlementRoads.MOD_ID);
 
-    public static void bootstrap(Registerable<PlacedFeature> context){
+    public static void bootstrap(BootstrapContext<PlacedFeature> context){
         LOGGER.info("Bootstrap PlacedFeature");
-        var configuredFeatureRegistryEntryLookup = context.getRegistryLookup(RegistryKeys.CONFIGURED_FEATURE);
+        HolderGetter<ConfiguredFeature<?, ?>> configuredFeatures = context.lookup(Registries.CONFIGURED_FEATURE);
 
         context.register(RoadFeature.ROAD_FEATURE_PLACED_KEY,
-                new PlacedFeature(configuredFeatureRegistryEntryLookup.getOrThrow(RoadFeature.ROAD_FEATURE_KEY),
-                        List.of(HeightmapPlacementModifier.of(Heightmap.Type.WORLD_SURFACE_WG)))
+                new PlacedFeature(configuredFeatures.getOrThrow(RoadFeature.ROAD_FEATURE_KEY),
+                        List.of(HeightmapPlacement.onHeightmap(Heightmap.Types.WORLD_SURFACE_WG)))
         );
     }
 }

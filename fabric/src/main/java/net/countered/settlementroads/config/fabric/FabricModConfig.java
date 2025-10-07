@@ -3,7 +3,7 @@ package net.countered.settlementroads.config.fabric;
 import eu.midnightdust.lib.config.MidnightConfig;
 import net.countered.settlementroads.config.ModConfig;
 
-public class FabricModConfig extends MidnightConfig implements ModConfig {
+public class FabricModConfig extends MidnightConfig {
     
     @Entry(category = "structures")
     public static String structureToLocate = "#minecraft:village";
@@ -49,80 +49,4 @@ public class FabricModConfig extends MidnightConfig implements ModConfig {
 
     @Entry(category = "pre-generation", min = 1, max = 10)
     public static int maxConcurrentRoadGeneration = 3;
-
-    // Implement ModConfig interface methods
-    @Override
-    public String structureToLocate() {
-        return structureToLocate;
-    }
-
-    @Override
-    public int structureSearchRadius() {
-        return structureSearchRadius;
-    }
-
-    @Override
-    public int initialLocatingCount() {
-        return initialLocatingCount;
-    }
-
-    @Override
-    public int maxConcurrentRoadGeneration() {
-        return maxConcurrentRoadGeneration;
-    }
-
-    @Override
-    public int averagingRadius() {
-        return averagingRadius;
-    }
-
-    @Override
-    public boolean allowArtificial() {
-        return allowArtificial;
-    }
-
-    @Override
-    public boolean allowNatural() {
-        return allowNatural;
-    }
-
-    @Override
-    public boolean placeWaypoints() {
-        return placeWaypoints;
-    }
-
-    @Override
-    public boolean placeRoadFences() {
-        return placeRoadFences;
-    }
-
-    @Override
-    public boolean placeSwings() {
-        return placeSwings;
-    }
-
-    @Override
-    public boolean placeBenches() {
-        return placeBenches;
-    }
-
-    @Override
-    public boolean placeGloriettes() {
-        return placeGloriettes;
-    }
-
-    @Override
-    public int structureDistanceFromRoad() {
-        return structureDistanceFromRoad;
-    }
-
-    @Override
-    public int maxHeightDifference() {
-        return maxHeightDifference;
-    }
-
-    @Override
-    public int maxTerrainStability() {
-        return maxTerrainStability;
-    }
 }

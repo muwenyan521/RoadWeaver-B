@@ -1,6 +1,5 @@
 package net.countered.settlementroads.events;
 
-
 import net.countered.settlementroads.config.ModConfig;
 import net.countered.settlementroads.features.RoadFeature;
 import net.countered.settlementroads.features.config.RoadFeatureConfig;
@@ -8,13 +7,13 @@ import net.countered.settlementroads.features.roadlogic.Road;
 import net.countered.settlementroads.features.roadlogic.RoadPathCalculator;
 import net.countered.settlementroads.helpers.Records;
 import net.countered.settlementroads.helpers.StructureConnector;
-import net.countered.settlementroads.persistence.attachments.WorldDataAttachment;
+import net.countered.settlementroads.persistence.WorldDataProvider;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.world.gen.feature.ConfiguredFeature;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,35 +34,41 @@ public class ModEventHandler {
     private static final ConcurrentHashMap<String, Future<?>> runningTasks = new ConcurrentHashMap<>();
 
     public static void register() {
+        WorldDataProvider dataProvider = WorldDataProvider.getInstance();
 
         ServerWorldEvents.LOAD.register((server, serverWorld) -> {
             restartExecutorIfNeeded();
-            if (!serverWorld.getRegistryKey().equals(net.minecraft.world.World.OVERWORLD)) return;
-            Records.StructureLocationData structureLocationData = serverWorld.getAttachedOrCreate(WorldDataAttachment.STRUCTURE_LOCATIONS, () -> new Records.StructureLocationData(new ArrayList<>()));
+            ServerLevel level = (ServerLevel) serverWorld;
+            if (!level.dimension().equals(net.minecraft.world.level.Level.OVERWORLD)) return;
+            
+            Records.StructureLocationData structureLocationData = dataProvider.getStructureLocations(level);
 
-            // 🆕 恢复未完成的道路生成任务
-            restoreUnfinishedRoads(serverWorld);
+            // 恢复未完成的道路生成任务
+            restoreUnfinishedRoads(level);
 
-            if (structureLocationData.structureLocations().size() < ModConfig.initialLocatingCount) {
-                for (int i = 0; i < ModConfig.initialLocatingCount; i++) {
-                    StructureConnector.cacheNewConnection(serverWorld, false);
-                    tryGenerateNewRoads(serverWorld, true, 5000);
+            ModConfig config = ModConfig.getInstance();
+            if (structureLocationData.structureLocations().size() < config.initialLocatingCount()) {
+                for (int i = 0; i < config.initialLocatingCount(); i++) {
+                    StructureConnector.cacheNewConnection(level, false);
+                    tryGenerateNewRoads(level, true, 5000);
                 }
             }
         });
 
         ServerWorldEvents.UNLOAD.register((server, serverWorld) -> {
-            if (!serverWorld.getRegistryKey().equals(net.minecraft.world.World.OVERWORLD)) return;
-            Future<?> task = runningTasks.remove(serverWorld.getRegistryKey().getValue().toString());
+            ServerLevel level = (ServerLevel) serverWorld;
+            if (!level.dimension().equals(net.minecraft.world.level.Level.OVERWORLD)) return;
+            Future<?> task = runningTasks.remove(level.dimension().location().toString());
             if (task != null && !task.isDone()) {
                 task.cancel(true);
-                LOGGER.debug("Aborted running road task for world: {}", serverWorld.getRegistryKey().getValue());
+                LOGGER.debug("Aborted running road task for world: {}", level.dimension().location());
             }
         });
 
         ServerTickEvents.START_WORLD_TICK.register((serverWorld) -> {
-            if (!serverWorld.getRegistryKey().equals(net.minecraft.world.World.OVERWORLD)) return;
-            tryGenerateNewRoads(serverWorld, true, 5000);
+            ServerLevel level = (ServerLevel) serverWorld;
+            if (!level.dimension().equals(net.minecraft.world.level.Level.OVERWORLD)) return;
+            tryGenerateNewRoads(level, true, 5000);
         });
 
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
@@ -75,28 +80,31 @@ public class ModEventHandler {
         });
     }
 
-    private static void tryGenerateNewRoads(ServerWorld serverWorld, Boolean async, int steps) {
+    private static void tryGenerateNewRoads(ServerLevel level, Boolean async, int steps) {
+        ModConfig config = ModConfig.getInstance();
+        WorldDataProvider dataProvider = WorldDataProvider.getInstance();
+        
         // 清理已完成的任务
         runningTasks.entrySet().removeIf(entry -> entry.getValue().isDone());
         
         // 检查是否达到并发上限
-        if (runningTasks.size() >= ModConfig.maxConcurrentRoadGeneration) {
+        if (runningTasks.size() >= config.maxConcurrentRoadGeneration()) {
             return;
         }
         
         if (!StructureConnector.cachedStructureConnections.isEmpty()) {
             Records.StructureConnection structureConnection = StructureConnector.cachedStructureConnections.poll();
-            ConfiguredFeature<?, ?> feature = serverWorld.getRegistryManager()
-                    .get(RegistryKeys.CONFIGURED_FEATURE)
+            ConfiguredFeature<?, ?> feature = level.registryAccess()
+                    .registryOrThrow(Registries.CONFIGURED_FEATURE)
                     .get(RoadFeature.ROAD_FEATURE_KEY);
 
             if (feature != null && feature.config() instanceof RoadFeatureConfig roadConfig) {
                 if (async) {
                     // 使用唯一的任务ID而不是世界ID，允许多个任务并发
-                    String taskId = serverWorld.getRegistryKey().getValue().toString() + "_" + System.nanoTime();
+                    String taskId = level.dimension().location().toString() + "_" + System.nanoTime();
                     Future<?> future = executor.submit(() -> {
                         try {
-                            new Road(serverWorld, structureConnection, roadConfig).generateRoad(steps);
+                            new Road(level, structureConnection, roadConfig, dataProvider).generateRoad(steps);
                         } catch (Exception e) {
                             LOGGER.error("Error generating road", e);
                         } finally {
@@ -106,7 +114,7 @@ public class ModEventHandler {
                     runningTasks.put(taskId, future);
                 }
                 else {
-                    new Road(serverWorld, structureConnection, roadConfig).generateRoad(steps);
+                    new Road(level, structureConnection, roadConfig, dataProvider).generateRoad(steps);
                 }
             }
         }
@@ -123,11 +131,9 @@ public class ModEventHandler {
      * 恢复未完成的道路生成任务
      * 在世界加载时调用，将所有 PLANNED 和 GENERATING 状态的连接重新加入队列
      */
-    private static void restoreUnfinishedRoads(ServerWorld serverWorld) {
-        List<Records.StructureConnection> connections = serverWorld.getAttachedOrCreate(
-                WorldDataAttachment.CONNECTED_STRUCTURES, 
-                ArrayList::new
-        );
+    private static void restoreUnfinishedRoads(ServerLevel level) {
+        WorldDataProvider dataProvider = WorldDataProvider.getInstance();
+        List<Records.StructureConnection> connections = dataProvider.getStructureConnections(level);
         
         int restoredCount = 0;
         for (Records.StructureConnection connection : connections) {
@@ -149,7 +155,7 @@ public class ModEventHandler {
                     int index = updatedConnections.indexOf(connection);
                     if (index >= 0) {
                         updatedConnections.set(index, resetConnection);
-                        serverWorld.setAttached(WorldDataAttachment.CONNECTED_STRUCTURES, updatedConnections);
+                        dataProvider.setStructureConnections(level, updatedConnections);
                     }
                 } else {
                     StructureConnector.cachedStructureConnections.add(connection);
