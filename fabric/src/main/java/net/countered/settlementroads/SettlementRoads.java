@@ -4,6 +4,7 @@ import eu.midnightdust.lib.config.MidnightConfig;
 import net.countered.settlementroads.config.fabric.FabricModConfig;
 import net.countered.settlementroads.events.ModEventHandler;
 import net.countered.settlementroads.features.config.RoadFeatureRegistry;
+import net.countered.settlementroads.features.config.FabricBiomeInjection;
 import net.countered.settlementroads.persistence.attachments.WorldDataAttachment;
 import net.fabricmc.api.ModInitializer;
 import org.slf4j.Logger;
@@ -27,6 +28,8 @@ public class SettlementRoads implements ModInitializer {
 		
 		// 注册特性
 		RoadFeatureRegistry.registerFeatures();
+		// Fabric 端通过 BiomeModifications 注入放置特性
+		FabricBiomeInjection.inject();
 		
 		// 注册事件处理器
 		ModEventHandler.register();

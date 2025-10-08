@@ -3,71 +3,44 @@
 ## ✅ 已完成
 
 ### 1. 项目配置
-- ✅ 根项目 `build.gradle` - Architectury 插件配置
 - ✅ `settings.gradle` - 仓库和模块配置  
 - ✅ `common/build.gradle` - Common 模块配置
 - ✅ `fabric/build.gradle` - Fabric 平台配置
 - ✅ `neoforge/build.gradle` - NeoForge 平台配置
 
-### 2. 已迁移到 common 的代码
+### 2. 跨平台桥接（已落地）
+- ✅ 配置系统桥接：`common/config/IModConfig.java` + `ConfigProvider`（Fabric `FabricModConfigAdapter` / NeoForge `NeoForgeModConfigAdapter`）
+- ✅ 世界数据桥接：`common/persistence/WorldDataProvider`（@ExpectPlatform）→ Fabric 使用 Attachment API，NeoForge 使用 SavedData（`WorldDataHelper`）
+- ✅ 事件体系统一：`common/events/ModEventHandler` 使用 Architectury Events（平台主类仅调用 `ModEventHandler.register()`）
+- ✅ 重复实现清理：NeoForge 端 `WorldDataProviderImpl` 统一改为返回 `NeoForgeWorldDataProvider`
+
+### 3. 已迁移到 common 的代码
 - ✅ `helpers/Records.java` - 数据记录类
 - ✅ `features/roadlogic/RoadDirection.java` - 方向枚举
+- ✅ `features/roadlogic/RoadPathCalculator.java` - A* 路径算法
+- ✅ `features/roadlogic/Road.java` - 道路生成逻辑
+- ✅ `features/decoration/*` - 装饰系统（含 `WoodSelector`、`RoadFenceDecoration` 等）
+- ✅ `features/RoadFeature.java` - 世界特性（统一实现，平台侧仅做注册）
+- ✅ `events/ModEventHandler.java` - 使用 Architectury 事件的通用事件处理器
 
 ## 🔄 进行中
 
-### 当前任务：验证 common 模块编译
-
-运行命令：
-```bash
-.\gradlew.bat :common:build
-```
+### 当前任务：暂无
+（注册系统统一已完成，见“已完成”与“下一步操作”更新）
 
 ## 📋 待迁移代码清单
 
 ### 优先级 1：纯逻辑类（无平台依赖）
-这些类可以直接复制到 common：
-
-1. **算法类**
-   - `features/roadlogic/RoadPathCalculator.java` (269行)
-   - `features/roadlogic/Road.java` (113行)
-
-2. **装饰系统基类**
-   - `features/decoration/Decoration.java`
-   - `features/decoration/OrientedDecoration.java`
-   - `features/decoration/BiomeWoodAware.java` (接口)
-   - `features/decoration/util/WoodSelector.java`
-
-3. **具体装饰类**
-   - `features/decoration/LamppostDecoration.java`
-   - `features/decoration/RoadFenceDecoration.java`
-   - `features/decoration/DistanceSignDecoration.java`
-   - `features/decoration/FenceWaypointDecoration.java`
-   - `features/decoration/StructureDecoration.java`
-   - `features/decoration/SwingDecoration.java`
-   - `features/decoration/NbtStructureDecoration.java`
-   - `features/decoration/RoadStructures.java`
+已完成迁移（Road/RoadPathCalculator/装饰系统全集合）。
 
 ### 优先级 2：需要抽象的平台特定代码
 
-这些需要创建接口或使用 Architectury API：
+这些项已完成或替换为统一实现：
 
-1. **配置系统** - `config/ModConfig.java`
-   - 需要创建接口，Fabric 用 MidnightLib，NeoForge 用 Config API
-
-2. **数据持久化** - `persistence/WorldDataHelper.java`
-   - Fabric 用 Attachment API
-   - NeoForge 用 SavedData
-   - 需要创建统一接口
-
-3. **事件处理** - `events/ModEventHandler.java`
-   - 使用 Architectury Events API 替代
-
-4. **注册系统** - `features/config/RoadFeatureRegistry.java`
-   - 使用 Architectury Registry API
-
-5. **辅助类**
-   - `helpers/StructureLocator.java`
-   - `helpers/StructureConnector.java`
+1. **配置系统** - 已完成（`IModConfig` + `ConfigProvider` + 平台 Adapter）
+2. **数据持久化** - 已完成（`WorldDataProvider` + Fabric Attachment / NeoForge SavedData）
+3. **事件处理** - 已完成（Architectury Events，common 收敛）
+4. **注册系统** - 待办：统一到 Architectury Registry（仍在平台侧注册）
 
 ### 优先级 3：平台特定实现
 
@@ -77,31 +50,23 @@
    - `fabric/SettlementRoads.java`
    - `neoforge/SettlementRoads.java`
 
-2. **客户端**
-   - `client/SettlementRoadsClient.java`
-   - `client/gui/RoadDebugScreen.java`
+2. **客户端（如调试 GUI）**
+   - `client/gui/RoadDebugScreen.java`（平台侧维护）
 
 3. **数据生成器**
    - `fabric/SettlementRoadsDataGenerator.java`
 
 ## 🎯 下一步操作
 
-### 步骤 1：验证 common 模块
+### 步骤 1：统一注册系统（已完成）
+已在 `common/features/config/RoadFeatureRegistry.java` 使用 Architectury Registry（`DeferredRegister`/`RegistrySupplier`）注册 `RoadFeature`；
+平台主类改为调用统一注册入口：
+ - Fabric：`SettlementRoads.onInitialize()` 调用 `RoadFeatureRegistry.registerFeatures()` 后通过 `BiomeModifications` 注入 `ROAD_FEATURE_PLACED`
+ - NeoForge：`SettlementRoads` 调用 `RoadFeatureRegistry.registerFeatures()`；生物群系注入使用数据驱动（`data/roadweaver/neoforge/biome_modifier/*.json`）
+
+### 步骤 2：验证 common 模块
 ```bash
 .\gradlew.bat :common:build
-```
-
-如果成功，继续步骤 2。
-
-### 步骤 2：迁移算法类
-```bash
-# 复制 RoadPathCalculator
-cp fabric/src/main/java/net/countered/settlementroads/features/roadlogic/RoadPathCalculator.java \
-   common/src/main/java/net/countered/settlementroads/features/roadlogic/
-
-# 复制 Road
-cp fabric/src/main/java/net/countered/settlementroads/features/roadlogic/Road.java \
-   common/src/main/java/net/countered/settlementroads/features/roadlogic/
 ```
 
 ### 步骤 3：迁移装饰系统

@@ -1,6 +1,7 @@
 package net.countered.settlementroads.events;
 
-import net.countered.settlementroads.config.ModConfig;
+import net.countered.settlementroads.config.ConfigProvider;
+import net.countered.settlementroads.config.IModConfig;
 import net.countered.settlementroads.features.RoadFeature;
 import net.countered.settlementroads.features.config.RoadFeatureConfig;
 import net.countered.settlementroads.features.roadlogic.Road;
@@ -46,7 +47,7 @@ public class ModEventHandler {
             // 恢复未完成的道路生成任务
             restoreUnfinishedRoads(level);
 
-            ModConfig config = ModConfig.getInstance();
+            IModConfig config = ConfigProvider.get();
             if (structureLocationData.structureLocations().size() < config.initialLocatingCount()) {
                 for (int i = 0; i < config.initialLocatingCount(); i++) {
                     StructureConnector.cacheNewConnection(level, false);
@@ -81,7 +82,7 @@ public class ModEventHandler {
     }
 
     private static void tryGenerateNewRoads(ServerLevel level, Boolean async, int steps) {
-        ModConfig config = ModConfig.getInstance();
+        IModConfig config = ConfigProvider.get();
         WorldDataProvider dataProvider = WorldDataProvider.getInstance();
         
         // 清理已完成的任务
@@ -104,7 +105,7 @@ public class ModEventHandler {
                     String taskId = level.dimension().location().toString() + "_" + System.nanoTime();
                     Future<?> future = executor.submit(() -> {
                         try {
-                            new Road(level, structureConnection, roadConfig, dataProvider).generateRoad(steps);
+                            new Road(level, structureConnection, roadConfig).generateRoad(steps);
                         } catch (Exception e) {
                             LOGGER.error("Error generating road", e);
                         } finally {
@@ -114,7 +115,7 @@ public class ModEventHandler {
                     runningTasks.put(taskId, future);
                 }
                 else {
-                    new Road(level, structureConnection, roadConfig, dataProvider).generateRoad(steps);
+                    new Road(level, structureConnection, roadConfig).generateRoad(steps);
                 }
             }
         }

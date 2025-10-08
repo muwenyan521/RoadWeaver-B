@@ -36,12 +36,23 @@ dependencyResolutionManagement {
 		maven { url = 'https://maven.fabricmc.net/' }
 		maven { url = 'https://api.modrinth.com/maven' }
 		maven { url = 'https://maven.neoforged.net/releases/' }
-		maven { url = 'https://maven.architectury.dev/' }
+
+		// 仅从官方仓库解析 NeoForged 组件，避免无意义的回退请求
+		exclusiveContent {
+			forRepository {
+				maven {
+					name = 'NeoForged'
+					url = 'https://maven.neoforged.net/releases/'
+				}
+			}
+			filter {
+				includeGroup 'net.neoforged'
+				includeGroupByRegex 'net\\.neoforged\\..*'
+			}
+		}
 	}
 }
-
 rootProject.name = 'roadweaver'
-
 // 包含子项目
 include 'common'
 include 'fabric'

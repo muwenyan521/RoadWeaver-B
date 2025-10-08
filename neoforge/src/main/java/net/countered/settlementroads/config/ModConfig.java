@@ -35,6 +35,9 @@ public class ModConfig {
         public final ModConfigSpec.IntValue structureDistanceFromRoad;
         public final ModConfigSpec.IntValue maxHeightDifference;
         public final ModConfigSpec.IntValue maxTerrainStability;
+        // Manual mode (more aggressive thresholds)
+        public final ModConfigSpec.IntValue manualMaxHeightDifference;
+        public final ModConfigSpec.IntValue manualMaxTerrainStability;
         
         public ServerConfig(ModConfigSpec.Builder builder) {
             builder.push("structures");
@@ -89,6 +92,15 @@ public class ModConfig {
             maxTerrainStability = builder
                     .comment("Maximum terrain stability value")
                     .defineInRange("maxTerrainStability", 4, 2, 10);
+            builder.pop();
+
+            builder.push("manual");
+            manualMaxHeightDifference = builder
+                    .comment("Manual connect: maximum height difference")
+                    .defineInRange("manualMaxHeightDifference", 8, 3, 20);
+            manualMaxTerrainStability = builder
+                    .comment("Manual connect: maximum terrain stability")
+                    .defineInRange("manualMaxTerrainStability", 8, 2, 20);
             builder.pop();
         }
     }
@@ -152,5 +164,13 @@ public class ModConfig {
     
     public static int maxConcurrentRoadGeneration() {
         return SERVER.maxConcurrentRoadGeneration.get();
+    }
+
+    public static int manualMaxHeightDifference() {
+        return SERVER.manualMaxHeightDifference.get();
+    }
+
+    public static int manualMaxTerrainStability() {
+        return SERVER.manualMaxTerrainStability.get();
     }
 }

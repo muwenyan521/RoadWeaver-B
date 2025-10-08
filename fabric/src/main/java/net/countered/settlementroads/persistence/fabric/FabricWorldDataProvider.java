@@ -9,7 +9,7 @@ import net.minecraft.server.level.ServerLevel;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FabricWorldDataProvider implements WorldDataProvider {
+public class FabricWorldDataProvider extends WorldDataProvider {
 
     @Override
     public Records.StructureLocationData getStructureLocations(ServerLevel level) {

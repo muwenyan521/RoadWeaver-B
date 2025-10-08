@@ -18,7 +18,7 @@ public class SettlementRoads {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
 	public SettlementRoads(IEventBus modEventBus, ModContainer modContainer) {
-		LOGGER.info("Initializing RoadWeaver (NeoForge)...");
+		LOGGER.info("Initializing roadWeaver (NeoForge)...");
 		
 		// 注册配置
 		modContainer.registerConfig(Type.SERVER, ModConfig.SERVER_SPEC);
@@ -27,10 +27,10 @@ public class SettlementRoads {
 		modEventBus.addListener(this::commonSetup);
 		
 		// 注册特性
-		RoadFeatureRegistry.registerFeatures(modEventBus);
+		RoadFeatureRegistry.registerFeatures();
 		
-		// 注册事件处理器
-		ModEventHandler.register(modEventBus);
+		// 注册事件处理器（使用 Architectury 事件的 common 实现）
+		ModEventHandler.register();
 	}
 
 	private void commonSetup(final FMLCommonSetupEvent event) {

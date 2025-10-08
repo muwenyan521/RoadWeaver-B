@@ -1,11 +1,11 @@
 package net.countered.settlementroads.config.fabric;
 
-import net.countered.settlementroads.config.ModConfig;
+import net.countered.settlementroads.config.IModConfig;
 
 /**
  * Adapter class to bridge MidnightConfig static fields with ModConfig interface
  */
-public class FabricModConfigAdapter implements ModConfig {
+public class FabricModConfigAdapter implements IModConfig {
     
     @Override
     public String structureToLocate() {
@@ -80,5 +80,15 @@ public class FabricModConfigAdapter implements ModConfig {
     @Override
     public int maxTerrainStability() {
         return FabricModConfig.maxTerrainStability;
+    }
+
+    @Override
+    public int manualMaxHeightDifference() {
+        return FabricModConfig.manualMaxHeightDifference;
+    }
+
+    @Override
+    public int manualMaxTerrainStability() {
+        return FabricModConfig.manualMaxTerrainStability;
     }
 }

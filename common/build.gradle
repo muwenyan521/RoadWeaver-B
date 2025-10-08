@@ -1,0 +1,8 @@
+architectury {
+    common("fabric", "neoforge")
+}
+
+dependencies {
+    // Architectury API（作为 mod 依赖以启用 Loom 重映射）
+    modImplementation("dev.architectury:architectury:13.0.8")
+}

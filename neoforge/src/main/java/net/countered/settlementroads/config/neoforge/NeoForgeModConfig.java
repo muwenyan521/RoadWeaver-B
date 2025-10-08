@@ -1,10 +1,10 @@
 package net.countered.settlementroads.config.neoforge;
 
-import net.countered.settlementroads.config.ModConfig;
+import net.countered.settlementroads.config.IModConfig;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import org.apache.commons.lang3.tuple.Pair;
 
-public class NeoForgeModConfig implements ModConfig {
+public class NeoForgeModConfig implements IModConfig {
     
     public static final ServerConfig SERVER;
     public static final ModConfigSpec SERVER_SPEC;
@@ -31,6 +31,9 @@ public class NeoForgeModConfig implements ModConfig {
         public final ModConfigSpec.IntValue maxHeightDifference;
         public final ModConfigSpec.IntValue maxTerrainStability;
         public final ModConfigSpec.IntValue maxConcurrentRoadGeneration;
+        // 手动连接模式（更激进阈值）
+        public final ModConfigSpec.IntValue manualMaxHeightDifference;
+        public final ModConfigSpec.IntValue manualMaxTerrainStability;
 
         ServerConfig(ModConfigSpec.Builder builder) {
             builder.comment("Structure Configuration").push("structures");
@@ -50,59 +53,57 @@ public class NeoForgeModConfig implements ModConfig {
             initialLocatingCount = builder
                     .comment("Initial structure locating count")
                     .defineInRange("initialLocatingCount", 7, 1, 20);
-                    
             maxConcurrentRoadGeneration = builder
                     .comment("Maximum concurrent road generation")
                     .defineInRange("maxConcurrentRoadGeneration", 3, 1, 10);
                     
             builder.pop();
-            
+
+            // Road Configuration
             builder.comment("Road Configuration").push("roads");
-            
             averagingRadius = builder
                     .comment("Averaging radius for road generation")
                     .defineInRange("averagingRadius", 1, 1, 5);
-                    
             allowArtificial = builder
                     .comment("Allow artificial road materials")
                     .define("allowArtificial", true);
-                    
             allowNatural = builder
                     .comment("Allow natural road materials")
                     .define("allowNatural", true);
-                    
             placeWaypoints = builder
                     .comment("Place waypoints on roads")
                     .define("placeWaypoints", false);
-                    
             placeRoadFences = builder
                     .comment("Generate road fences: Generate intermittent fence decorations along roads for enhanced visual appeal")
                     .define("placeRoadFences", true);
-                    
             placeSwings = builder
                     .comment("Place swings as decorations")
                     .define("placeSwings", true);
-                    
             placeBenches = builder
                     .comment("Place benches as decorations")
                     .define("placeBenches", true);
-                    
             placeGloriettes = builder
                     .comment("Place gloriettes as decorations")
                     .define("placeGloriettes", true);
-                    
             structureDistanceFromRoad = builder
                     .comment("Distance from road for structure placement")
                     .defineInRange("structureDistanceFromRoad", 4, 3, 8);
-                    
             maxHeightDifference = builder
                     .comment("Maximum height difference for road generation")
                     .defineInRange("maxHeightDifference", 5, 3, 10);
-                    
             maxTerrainStability = builder
                     .comment("Maximum terrain stability for road generation")
                     .defineInRange("maxTerrainStability", 4, 2, 10);
-                    
+            builder.pop();
+
+            // Manual connect thresholds (more lenient than normal)
+            builder.comment("Manual Connection Thresholds").push("manual");
+            manualMaxHeightDifference = builder
+                    .comment("Maximum height difference when manually connecting structures")
+                    .defineInRange("manualMaxHeightDifference", 8, 3, 20);
+            manualMaxTerrainStability = builder
+                    .comment("Maximum terrain stability when manually connecting structures")
+                    .defineInRange("manualMaxTerrainStability", 8, 2, 20);
             builder.pop();
         }
     }
@@ -181,5 +182,15 @@ public class NeoForgeModConfig implements ModConfig {
     @Override
     public int maxTerrainStability() {
         return SERVER.maxTerrainStability.get();
+    }
+
+    @Override
+    public int manualMaxHeightDifference() {
+        return SERVER.manualMaxHeightDifference.get();
+    }
+
+    @Override
+    public int manualMaxTerrainStability() {
+        return SERVER.manualMaxTerrainStability.get();
     }
 }

@@ -2,9 +2,11 @@ package net.countered.settlementroads.features;
 
 import com.mojang.serialization.Codec;
 import net.countered.settlementroads.SettlementRoads;
-import net.countered.settlementroads.config.ModConfig;
+import net.countered.settlementroads.config.ConfigProvider;
+import net.countered.settlementroads.config.IModConfig;
 import net.countered.settlementroads.features.config.RoadFeatureConfig;
 import net.countered.settlementroads.features.decoration.*;
+import net.countered.settlementroads.features.decoration.RoadStructures;
 import net.countered.settlementroads.features.roadlogic.RoadPathCalculator;
 import net.countered.settlementroads.helpers.Records;
 import net.countered.settlementroads.helpers.StructureConnector;
@@ -83,11 +85,7 @@ public class RoadFeature extends Feature<RoadFeatureConfig> {
     }
     
     private static void tryPlaceDecorations(Set<Decoration> decorations) {
-        for (Decoration decoration : decorations) {
-            if (decoration.placeAllowed()) {
-                decoration.place();
-            }
-        }
+        RoadStructures.tryPlaceDecorations(decorations);
     }
 
     private void tryFindNewStructureConnection(List<BlockPos> villageLocations, ServerLevel serverLevel) {
@@ -102,7 +100,7 @@ public class RoadFeature extends Feature<RoadFeatureConfig> {
     }
 
     private void runRoadLogic(WorldGenLevel level, FeaturePlaceContext<RoadFeatureConfig> context, Set<Decoration> roadDecorationPlacementPositions) {
-        ModConfig config = ModConfig.getInstance();
+        IModConfig config = ConfigProvider.get();
         WorldDataProvider dataProvider = WorldDataProvider.getInstance();
         ServerLevel serverLevel = (ServerLevel) level.getLevel();
         
@@ -157,7 +155,7 @@ public class RoadFeature extends Feature<RoadFeatureConfig> {
     }
 
     private void addDecoration(WorldGenLevel level, Set<Decoration> roadDecorationPlacementPositions,
-                               BlockPos placePos, int segmentIndex, BlockPos nextPos, BlockPos prevPos, List<BlockPos> middleBlockPositions, int roadType, RandomSource random, ModConfig config) {
+                               BlockPos placePos, int segmentIndex, BlockPos nextPos, BlockPos prevPos, List<BlockPos> middleBlockPositions, int roadType, RandomSource random, IModConfig config) {
         BlockPos surfacePos = placePos.atY(level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, placePos.getX(), placePos.getZ()));
         BlockState blockStateAtPos = level.getBlockState(surfacePos.below());
         // Water surface handling is now done in placeOnSurface method
@@ -245,7 +243,7 @@ public class RoadFeature extends Feature<RoadFeatureConfig> {
     }
 
     private void placeOnSurface(WorldGenLevel level, BlockPos placePos, List<BlockState> material, int natural, RandomSource random) {
-        ModConfig config = ModConfig.getInstance();
+        IModConfig config = ConfigProvider.get();
         double naturalBlockChance = 0.5;
         BlockPos surfacePos = placePos;
         if (natural == 1 || config.averagingRadius() == 0) {

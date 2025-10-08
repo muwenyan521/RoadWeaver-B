@@ -16,6 +16,11 @@
 - **Architectury Plugin**: 3.4-SNAPSHOT
 - **Architectury API**: 13.0.8
 
+## 当前状态同步
+- 配置桥接、世界数据桥接、事件系统已统一到 `common/`（`ConfigProvider` / `WorldDataProvider` / `ModEventHandler`）。
+- 注册系统仍在平台侧（Fabric/NeoForge）维护；可选将 `RoadFeature` 注册统一到 `common/` 使用 Architectury Registry。
+- 已清理重复实现：NeoForge 端 `WorldDataProviderImpl` 统一返回 `NeoForgeWorldDataProvider`。
+
 ---
 
 ## 📋 代码迁移步骤

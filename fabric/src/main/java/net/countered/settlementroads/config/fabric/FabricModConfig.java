@@ -1,7 +1,6 @@
 package net.countered.settlementroads.config.fabric;
 
 import eu.midnightdust.lib.config.MidnightConfig;
-import net.countered.settlementroads.config.ModConfig;
 
 public class FabricModConfig extends MidnightConfig {
     
@@ -49,4 +48,11 @@ public class FabricModConfig extends MidnightConfig {
 
     @Entry(category = "pre-generation", min = 1, max = 10)
     public static int maxConcurrentRoadGeneration = 3;
+
+    // 手动链接模式专用参数（更激进），用于当自动生成失败时提高通过率
+    @Entry(category = "manual", min = 3, max = 20)
+    public static int manualMaxHeightDifference = 8;
+
+    @Entry(category = "manual", min = 2, max = 20)
+    public static int manualMaxTerrainStability = 8;
 }

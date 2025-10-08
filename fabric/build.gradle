@@ -78,45 +78,44 @@ jar {
 		rename { "${it}_${base.archivesName.get()}"}
 	}
 }
-
 sourcesJar {
-	def commonSources = project(':common').sourcesJar
-	dependsOn commonSources
-	from commonSources.archiveFile.map { zipTree(it) }
+    // Avoid duplicate entries when merging common sources
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    def commonSources = project(':common').sourcesJar
+    dependsOn commonSources
+    from commonSources.archiveFile.map { zipTree(it) }
 }
 
 components.java {
-	withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
-		skip()
-	}
+    withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
+        skip()
+    }
 }
 
 // Modrinth 发布配置
 modrinth {
-	token = System.getenv("MODRINTH_TOKEN")
-	projectId = "countereds-settlement-roads"
-	versionNumber = "${project.version}"
-	versionType = "release"
-	uploadFile = remapJar
-	gameVersions = ["1.21.1"]
-	loaders = ["fabric"]
-	changelog = file("${rootProject.projectDir}/changelog.md").text
-	versionName = "RoadWeaver ${project.version} (Fabric)"
-	dependencies {
-		embedded.project "midnightlib"
-	}
+    token = System.getenv("MODRINTH_TOKEN")
+    projectId = "countereds-settlement-roads"
+    versionNumber = "${project.version}"
+    versionType = "release"
+    uploadFile = remapJar
+    gameVersions = ["1.21.1"]
+    loaders = ["fabric"]
+    changelog = file("${rootProject.projectDir}/changelog.md").text
+    versionName = "RoadWeaver ${project.version} (Fabric)"
+    dependencies {
+        embedded.project "midnightlib"
+    }
 }
 
 // CurseForge 发布配置
 tasks.register("curseforge", TaskPublishCurseForge) {
 	apiToken = System.getenv("CURSEFORGE_TOKEN")
 	def projectId = "1140708"
-
 	def mainFile = upload(projectId, remapJar)
 	mainFile.changelog = file("${rootProject.projectDir}/changelog.md")
 	mainFile.changelogType = "markdown"
 	mainFile.displayName = "RoadWeaver ${project.version} (Fabric)"
-	mainFile.releaseType = "release"
 	mainFile.addGameVersion("Fabric")
 	mainFile.addGameVersion("1.21.1")
 	mainFile.addEmbedded("midnightlib")
@@ -124,13 +123,30 @@ tasks.register("curseforge", TaskPublishCurseForge) {
 
 // Maven 发布
 publishing {
-	publications {
-		create("mavenJava", MavenPublication) {
-			artifactId = "${rootProject.name}-fabric"
-			from components.java
-		}
-	}
-	repositories {
-		// 添加发布仓库
-	}
+    publications {
+        create("mavenJava", MavenPublication) {
+            artifactId = "${rootProject.name}-fabric"
+            from components.java
+        }
+    }
+    repositories {
+        // 添加发布仓库
+    }
+}
+
+// 使用 common 中的 roadFeature，避免重复类定义
+sourceSets {
+    main {
+        java {
+            exclude 'net/countered/settlementroads/features/RoadFeature.java'
+            exclude 'net/countered/settlementroads/events/ModEventHandler.java'
+            // Use common's unified registry instead of platform-specific one
+            exclude 'net/countered/settlementroads/features/config/RoadFeatureRegistry.java'
+        }
+        resources {
+            // Use common data-driven configured/placed features
+            exclude 'data/roadweaver/worldgen/configured_feature/road_feature.json'
+            exclude 'data/roadweaver/worldgen/placed_feature/road_feature_placed.json'
+        }
+    }
 }
