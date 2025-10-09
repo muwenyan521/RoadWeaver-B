@@ -58,6 +58,7 @@ public final class StructureLocatorImpl {
 
         List<BlockPos> centers = collectSearchCenters(level, locateAtPlayer);
         int radius = Math.max(config.structureSearchRadius(), 1);
+        LOGGER.debug("RoadWeaver: locating up to {} structure(s) - centers={}, radius={}, atPlayer={}", locateCount, centers.size(), radius, locateAtPlayer);
 
         for (BlockPos center : centers) {
             if (locateCount <= 0) {
@@ -105,8 +106,23 @@ public final class StructureLocatorImpl {
             }
         }
 
+        BlockPos spawn = level.getSharedSpawnPos();
         if (centers.isEmpty()) {
-            centers.add(level.getSharedSpawnPos());
+            centers.add(spawn);
+            // 扩展搜索：以出生点为中心，按配置半径的倍数在八个方向取样
+            int r = Math.max(ConfigProvider.get().structureSearchRadius(), 1);
+            int[] muls = new int[] {3, 6};
+            for (int m : muls) {
+                int d = r * m;
+                centers.add(spawn.offset( d, 0,  0));
+                centers.add(spawn.offset(-d, 0,  0));
+                centers.add(spawn.offset( 0, 0,  d));
+                centers.add(spawn.offset( 0, 0, -d));
+                centers.add(spawn.offset( d, 0,  d));
+                centers.add(spawn.offset(-d, 0,  d));
+                centers.add(spawn.offset( d, 0, -d));
+                centers.add(spawn.offset(-d, 0, -d));
+            }
         }
         return centers;
     }
