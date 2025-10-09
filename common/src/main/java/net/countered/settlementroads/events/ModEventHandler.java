@@ -82,10 +82,15 @@ public class ModEventHandler {
 
         IModConfig config = ConfigProvider.get();
         if (structureLocationData.structureLocations().size() < config.initialLocatingCount()) {
+            LOGGER.info("Initializing world with {} structures", config.initialLocatingCount());
+            
+            // 只搜寻结构，不立即生成道路（由 tick 事件处理）
             for (int i = 0; i < config.initialLocatingCount(); i++) {
                 StructureConnector.cacheNewConnection(level, false);
-                tryGenerateNewRoads(level, true, 5000);
             }
+            
+            LOGGER.info("Initial structure search completed, queue size: {}", 
+                StructureConnector.cachedStructureConnections.size());
         }
     }
 
@@ -93,16 +98,38 @@ public class ModEventHandler {
         IModConfig config = ConfigProvider.get();
         WorldDataProvider dataProvider = WorldDataProvider.getInstance();
 
-        // 清理已完成的任务
-        runningTasks.entrySet().removeIf(entry -> entry.getValue().isDone());
+        // 清理已完成的任务（包括异常终止的）
+        runningTasks.entrySet().removeIf(entry -> {
+            Future<?> future = entry.getValue();
+            if (future.isDone()) {
+                try {
+                    future.get(); // 检查是否有异常
+                } catch (Exception e) {
+                    LOGGER.warn("Task {} completed with error: {}", entry.getKey(), e.getMessage());
+                }
+                return true;
+            }
+            return false;
+        });
 
-        // 并发上限
-        if (runningTasks.size() >= config.maxConcurrentRoadGeneration()) {
+        // 并发上限检查
+        int currentRunning = runningTasks.size();
+        if (currentRunning >= config.maxConcurrentRoadGeneration()) {
             return;
         }
 
         if (!StructureConnector.cachedStructureConnections.isEmpty()) {
             Records.StructureConnection structureConnection = StructureConnector.cachedStructureConnections.poll();
+            
+            if (structureConnection == null) {
+                return; // 队列为空（并发情况）
+            }
+            
+            LOGGER.info("🚧 Starting road generation: {} -> {} (running: {}/{}, queue: {})", 
+                structureConnection.from(), structureConnection.to(), 
+                currentRunning + 1, config.maxConcurrentRoadGeneration(),
+                StructureConnector.cachedStructureConnections.size());
+            
             ConfiguredFeature<?, ?> feature = level.registryAccess()
                     .registryOrThrow(Registries.CONFIGURED_FEATURE)
                     .get(RoadFeature.ROAD_FEATURE_KEY);
@@ -112,17 +139,58 @@ public class ModEventHandler {
                     String taskId = level.dimension().location().toString() + "_" + System.nanoTime();
                     Future<?> future = executor.submit(() -> {
                         try {
+                            LOGGER.debug("🔨 Generating road: {} -> {}", 
+                                structureConnection.from(), structureConnection.to());
                             new Road(level, structureConnection, roadConfig).generateRoad(steps);
+                            LOGGER.info("✅ Road generation completed: {} -> {}", 
+                                structureConnection.from(), structureConnection.to());
                         } catch (Exception e) {
-                            LOGGER.error("Error generating road", e);
+                            LOGGER.error("❌ Error generating road {} -> {}: {}", 
+                                structureConnection.from(), structureConnection.to(), 
+                                e.getMessage(), e);
+                            
+                            // 异常时标记为 FAILED，避免重试
+                            try {
+                                markConnectionAsFailed(level, structureConnection);
+                            } catch (Exception ex) {
+                                LOGGER.error("Failed to mark connection as failed", ex);
+                            }
                         } finally {
                             runningTasks.remove(taskId);
                         }
                     });
                     runningTasks.put(taskId, future);
                 } else {
-                    new Road(level, structureConnection, roadConfig).generateRoad(steps);
+                    try {
+                        new Road(level, structureConnection, roadConfig).generateRoad(steps);
+                    } catch (Exception e) {
+                        LOGGER.error("❌ Error generating road: {}", e.getMessage(), e);
+                        markConnectionAsFailed(level, structureConnection);
+                    }
                 }
+            } else {
+                LOGGER.warn("❌ RoadFeature or config not found!");
+            }
+        }
+    }
+
+    /**
+     * 标记连接为失败状态
+     */
+    private static void markConnectionAsFailed(ServerLevel level, Records.StructureConnection structureConnection) {
+        WorldDataProvider dataProvider = WorldDataProvider.getInstance();
+        List<Records.StructureConnection> connections = dataProvider.getStructureConnections(level);
+        List<Records.StructureConnection> mutableConnections = new ArrayList<>(connections != null ? connections : new ArrayList<>());
+        
+        for (int i = 0; i < mutableConnections.size(); i++) {
+            Records.StructureConnection conn = mutableConnections.get(i);
+            if ((conn.from().equals(structureConnection.from()) && conn.to().equals(structureConnection.to())) ||
+                (conn.from().equals(structureConnection.to()) && conn.to().equals(structureConnection.from()))) {
+                mutableConnections.set(i, new Records.StructureConnection(
+                    conn.from(), conn.to(), Records.ConnectionStatus.FAILED, conn.manual()));
+                dataProvider.setStructureConnections(level, mutableConnections);
+                LOGGER.info("Marked connection as FAILED: {} -> {}", conn.from(), conn.to());
+                break;
             }
         }
     }
@@ -137,39 +205,51 @@ public class ModEventHandler {
     /**
      * 恢复未完成的道路生成任务
      * 在世界加载时调用，将所有 PLANNED 和 GENERATING 状态的连接重新加入队列
+     * FAILED 和 COMPLETED 状态不处理
      */
     private static void restoreUnfinishedRoads(ServerLevel level) {
         WorldDataProvider dataProvider = WorldDataProvider.getInstance();
         List<Records.StructureConnection> connections = dataProvider.getStructureConnections(level);
 
         int restoredCount = 0;
-        for (Records.StructureConnection connection : connections) {
+        List<Records.StructureConnection> updatedConnections = new ArrayList<>(connections);
+        boolean needsUpdate = false;
+        
+        for (int i = 0; i < updatedConnections.size(); i++) {
+            Records.StructureConnection connection = updatedConnections.get(i);
+            
+            // 恢复 PLANNED 和 GENERATING 状态的连接
             if (connection.status() == Records.ConnectionStatus.PLANNED ||
                 connection.status() == Records.ConnectionStatus.GENERATING) {
 
+                // 将 GENERATING 状态重置为 PLANNED（意外中断的任务）
                 if (connection.status() == Records.ConnectionStatus.GENERATING) {
                     Records.StructureConnection resetConnection = new Records.StructureConnection(
                             connection.from(),
                             connection.to(),
-                            Records.ConnectionStatus.PLANNED
+                            Records.ConnectionStatus.PLANNED,
+                            connection.manual()
                     );
+                    updatedConnections.set(i, resetConnection);
                     StructureConnector.cachedStructureConnections.add(resetConnection);
-
-                    List<Records.StructureConnection> updatedConnections = new ArrayList<>(connections);
-                    int index = updatedConnections.indexOf(connection);
-                    if (index >= 0) {
-                        updatedConnections.set(index, resetConnection);
-                        dataProvider.setStructureConnections(level, updatedConnections);
-                    }
+                    needsUpdate = true;
                 } else {
+                    // PLANNED 状态直接加入队列
                     StructureConnector.cachedStructureConnections.add(connection);
                 }
                 restoredCount++;
             }
+            // COMPLETED 和 FAILED 状态不处理
+        }
+
+        // 批量更新连接状态
+        if (needsUpdate) {
+            dataProvider.setStructureConnections(level, updatedConnections);
         }
 
         if (restoredCount > 0) {
-            LOGGER.info("RoadWeaver: 恢复了 {} 个未完成的道路生成任务", restoredCount);
+            LOGGER.info("RoadWeaver: 恢复了 {} 个未完成的道路生成任务（队列大小: {}）", 
+                restoredCount, StructureConnector.cachedStructureConnections.size());
         }
     }
 }

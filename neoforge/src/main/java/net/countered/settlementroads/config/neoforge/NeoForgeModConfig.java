@@ -31,6 +31,7 @@ public class NeoForgeModConfig implements IModConfig {
         public final ModConfigSpec.IntValue maxHeightDifference;
         public final ModConfigSpec.IntValue maxTerrainStability;
         public final ModConfigSpec.IntValue maxConcurrentRoadGeneration;
+        public final ModConfigSpec.IntValue structureSearchTriggerDistance;
         // 手动连接模式（更激进阈值）
         public final ModConfigSpec.IntValue manualMaxHeightDifference;
         public final ModConfigSpec.IntValue manualMaxTerrainStability;
@@ -56,6 +57,9 @@ public class NeoForgeModConfig implements IModConfig {
             maxConcurrentRoadGeneration = builder
                     .comment("Maximum concurrent road generation")
                     .defineInRange("maxConcurrentRoadGeneration", 3, 1, 10);
+            structureSearchTriggerDistance = builder
+                    .comment("Chunks to load before triggering new structure search")
+                    .defineInRange("structureSearchTriggerDistance", 500, 300, 1500);
                     
             builder.pop();
 
@@ -127,6 +131,11 @@ public class NeoForgeModConfig implements IModConfig {
     @Override
     public int maxConcurrentRoadGeneration() {
         return SERVER.maxConcurrentRoadGeneration.get();
+    }
+
+    @Override
+    public int structureSearchTriggerDistance() {
+        return SERVER.structureSearchTriggerDistance.get();
     }
 
     @Override

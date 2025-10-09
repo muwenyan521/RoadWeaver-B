@@ -49,6 +49,9 @@ public class FabricModConfig extends MidnightConfig {
     @Entry(category = "pre-generation", min = 1, max = 10)
     public static int maxConcurrentRoadGeneration = 3;
 
+    @Entry(category = "pre-generation", min = 300, max = 1500)
+    public static int structureSearchTriggerDistance = 500;
+
     // 手动链接模式专用参数（更激进），用于当自动生成失败时提高通过率
     @Entry(category = "manual", min = 3, max = 20)
     public static int manualMaxHeightDifference = 8;

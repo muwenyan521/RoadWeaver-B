@@ -60,9 +60,10 @@ public class Road {
 
         WorldDataProvider dataProvider = WorldDataProvider.getInstance();
         List<Records.RoadData> roadDataList = dataProvider.getRoadDataList(serverWorld);
-        if (roadDataList == null) roadDataList = new ArrayList<>();
-        roadDataList.add(new Records.RoadData(width, type, material, roadSegmentPlacementList));
-        dataProvider.setRoadDataList(serverWorld, roadDataList);
+        // 创建可变副本以避免 UnsupportedOperationException
+        List<Records.RoadData> mutableList = new ArrayList<>(roadDataList != null ? roadDataList : new ArrayList<>());
+        mutableList.add(new Records.RoadData(width, type, material, roadSegmentPlacementList));
+        dataProvider.setRoadDataList(serverWorld, mutableList);
 
         // 完成
         updateConnectionStatus(Records.ConnectionStatus.COMPLETED);
@@ -71,13 +72,15 @@ public class Road {
     private void updateConnectionStatus(Records.ConnectionStatus newStatus) {
         WorldDataProvider dataProvider = WorldDataProvider.getInstance();
         List<Records.StructureConnection> connections = dataProvider.getStructureConnections(serverWorld);
-        if (connections == null) connections = new ArrayList<>();
-        for (int i = 0; i < connections.size(); i++) {
-            Records.StructureConnection conn = connections.get(i);
+        // 创建可变副本以避免 UnsupportedOperationException
+        List<Records.StructureConnection> mutableConnections = new ArrayList<>(connections != null ? connections : new ArrayList<>());
+        
+        for (int i = 0; i < mutableConnections.size(); i++) {
+            Records.StructureConnection conn = mutableConnections.get(i);
             if ((conn.from().equals(structureConnection.from()) && conn.to().equals(structureConnection.to())) ||
                 (conn.from().equals(structureConnection.to()) && conn.to().equals(structureConnection.from()))) {
-                connections.set(i, new Records.StructureConnection(conn.from(), conn.to(), newStatus, conn.manual()));
-                dataProvider.setStructureConnections(serverWorld, connections);
+                mutableConnections.set(i, new Records.StructureConnection(conn.from(), conn.to(), newStatus, conn.manual()));
+                dataProvider.setStructureConnections(serverWorld, mutableConnections);
                 break;
             }
         }

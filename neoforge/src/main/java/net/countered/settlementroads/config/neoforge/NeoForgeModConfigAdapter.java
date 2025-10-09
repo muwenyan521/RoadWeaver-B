@@ -26,6 +26,11 @@ public class NeoForgeModConfigAdapter implements IModConfig {
     }
 
     @Override
+    public int structureSearchTriggerDistance() {
+        return CONFIG.structureSearchTriggerDistance();
+    }
+
+    @Override
     public int averagingRadius() {
         return CONFIG.averagingRadius();
     }

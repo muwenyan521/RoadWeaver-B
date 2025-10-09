@@ -2,8 +2,10 @@ package net.countered.settlementroads.persistence;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.countered.settlementroads.helpers.Records;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -28,4 +30,14 @@ public abstract class WorldDataProvider {
     // 道路数据
     public abstract List<Records.RoadData> getRoadDataList(ServerLevel level);
     public abstract void setRoadDataList(ServerLevel level, List<Records.RoadData> roadDataList);
+    
+    // 便捷方法：添加单个结构位置
+    public void addStructureLocation(ServerLevel level, BlockPos pos) {
+        Records.StructureLocationData data = getStructureLocations(level);
+        List<BlockPos> locations = new ArrayList<>(data.structureLocations());
+        if (!locations.contains(pos)) {
+            locations.add(pos);
+            setStructureLocations(level, new Records.StructureLocationData(locations));
+        }
+    }
 }

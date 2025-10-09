@@ -15,14 +15,28 @@ public class StructureConnector {
     public static Queue<Records.StructureConnection> cachedStructureConnections = new ArrayDeque<>();
 
     public static void cacheNewConnection(ServerLevel serverWorld, boolean locateAtPlayer) {
-        StructureLocator.locateConfiguredStructure(serverWorld, 1, locateAtPlayer);
+        LOGGER.debug("🔍 cacheNewConnection called, locateAtPlayer={}", locateAtPlayer);
+        
         WorldDataProvider dataProvider = WorldDataProvider.getInstance();
+        int beforeCount = dataProvider.getStructureLocations(serverWorld).structureLocations().size();
+        
+        StructureLocator.locateConfiguredStructure(serverWorld, 1, locateAtPlayer);
+        
         Records.StructureLocationData structureLocationData = dataProvider.getStructureLocations(serverWorld);
-        if (structureLocationData == null) return;
-        List<BlockPos> locations = structureLocationData.structureLocations();
-        if (locations == null || locations.size() < 2) {
+        if (structureLocationData == null) {
+            LOGGER.warn("❌ structureLocationData is null");
             return;
         }
+        
+        List<BlockPos> locations = structureLocationData.structureLocations();
+        int afterCount = locations.size();
+        LOGGER.debug("Structure count: before={}, after={}", beforeCount, afterCount);
+        
+        if (locations == null || locations.size() < 2) {
+            LOGGER.debug("❌ Not enough structures to create connection (need 2, have {})", locations.size());
+            return;
+        }
+        
         createNewStructureConnection(serverWorld);
     }
 
@@ -45,10 +59,14 @@ public class StructureConnector {
                 connections.add(structureConnection);
                 dataProvider.setStructureConnections(serverWorld, connections);
                 cachedStructureConnections.add(structureConnection);
-                LOGGER.debug("Created connection between {} and {} (distance: {} blocks)",
-                        latestVillagePos, closestVillage,
-                        Math.sqrt(latestVillagePos.distSqr(closestVillage)));
+                double distance = Math.sqrt(latestVillagePos.distSqr(closestVillage));
+                LOGGER.info("🔗 Created connection between {} and {} (distance: {:.1f} blocks, queue size: {})",
+                        latestVillagePos, closestVillage, cachedStructureConnections.size(), distance);
+            } else {
+                LOGGER.debug("Connection already exists between {} and {}", latestVillagePos, closestVillage);
             }
+        } else {
+            LOGGER.warn("❌ Could not find closest structure for {}", latestVillagePos);
         }
     }
 

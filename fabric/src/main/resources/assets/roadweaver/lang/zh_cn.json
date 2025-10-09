@@ -50,6 +50,9 @@
   "roadweaver.midnightconfig.maxConcurrentRoadGeneration": "同时生成道路数量上限",
   "roadweaver.midnightconfig.maxConcurrentRoadGeneration.tooltip": "同时生成的道路任务数量上限。数值越小性能占用越低，但道路生成速度会变慢。默认：3",
 
+  "roadweaver.midnightconfig.structureSearchTriggerDistance": "结构搜寻触发距离",
+  "roadweaver.midnightconfig.structureSearchTriggerDistance.tooltip": "加载多少区块后触发新的结构搜寻。数值越大搜寻频率越低，但可能错过附近的结构。默认：300 区块",
+
   "key.roadweaver.debug_map": "打开调试地图",
   "category.roadweaver": "RoadWeaver",
 

@@ -206,7 +206,10 @@ public class MapRenderer {
         final int outline = 0xFF932D1F;
 
         float yaw = mc.player.getYRot();
-        double angle = Math.toRadians(-yaw + 90);
+        // Minecraft yaw: 0=South(+Z), 90=West(-X), 180=North(-Z), 270=East(+X)
+        // Screen angle: 0=Right(+X), 90=Down(+Y), 180=Left(-X), 270=Up(-Y)
+        // Map: North(-Z) is up, so we need: yaw 0 -> 90°, yaw 90 -> 180°, yaw 180 -> 270°, yaw 270 -> 0°
+        double angle = Math.toRadians(yaw + 90);
 
         int arrowLength = playerRadius + Math.max(3, (int)(4 * Math.min(zoom / 3.0, 1.5)));
 

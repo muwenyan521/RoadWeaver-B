@@ -85,9 +85,12 @@ public class RoadPathCalculator {
                 if (closedSet.contains(neighborPos)) continue;
 
                 Holder<Biome> biomeHolder = biomeSampler(neighborPos, serverWorld);
-                int biomeCost = biomeHolder.is(BiomeTags.IS_RIVER)
+                boolean isWater = biomeHolder.is(BiomeTags.IS_RIVER)
                         || biomeHolder.is(BiomeTags.IS_OCEAN)
-                        || biomeHolder.is(BiomeTags.IS_DEEP_OCEAN) ? 50 : 0;
+                        || biomeHolder.is(BiomeTags.IS_DEEP_OCEAN);
+                // 水域成本：50 * 8 = 400（与原项目一致）
+                // 如果绕路成本更高（距离远、高度差大），仍会选择穿过水域
+                int biomeCost = isWater ? 50 : 0;
                 int elevation = Math.abs(y - current.pos.getY());
                 if (elevation > maxHeightDifference) {
                     continue;

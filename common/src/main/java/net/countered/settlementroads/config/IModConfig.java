@@ -8,6 +8,7 @@ public interface IModConfig {
     // Pre-generation
     int initialLocatingCount();
     int maxConcurrentRoadGeneration();
+    int structureSearchTriggerDistance();
 
     // Roads
     int averagingRadius();

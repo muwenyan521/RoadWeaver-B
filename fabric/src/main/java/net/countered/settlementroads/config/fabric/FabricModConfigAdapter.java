@@ -28,6 +28,11 @@ public class FabricModConfigAdapter implements IModConfig {
     }
 
     @Override
+    public int structureSearchTriggerDistance() {
+        return FabricModConfig.structureSearchTriggerDistance;
+    }
+
+    @Override
     public int averagingRadius() {
         return FabricModConfig.averagingRadius;
     }

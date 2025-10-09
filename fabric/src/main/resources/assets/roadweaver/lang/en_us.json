@@ -44,6 +44,9 @@
   "roadweaver.midnightconfig.maxConcurrentRoadGeneration": "Max Concurrent Road Generation",
   "roadweaver.midnightconfig.maxConcurrentRoadGeneration.tooltip": "Maximum number of roads that can be generated simultaneously. Lower values reduce performance impact but slow down road generation. Default: 3",
 
+  "roadweaver.midnightconfig.structureSearchTriggerDistance": "Structure Search Trigger Distance",
+  "roadweaver.midnightconfig.structureSearchTriggerDistance.tooltip": "Number of chunks to load before triggering a new structure search. Higher values reduce search frequency but may miss nearby structures. Default: 300 chunks",
+
   "roadweaver.midnightconfig.title":"RoadWeaver",
 
   "key.roadweaver.debug_map": "Open Debug Map",

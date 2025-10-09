@@ -333,12 +333,26 @@ public class RoadDebugScreen extends Screen {
             List<Records.StructureConnection> list = new ArrayList<>(
                     Optional.ofNullable(provider.getStructureConnections(world)).orElseGet(ArrayList::new)
             );
+            
+            // 移除已存在的失败连接（如果有）
+            list.removeIf(conn -> 
+                ((conn.from().equals(from) && conn.to().equals(to)) || 
+                 (conn.from().equals(to) && conn.to().equals(from))) &&
+                conn.status() == Records.ConnectionStatus.FAILED
+            );
+            
+            // 添加新的计划连接
             list.add(newConn);
             provider.setStructureConnections(world, list);
             StructureConnector.cachedStructureConnections.add(newConn);
         });
 
-        // 立即在客户端侧可视化
+        // 立即在客户端侧可视化：移除失败连接，添加新连接
+        this.connections.removeIf(conn -> 
+            ((conn.from().equals(from) && conn.to().equals(to)) || 
+             (conn.from().equals(to) && conn.to().equals(from))) &&
+            conn.status() == Records.ConnectionStatus.FAILED
+        );
         this.connections.add(newConn);
         toast(Component.translatable("toast.roadweaver.manual_created").getString(), 2000);
     }

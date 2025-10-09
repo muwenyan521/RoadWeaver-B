@@ -1,18 +1,22 @@
 package net.countered.settlementroads.client.gui;
 
 import net.countered.settlementroads.helpers.Records;
+import net.countered.settlementroads.helpers.StructureConnector;
+import net.countered.settlementroads.persistence.WorldDataProvider;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.*;
 
 /**
- * 道路网络调试屏幕 - Forge版本（重构版）
+ * 道路网络调试屏幕 - NeoForge版本（重构版）
  * 功能: 显示结构节点、道路连接、支持平移/缩放、点击传送
  * 包含LOD系统、高级渲染、性能优化
  * 
@@ -20,6 +24,7 @@ import java.util.*;
  * 1. 计划道路现在正确连接结构位置（使用虚线）
  * 2. 优化LOD系统，改善缩小时的精度
  * 3. 模块化代码结构，便于维护
+ * 4. 手动连接模式：选择两处结构创建 PLANNED 连接，写入世界数据并入队生成
  */
 public class RoadDebugScreen extends Screen {
 
@@ -56,13 +61,21 @@ public class RoadDebugScreen extends Screen {
     
     private BlockPos hoveredStructure = null;
     
+    // 手动连接模式
+    private boolean manualMode = false;
+    private BlockPos manualFirst = null;
+    private String toastMessage = null;
+    private long toastExpireMs = 0;
+    
     // 渲染器
     private final MapRenderer mapRenderer;
     private final GridRenderer gridRenderer;
     private final UIRenderer uiRenderer;
     private final ScreenBounds bounds;
     
+    // 按钮
     private Button configButton;
+    private Button manualButton;
 
     public RoadDebugScreen(List<BlockPos> structures,
                            List<Records.StructureConnection> connections,
@@ -108,6 +121,29 @@ public class RoadDebugScreen extends Screen {
                 .build();
         
         this.addRenderableWidget(this.configButton);
+        
+        // 左下角：手动连接模式开关
+        int manualButtonW = 110;
+        int manualButtonH = 16;
+        int manualButtonX = 8;
+        int manualButtonY = this.height - manualButtonH - 8;
+        this.manualButton = Button.builder(getManualModeLabel(), b -> toggleManualMode())
+                .bounds(manualButtonX, manualButtonY, manualButtonW, manualButtonH)
+                .build();
+        this.addRenderableWidget(this.manualButton);
+    }
+    
+    private Component getManualModeLabel() {
+        Component state = Component.translatable(manualMode ? "gui.roadweaver.common.on" : "gui.roadweaver.common.off");
+        return Component.translatable("gui.roadweaver.debug_map.manual_mode", state);
+    }
+    
+    private void toggleManualMode() {
+        manualMode = !manualMode;
+        manualFirst = null;
+        if (manualButton != null) manualButton.setMessage(getManualModeLabel());
+        String msg = Component.translatable(manualMode ? "toast.roadweaver.manual_mode_on" : "toast.roadweaver.manual_mode_off").getString();
+        toast(msg, 2000);
     }
     
     @Override
@@ -231,6 +267,25 @@ public class RoadDebugScreen extends Screen {
         }
         
         updateHoveredStructure(mouseX, mouseY);
+        
+        // Toast
+        if (toastMessage != null && System.currentTimeMillis() < toastExpireMs) {
+            drawToast(ctx, toastMessage);
+        }
+    }
+    
+    private void drawToast(GuiGraphics ctx, String message) {
+        var font = Minecraft.getInstance().font;
+        int tw = font.width(message);
+        int x = 10;
+        int y = 10;
+        RenderUtils.drawPanel(ctx, x - 4, y - 4, x + tw + 6, y + 12, 0xC0000000, 0xFF666666);
+        ctx.drawString(font, message, x, y, 0xFFFFFFFF, false);
+    }
+    
+    private void toast(String msg, long durationMs) {
+        this.toastMessage = msg;
+        this.toastExpireMs = System.currentTimeMillis() + durationMs;
     }
 
     @Override
@@ -283,11 +338,68 @@ public class RoadDebugScreen extends Screen {
 
         BlockPos clicked = findClickedStructure(mouseX, mouseY);
         if (clicked != null) {
-            teleportTo(clicked);
+            if (manualMode) {
+                handleManualClick(clicked);
+            } else {
+                teleportTo(clicked);
+            }
             return true;
         }
         dragging = true;
         return true;
+    }
+    
+    private void handleManualClick(BlockPos clicked) {
+        if (manualFirst == null) {
+            manualFirst = clicked;
+            String pick = Component.translatable("toast.roadweaver.manual_pick_start", clicked.getX(), clicked.getZ()).getString();
+            toast(pick, 2000);
+        } else if (!manualFirst.equals(clicked)) {
+            BlockPos first = manualFirst;
+            manualFirst = null;
+            createManualConnection(first, clicked);
+        }
+    }
+    
+    private void createManualConnection(BlockPos from, BlockPos to) {
+        Minecraft client = Minecraft.getInstance();
+        MinecraftServer server = client.getSingleplayerServer();
+        if (server == null) {
+            toast(Component.translatable("toast.roadweaver.manual_multiplayer_not_supported").getString(), 2500);
+            return;
+        }
+
+        Records.StructureConnection newConn = new Records.StructureConnection(from, to, Records.ConnectionStatus.PLANNED, true);
+
+        // 服务器线程执行：写入世界数据并入队
+        server.execute(() -> {
+            ServerLevel world = server.overworld();
+            WorldDataProvider provider = WorldDataProvider.getInstance();
+            List<Records.StructureConnection> list = new ArrayList<>(
+                    Optional.ofNullable(provider.getStructureConnections(world)).orElseGet(ArrayList::new)
+            );
+            
+            // 移除已存在的失败连接（如果有）
+            list.removeIf(conn -> 
+                ((conn.from().equals(from) && conn.to().equals(to)) || 
+                 (conn.from().equals(to) && conn.to().equals(from))) &&
+                conn.status() == Records.ConnectionStatus.FAILED
+            );
+            
+            // 添加新的计划连接
+            list.add(newConn);
+            provider.setStructureConnections(world, list);
+            StructureConnector.cachedStructureConnections.add(newConn);
+        });
+
+        // 立即在客户端侧可视化：移除失败连接，添加新连接
+        this.connections.removeIf(conn -> 
+            ((conn.from().equals(from) && conn.to().equals(to)) || 
+             (conn.from().equals(to) && conn.to().equals(from))) &&
+            conn.status() == Records.ConnectionStatus.FAILED
+        );
+        this.connections.add(newConn);
+        toast(Component.translatable("toast.roadweaver.manual_created").getString(), 2000);
     }
     
     @Override
