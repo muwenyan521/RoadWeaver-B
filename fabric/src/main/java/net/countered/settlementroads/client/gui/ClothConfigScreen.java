@@ -3,7 +3,7 @@ package net.countered.settlementroads.client.gui;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
-import net.countered.settlementroads.config.neoforge.NeoForgeModConfig;
+import net.countered.settlementroads.config.fabric.FabricModConfig;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
@@ -15,6 +15,7 @@ public class ClothConfigScreen {
                 .setTitle(Component.translatable("config.roadweaver.title"))
                 .setSavingRunnable(() -> {
                     // 配置会自动保存到文件
+                    FabricModConfig.save();
                 });
         
         ConfigEntryBuilder entryBuilder = builder.entryBuilder();
@@ -25,19 +26,19 @@ public class ClothConfigScreen {
         
         structures.addEntry(entryBuilder.startStrField(
                 Component.translatable("config.roadweaver.structureToLocate"),
-                NeoForgeModConfig.SERVER.structureToLocate.get())
+                FabricModConfig.getStructureToLocate())
                 .setDefaultValue("#minecraft:village")
                 .setTooltip(Component.translatable("config.roadweaver.structureToLocate.tooltip"))
-                .setSaveConsumer(NeoForgeModConfig.SERVER.structureToLocate::set)
+                .setSaveConsumer(FabricModConfig::setStructureToLocate)
                 .build());
         
         structures.addEntry(entryBuilder.startIntSlider(
                 Component.translatable("config.roadweaver.structureSearchRadius"),
-                NeoForgeModConfig.SERVER.structureSearchRadius.get(),
+                FabricModConfig.getStructureSearchRadius(),
                 50, 200)
                 .setDefaultValue(100)
                 .setTooltip(Component.translatable("config.roadweaver.structureSearchRadius.tooltip"))
-                .setSaveConsumer(NeoForgeModConfig.SERVER.structureSearchRadius::set)
+                .setSaveConsumer(FabricModConfig::setStructureSearchRadius)
                 .build());
         
         // 预生成配置分类
@@ -46,22 +47,22 @@ public class ClothConfigScreen {
         
         preGeneration.addEntry(entryBuilder.startIntField(
                 Component.translatable("config.roadweaver.initialLocatingCount"),
-                NeoForgeModConfig.SERVER.initialLocatingCount.get())
+                FabricModConfig.getInitialLocatingCount())
                 .setDefaultValue(7)
                 .setMin(1)
                 .setMax(20)
                 .setTooltip(Component.translatable("config.roadweaver.initialLocatingCount.tooltip"))
-                .setSaveConsumer(NeoForgeModConfig.SERVER.initialLocatingCount::set)
+                .setSaveConsumer(FabricModConfig::setInitialLocatingCount)
                 .build());
         
         preGeneration.addEntry(entryBuilder.startIntField(
                 Component.translatable("config.roadweaver.maxConcurrentRoadGeneration"),
-                NeoForgeModConfig.SERVER.maxConcurrentRoadGeneration.get())
+                FabricModConfig.getMaxConcurrentRoadGeneration())
                 .setDefaultValue(3)
                 .setMin(1)
                 .setMax(10)
                 .setTooltip(Component.translatable("config.roadweaver.maxConcurrentRoadGeneration.tooltip"))
-                .setSaveConsumer(NeoForgeModConfig.SERVER.maxConcurrentRoadGeneration::set)
+                .setSaveConsumer(FabricModConfig::setMaxConcurrentRoadGeneration)
                 .build());
         
         // 道路配置分类
@@ -70,58 +71,58 @@ public class ClothConfigScreen {
         
         roads.addEntry(entryBuilder.startIntField(
                 Component.translatable("config.roadweaver.averagingRadius"),
-                NeoForgeModConfig.SERVER.averagingRadius.get())
+                FabricModConfig.getAveragingRadius())
                 .setDefaultValue(1)
                 .setMin(0)
                 .setMax(5)
                 .setTooltip(Component.translatable("config.roadweaver.averagingRadius.tooltip"))
-                .setSaveConsumer(NeoForgeModConfig.SERVER.averagingRadius::set)
+                .setSaveConsumer(FabricModConfig::setAveragingRadius)
                 .build());
         
         roads.addEntry(entryBuilder.startBooleanToggle(
                 Component.translatable("config.roadweaver.allowArtificial"),
-                NeoForgeModConfig.SERVER.allowArtificial.get())
+                FabricModConfig.getAllowArtificial())
                 .setDefaultValue(true)
                 .setTooltip(Component.translatable("config.roadweaver.allowArtificial.tooltip"))
-                .setSaveConsumer(NeoForgeModConfig.SERVER.allowArtificial::set)
+                .setSaveConsumer(FabricModConfig::setAllowArtificial)
                 .build());
         
         roads.addEntry(entryBuilder.startBooleanToggle(
                 Component.translatable("config.roadweaver.allowNatural"),
-                NeoForgeModConfig.SERVER.allowNatural.get())
+                FabricModConfig.getAllowNatural())
                 .setDefaultValue(true)
                 .setTooltip(Component.translatable("config.roadweaver.allowNatural.tooltip"))
-                .setSaveConsumer(NeoForgeModConfig.SERVER.allowNatural::set)
+                .setSaveConsumer(FabricModConfig::setAllowNatural)
                 .build());
         
         roads.addEntry(entryBuilder.startIntField(
                 Component.translatable("config.roadweaver.structureDistanceFromRoad"),
-                NeoForgeModConfig.SERVER.structureDistanceFromRoad.get())
+                FabricModConfig.getStructureDistanceFromRoad())
                 .setDefaultValue(4)
                 .setMin(3)
                 .setMax(8)
                 .setTooltip(Component.translatable("config.roadweaver.structureDistanceFromRoad.tooltip"))
-                .setSaveConsumer(NeoForgeModConfig.SERVER.structureDistanceFromRoad::set)
+                .setSaveConsumer(FabricModConfig::setStructureDistanceFromRoad)
                 .build());
         
         roads.addEntry(entryBuilder.startIntField(
                 Component.translatable("config.roadweaver.maxHeightDifference"),
-                NeoForgeModConfig.SERVER.maxHeightDifference.get())
+                FabricModConfig.getMaxHeightDifference())
                 .setDefaultValue(5)
                 .setMin(3)
                 .setMax(10)
                 .setTooltip(Component.translatable("config.roadweaver.maxHeightDifference.tooltip"))
-                .setSaveConsumer(NeoForgeModConfig.SERVER.maxHeightDifference::set)
+                .setSaveConsumer(FabricModConfig::setMaxHeightDifference)
                 .build());
         
         roads.addEntry(entryBuilder.startIntField(
                 Component.translatable("config.roadweaver.maxTerrainStability"),
-                NeoForgeModConfig.SERVER.maxTerrainStability.get())
+                FabricModConfig.getMaxTerrainStability())
                 .setDefaultValue(4)
                 .setMin(2)
                 .setMax(10)
                 .setTooltip(Component.translatable("config.roadweaver.maxTerrainStability.tooltip"))
-                .setSaveConsumer(NeoForgeModConfig.SERVER.maxTerrainStability::set)
+                .setSaveConsumer(FabricModConfig::setMaxTerrainStability)
                 .build());
         
         // 装饰配置分类
@@ -130,42 +131,42 @@ public class ClothConfigScreen {
         
         decorations.addEntry(entryBuilder.startBooleanToggle(
                 Component.translatable("config.roadweaver.placeWaypoints"),
-                NeoForgeModConfig.SERVER.placeWaypoints.get())
+                FabricModConfig.getPlaceWaypoints())
                 .setDefaultValue(false)
                 .setTooltip(Component.translatable("config.roadweaver.placeWaypoints.tooltip"))
-                .setSaveConsumer(NeoForgeModConfig.SERVER.placeWaypoints::set)
+                .setSaveConsumer(FabricModConfig::setPlaceWaypoints)
                 .build());
         
         decorations.addEntry(entryBuilder.startBooleanToggle(
                 Component.translatable("config.roadweaver.placeRoadFences"),
-                NeoForgeModConfig.SERVER.placeRoadFences.get())
+                FabricModConfig.getPlaceRoadFences())
                 .setDefaultValue(true)
                 .setTooltip(Component.translatable("config.roadweaver.placeRoadFences.tooltip"))
-                .setSaveConsumer(NeoForgeModConfig.SERVER.placeRoadFences::set)
+                .setSaveConsumer(FabricModConfig::setPlaceRoadFences)
                 .build());
         
         decorations.addEntry(entryBuilder.startBooleanToggle(
                 Component.translatable("config.roadweaver.placeSwings"),
-                NeoForgeModConfig.SERVER.placeSwings.get())
+                FabricModConfig.getPlaceSwings())
                 .setDefaultValue(true)
                 .setTooltip(Component.translatable("config.roadweaver.placeSwings.tooltip"))
-                .setSaveConsumer(NeoForgeModConfig.SERVER.placeSwings::set)
+                .setSaveConsumer(FabricModConfig::setPlaceSwings)
                 .build());
         
         decorations.addEntry(entryBuilder.startBooleanToggle(
                 Component.translatable("config.roadweaver.placeBenches"),
-                NeoForgeModConfig.SERVER.placeBenches.get())
+                FabricModConfig.getPlaceBenches())
                 .setDefaultValue(true)
                 .setTooltip(Component.translatable("config.roadweaver.placeBenches.tooltip"))
-                .setSaveConsumer(NeoForgeModConfig.SERVER.placeBenches::set)
+                .setSaveConsumer(FabricModConfig::setPlaceBenches)
                 .build());
         
         decorations.addEntry(entryBuilder.startBooleanToggle(
                 Component.translatable("config.roadweaver.placeGloriettes"),
-                NeoForgeModConfig.SERVER.placeGloriettes.get())
+                FabricModConfig.getPlaceGloriettes())
                 .setDefaultValue(true)
                 .setTooltip(Component.translatable("config.roadweaver.placeGloriettes.tooltip"))
-                .setSaveConsumer(NeoForgeModConfig.SERVER.placeGloriettes::set)
+                .setSaveConsumer(FabricModConfig::setPlaceGloriettes)
                 .build());
         
         // 手动模式配置分类
@@ -174,22 +175,22 @@ public class ClothConfigScreen {
         
         manual.addEntry(entryBuilder.startIntField(
                 Component.translatable("config.roadweaver.manualMaxHeightDifference"),
-                NeoForgeModConfig.SERVER.manualMaxHeightDifference.get())
+                FabricModConfig.getManualMaxHeightDifference())
                 .setDefaultValue(8)
                 .setMin(3)
                 .setMax(20)
                 .setTooltip(Component.translatable("config.roadweaver.manualMaxHeightDifference.tooltip"))
-                .setSaveConsumer(NeoForgeModConfig.SERVER.manualMaxHeightDifference::set)
+                .setSaveConsumer(FabricModConfig::setManualMaxHeightDifference)
                 .build());
         
         manual.addEntry(entryBuilder.startIntField(
                 Component.translatable("config.roadweaver.manualMaxTerrainStability"),
-                NeoForgeModConfig.SERVER.manualMaxTerrainStability.get())
+                FabricModConfig.getManualMaxTerrainStability())
                 .setDefaultValue(8)
                 .setMin(2)
                 .setMax(20)
                 .setTooltip(Component.translatable("config.roadweaver.manualMaxTerrainStability.tooltip"))
-                .setSaveConsumer(NeoForgeModConfig.SERVER.manualMaxTerrainStability::set)
+                .setSaveConsumer(FabricModConfig::setManualMaxTerrainStability)
                 .build());
         
         return builder.build();

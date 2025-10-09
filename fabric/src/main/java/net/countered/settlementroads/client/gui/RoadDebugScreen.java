@@ -59,6 +59,15 @@ public class RoadDebugScreen extends Screen {
     private BlockPos manualFirst = null;
     private String toastMessage = null;
     private long toastExpireMs = 0;
+    
+    // 拖动检测
+    private double mouseDownX = 0;
+    private double mouseDownY = 0;
+    private boolean hasDragged = false;
+    
+    // 传送确认
+    private BlockPos pendingTeleport = null;
+    private long teleportConfirmExpireMs = 0;
 
     // 渲染组件
     private final MapRenderer mapRenderer;
@@ -68,6 +77,7 @@ public class RoadDebugScreen extends Screen {
 
     // 按钮
     private Button manualButton;
+    private Button configButton;
 
     public RoadDebugScreen(List<BlockPos> structures,
                            List<Records.StructureConnection> connections,
@@ -93,6 +103,23 @@ public class RoadDebugScreen extends Screen {
     @Override
     protected void init() {
         super.init();
+        
+        // 右上角：配置按钮
+        int configButtonW = 50;
+        int configButtonH = 16;
+        int configButtonX = this.width - configButtonW - 8;
+        int configButtonY = 8;
+        this.configButton = Button.builder(
+                Component.translatable("gui.roadweaver.config"),
+                button -> {
+                    if (this.minecraft != null) {
+                        this.minecraft.setScreen(ClothConfigScreen.createConfigScreen(this));
+                    }
+                })
+                .bounds(configButtonX, configButtonY, configButtonW, configButtonH)
+                .build();
+        this.addRenderableWidget(this.configButton);
+        
         // 左下角：手动连接模式开关
         int buttonW = 110;
         int buttonH = 16;
@@ -192,7 +219,7 @@ public class RoadDebugScreen extends Screen {
 
         mapRenderer.drawRoadPaths(ctx, roads, lod, baseScale, zoom, converter);
         mapRenderer.drawConnections(ctx, connections, roads, lod, converter);
-        mapRenderer.drawStructures(ctx, structures, hoveredStructure, lod, converter);
+        mapRenderer.drawStructures(ctx, structures, hoveredStructure, manualFirst, lod, converter);
         mapRenderer.drawPlayerMarker(ctx, lod, zoom, converter);
 
         // UI 面板
@@ -236,11 +263,31 @@ public class RoadDebugScreen extends Screen {
     public boolean shouldCloseOnEsc() {
         return true;
     }
+    
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        // 检查是否按下了调试地图按键（默认 H 键）
+        if (this.minecraft != null && this.minecraft.options.keyMappings != null) {
+            for (var keyMapping : this.minecraft.options.keyMappings) {
+                if (keyMapping.getName().equals("key.roadweaver.debug_map") && 
+                    keyMapping.matches(keyCode, scanCode)) {
+                    this.onClose();
+                    return true;
+                }
+            }
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers);
+    }
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
         if (super.mouseDragged(mouseX, mouseY, button, dragX, dragY)) return true;
         if (dragging && button == 0) {
+            // 检测是否真的在拖动（移动超过3像素）
+            double totalDrag = Math.abs(mouseX - mouseDownX) + Math.abs(mouseY - mouseDownY);
+            if (totalDrag > 3) {
+                hasDragged = true;
+            }
             offsetX += dragX;
             offsetY += dragY;
             layoutDirty = true;
@@ -265,15 +312,10 @@ public class RoadDebugScreen extends Screen {
         if (super.mouseClicked(mouseX, mouseY, button)) return true;
         if (button != 0) return false;
 
-        BlockPos clicked = findClickedStructure(mouseX, mouseY);
-        if (clicked != null) {
-            if (manualMode) {
-                handleManualClick(clicked);
-            } else {
-                teleportTo(clicked);
-            }
-            return true;
-        }
+        // 记录鼠标按下位置
+        mouseDownX = mouseX;
+        mouseDownY = mouseY;
+        hasDragged = false;
         dragging = true;
         return true;
     }
@@ -283,6 +325,32 @@ public class RoadDebugScreen extends Screen {
         if (super.mouseReleased(mouseX, mouseY, button)) return true;
         if (button == 0 && dragging) {
             dragging = false;
+            
+            // 只有在没有拖动时才处理点击
+            if (!hasDragged) {
+                BlockPos clicked = findClickedStructure(mouseX, mouseY);
+                if (clicked != null) {
+                    if (manualMode) {
+                        handleManualClick(clicked);
+                    } else {
+                        // 传送确认逻辑
+                        if (pendingTeleport != null && pendingTeleport.equals(clicked) && 
+                            System.currentTimeMillis() < teleportConfirmExpireMs) {
+                            // 确认传送
+                            teleportTo(clicked);
+                            pendingTeleport = null;
+                        } else {
+                            // 第一次点击：请求确认
+                            pendingTeleport = clicked;
+                            teleportConfirmExpireMs = System.currentTimeMillis() + 3000;
+                            String confirm = Component.translatable("toast.roadweaver.teleport_confirm", 
+                                clicked.getX(), clicked.getZ()).getString();
+                            toast(confirm, 3000);
+                        }
+                    }
+                    return true;
+                }
+            }
             return true;
         }
         return false;
@@ -309,7 +377,12 @@ public class RoadDebugScreen extends Screen {
             manualFirst = clicked;
             String pick = Component.translatable("toast.roadweaver.manual_pick_start", clicked.getX(), clicked.getZ()).getString();
             toast(pick, 2000);
-        } else if (!manualFirst.equals(clicked)) {
+        } else if (manualFirst.equals(clicked)) {
+            // 再次点击同一个结构：取消选中
+            manualFirst = null;
+            String cancel = Component.translatable("toast.roadweaver.manual_cancelled").getString();
+            toast(cancel, 2000);
+        } else {
             BlockPos first = manualFirst;
             manualFirst = null;
             createManualConnection(first, clicked);

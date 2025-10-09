@@ -3,97 +3,97 @@ package net.countered.settlementroads.config.fabric;
 import net.countered.settlementroads.config.IModConfig;
 
 /**
- * Adapter class to bridge MidnightConfig static fields with ModConfig interface
+ * Adapter class to bridge FabricModConfig with IModConfig interface
  */
 public class FabricModConfigAdapter implements IModConfig {
     
     @Override
     public String structureToLocate() {
-        return FabricModConfig.structureToLocate;
+        return FabricModConfig.getStructureToLocate();
     }
 
     @Override
     public int structureSearchRadius() {
-        return FabricModConfig.structureSearchRadius;
+        return FabricModConfig.getStructureSearchRadius();
     }
 
     @Override
     public int initialLocatingCount() {
-        return FabricModConfig.initialLocatingCount;
+        return FabricModConfig.getInitialLocatingCount();
     }
 
     @Override
     public int maxConcurrentRoadGeneration() {
-        return FabricModConfig.maxConcurrentRoadGeneration;
+        return FabricModConfig.getMaxConcurrentRoadGeneration();
     }
 
     @Override
     public int structureSearchTriggerDistance() {
-        return FabricModConfig.structureSearchTriggerDistance;
+        return FabricModConfig.getStructureSearchTriggerDistance();
     }
 
     @Override
     public int averagingRadius() {
-        return FabricModConfig.averagingRadius;
+        return FabricModConfig.getAveragingRadius();
     }
 
     @Override
     public boolean allowArtificial() {
-        return FabricModConfig.allowArtificial;
+        return FabricModConfig.getAllowArtificial();
     }
 
     @Override
     public boolean allowNatural() {
-        return FabricModConfig.allowNatural;
+        return FabricModConfig.getAllowNatural();
     }
 
     @Override
     public boolean placeWaypoints() {
-        return FabricModConfig.placeWaypoints;
+        return FabricModConfig.getPlaceWaypoints();
     }
 
     @Override
     public boolean placeRoadFences() {
-        return FabricModConfig.placeRoadFences;
+        return FabricModConfig.getPlaceRoadFences();
     }
 
     @Override
     public boolean placeSwings() {
-        return FabricModConfig.placeSwings;
+        return FabricModConfig.getPlaceSwings();
     }
 
     @Override
     public boolean placeBenches() {
-        return FabricModConfig.placeBenches;
+        return FabricModConfig.getPlaceBenches();
     }
 
     @Override
     public boolean placeGloriettes() {
-        return FabricModConfig.placeGloriettes;
+        return FabricModConfig.getPlaceGloriettes();
     }
 
     @Override
     public int structureDistanceFromRoad() {
-        return FabricModConfig.structureDistanceFromRoad;
+        return FabricModConfig.getStructureDistanceFromRoad();
     }
 
     @Override
     public int maxHeightDifference() {
-        return FabricModConfig.maxHeightDifference;
+        return FabricModConfig.getMaxHeightDifference();
     }
 
     @Override
     public int maxTerrainStability() {
-        return FabricModConfig.maxTerrainStability;
+        return FabricModConfig.getMaxTerrainStability();
     }
 
     @Override
     public int manualMaxHeightDifference() {
-        return FabricModConfig.manualMaxHeightDifference;
+        return FabricModConfig.getManualMaxHeightDifference();
     }
 
     @Override
     public int manualMaxTerrainStability() {
-        return FabricModConfig.manualMaxTerrainStability;
+        return FabricModConfig.getManualMaxTerrainStability();
     }
 }

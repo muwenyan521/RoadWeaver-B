@@ -139,7 +139,7 @@ public class MapRenderer {
     }
     
     public void drawStructures(GuiGraphics ctx, List<BlockPos> structures, 
-                              BlockPos hoveredStructure, LODLevel lod,
+                              BlockPos hoveredStructure, BlockPos manualFirst, LODLevel lod,
                               WorldToScreenConverter converter) {
         if (structures == null || structures.isEmpty()) return;
         
@@ -151,22 +151,46 @@ public class MapRenderer {
             if (!bounds.isInBounds(pos.x(), pos.y(), adaptiveRadius + 6)) continue;
             
             boolean isHovered = structure.equals(hoveredStructure);
+            boolean isManualSelected = structure.equals(manualFirst);
             int radius = isHovered ? adaptiveRadius + 2 : adaptiveRadius;
             
             switch (lod) {
                 case HIGH -> {
-                    int glowColor = 0x402ECC71;
-                    RenderUtils.fillCircle(ctx, pos.x(), pos.y(), radius + 1, glowColor);
-                    RenderUtils.fillCircle(ctx, pos.x(), pos.y(), radius, statusColors.get("structure"));
-                    RenderUtils.drawCircleOutline(ctx, pos.x(), pos.y(), radius, 0xFF1E7E34);
-                    
-                    int highlightSize = Math.max(1, radius / 3);
-                    ctx.fill(pos.x() - highlightSize, pos.y() - highlightSize, 
-                            pos.x() + highlightSize + 1, pos.y() + highlightSize + 1, 0x80FFFFFF);
+                    // 手动选中的结构：金色脉冲光晕
+                    if (isManualSelected) {
+                        long time = System.currentTimeMillis();
+                        float pulse = (float) (Math.sin(time / 200.0) * 0.5 + 0.5);
+                        int pulseAlpha = (int) (0x60 + pulse * 0x40);
+                        int glowColor = (pulseAlpha << 24) | 0xFFD700;
+                        RenderUtils.fillCircle(ctx, pos.x(), pos.y(), radius + 4, glowColor);
+                        RenderUtils.fillCircle(ctx, pos.x(), pos.y(), radius + 2, 0x80FFD700);
+                        RenderUtils.fillCircle(ctx, pos.x(), pos.y(), radius, 0xFFFFD700);
+                        RenderUtils.drawCircleOutline(ctx, pos.x(), pos.y(), radius, 0xFFFFAA00);
+                        
+                        // 绘制十字标记
+                        int crossSize = radius + 3;
+                        ctx.fill(pos.x() - crossSize, pos.y() - 1, pos.x() + crossSize, pos.y() + 1, 0xFFFFD700);
+                        ctx.fill(pos.x() - 1, pos.y() - crossSize, pos.x() + 1, pos.y() + crossSize, 0xFFFFD700);
+                    } else {
+                        int glowColor = 0x402ECC71;
+                        RenderUtils.fillCircle(ctx, pos.x(), pos.y(), radius + 1, glowColor);
+                        RenderUtils.fillCircle(ctx, pos.x(), pos.y(), radius, statusColors.get("structure"));
+                        RenderUtils.drawCircleOutline(ctx, pos.x(), pos.y(), radius, 0xFF1E7E34);
+                        
+                        int highlightSize = Math.max(1, radius / 3);
+                        ctx.fill(pos.x() - highlightSize, pos.y() - highlightSize, 
+                                pos.x() + highlightSize + 1, pos.y() + highlightSize + 1, 0x80FFFFFF);
+                    }
                 }
                 case MEDIUM -> {
-                    RenderUtils.fillCircle(ctx, pos.x(), pos.y(), radius, statusColors.get("structure"));
-                    RenderUtils.drawCircleOutline(ctx, pos.x(), pos.y(), radius, 0xFF1E7E34);
+                    if (isManualSelected) {
+                        RenderUtils.fillCircle(ctx, pos.x(), pos.y(), radius + 1, 0x80FFD700);
+                        RenderUtils.fillCircle(ctx, pos.x(), pos.y(), radius, 0xFFFFD700);
+                        RenderUtils.drawCircleOutline(ctx, pos.x(), pos.y(), radius, 0xFFFFAA00);
+                    } else {
+                        RenderUtils.fillCircle(ctx, pos.x(), pos.y(), radius, statusColors.get("structure"));
+                        RenderUtils.drawCircleOutline(ctx, pos.x(), pos.y(), radius, 0xFF1E7E34);
+                    }
                     if (radius >= 3) {
                         ctx.fill(pos.x() - 1, pos.y() - 1, pos.x() + 1, pos.y() + 1, 0x60FFFFFF);
                     }

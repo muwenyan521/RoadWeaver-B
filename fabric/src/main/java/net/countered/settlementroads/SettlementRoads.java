@@ -1,6 +1,5 @@
 package net.countered.settlementroads;
 
-import eu.midnightdust.lib.config.MidnightConfig;
 import net.countered.settlementroads.config.fabric.FabricModConfig;
 import net.countered.settlementroads.events.ModEventHandler;
 import net.countered.settlementroads.features.config.RoadFeatureRegistry;
@@ -18,13 +17,14 @@ public class SettlementRoads implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		LOGGER.info("Initializing roadWeaver (Fabric)...");
+		LOGGER.info("Initializing RoadWeaver (Fabric)...");
 		
 		// 注册 Fabric Attachment API
 		WorldDataAttachment.registerWorldDataAttachment();
 		
-		// 初始化 MidnightConfig
-		MidnightConfig.init(MOD_ID, FabricModConfig.class);
+		// 加载配置
+		FabricModConfig.load();
+		LOGGER.info("Configuration loaded");
 		
 		// 注册特性
 		RoadFeatureRegistry.registerFeatures();
