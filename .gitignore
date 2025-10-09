@@ -14,3 +14,11 @@
 /forge/build/
 /forge/run/
 /forge/.gradle/
+
+# Common module build outputs
+/common/build/
+/common/.gradle/
+
+# Legacy nested project snapshot (kept for reference, excluded from VCS and build)
+/RoadWeaver/
+/RoadWeaver/**

@@ -2,8 +2,8 @@ plugins {
 	id 'com.gradleup.shadow' version '8.3.6'
 }
 architectury {
-	platformSetupLoomIde()
-	neoForge()
+    platformSetupLoomIde()
+    neoForge()
 }
 
 loom {
@@ -20,8 +20,19 @@ loom {
             programArgs "--output", file("src/generated/resources").absolutePath
             programArgs "--existing", file("src/main/resources").absolutePath
             runDir "run"
-            // 解决 dev runtime 模块系统冲突：让 unprotect 读取 NeoForged SPI 模块
-            vmArgs "--add-reads=io.github.juuxel.unprotect=net.neoforged.neoforgespi"
+            // 禁用 Loom 的 JPMS 模块路径，避免多个模块导出同一包造成的 ResolutionException
+            vmArgs "-Dloom.platform.disableModJpms=true"
+            vmArgs "-Dloom.disableModJpms=true"
+            // 合并 main 与 datagen 源集为同一个 mod，避免出现额外的 generated_* 模块导出重复包
+            mods {
+                roadweaver {
+                    source sourceSets.main
+                    def ds = project.sourceSets.findByName("datagen")
+                    if (ds != null) {
+                        source ds
+                    }
+                }
+            }
         }
     }
 }
@@ -30,8 +41,10 @@ configurations {
     common
     shadowCommon // Don't use shadow from the shadow plugin since it conflicts with Loom.
     compileClasspath.extendsFrom common
-    runtimeClasspath.extendsFrom common
+    // 在开发环境将 :common 作为 dev mod 注入，确保 IModConfig 等类在运行期可见
     developmentNeoForge.extendsFrom common
+    // 同时保留在通用运行时类路径，避免某些任务缺少类
+    runtimeClasspath.extendsFrom common
 }
 
 shadowJar {
@@ -136,12 +149,13 @@ sourceSets {
         java {
             // 使用 common 中的 RoadFeatureConfig，避免重复类定义
             exclude 'net/countered/settlementroads/features/config/RoadFeatureConfig.java'
-            // 使用 common 中的 RoadFeature，避免重复类定义
             exclude 'net/countered/settlementroads/features/RoadFeature.java'
             // 使用 common 中的事件处理器
             exclude 'net/countered/settlementroads/events/ModEventHandler.java'
-            // 使用 common 中的统一注册
+            // 使用 common 中的统一注册（避免与平台侧实现重复、方法签名不一致）
             exclude 'net/countered/settlementroads/features/config/RoadFeatureRegistry.java'
+            // 平台侧提供 RoadFeatureRegistry（neoforge 需要 IEventBus）
+            // 保留 datagen 代码在主源集，避免注解扫描缺失导致不触发 GatherDataEvent
         }
         resources {
             // 输出的数据目录
@@ -152,6 +166,8 @@ sourceSets {
         }
     }
 }
+
+// 保持 runData 默认依赖 main 编译产物，无需额外 datagen 源集
 
 // Maven 发布
 publishing {

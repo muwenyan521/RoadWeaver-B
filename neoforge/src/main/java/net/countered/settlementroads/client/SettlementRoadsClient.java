@@ -2,7 +2,7 @@ package net.countered.settlementroads.client;
 
 import net.countered.settlementroads.client.gui.RoadDebugScreen;
 import net.countered.settlementroads.helpers.Records;
-import net.countered.settlementroads.persistence.WorldDataHelper;
+import net.countered.settlementroads.persistence.neoforge.WorldDataHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.server.level.ServerLevel;
@@ -10,7 +10,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
-import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ public class SettlementRoadsClient {
     @EventBusSubscriber(modid = "roadweaver", bus = EventBusSubscriber.Bus.GAME, value = Dist.CLIENT)
     public static class ClientEvents {
         @SubscribeEvent
-        public static void onClientTick(PlayerTickEvent.Post event) {
+        public static void onClientTick(ClientTickEvent.Post event) {
             Minecraft client = Minecraft.getInstance();
             
             while (debugMapKey.consumeClick()) {
@@ -47,7 +47,7 @@ public class SettlementRoadsClient {
     private static void handleDebugMapKey(Minecraft client) {
         // 如果已经打开调试屏幕，关闭它
         if (client.screen instanceof RoadDebugScreen) {
-            client.setScreen(null);
+            client.execute(() -> client.setScreen(null));
             return;
         }
 
@@ -61,20 +61,19 @@ public class SettlementRoadsClient {
             return;
         }
 
-        // 在服务器线程安全地获取数据
+        // 获取数据并在渲染线程打开界面
         try {
             Records.StructureLocationData structureData = WorldDataHelper.getStructureLocations(world);
             List<Records.StructureConnection> connections = WorldDataHelper.getConnectedStructures(world);
             List<Records.RoadData> roads = WorldDataHelper.getRoadDataList(world);
 
-            List<net.minecraft.core.BlockPos> structures = structureData != null ? 
+            List<net.minecraft.core.BlockPos> structures = structureData != null ?
                 new ArrayList<>(structureData.structureLocations()) : new ArrayList<>();
 
-            // 打开调试屏幕
-            client.setScreen(new RoadDebugScreen(structures, connections, roads));
+            client.execute(() -> client.setScreen(new RoadDebugScreen(structures, connections, roads)));
         } catch (Exception e) {
-            // 如果获取数据失败，打开空屏幕
-            client.setScreen(new RoadDebugScreen(new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
+            // 如果获取数据失败，打开空屏幕（仍然在渲染线程调度）
+            client.execute(() -> client.setScreen(new RoadDebugScreen(new ArrayList<>(), new ArrayList<>(), new ArrayList<>())));
         }
     }
 }

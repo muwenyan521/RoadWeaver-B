@@ -2,7 +2,7 @@ package net.countered.settlementroads.persistence.neoforge;
 
 import net.countered.settlementroads.helpers.Records;
 import net.countered.settlementroads.persistence.WorldDataProvider;
-import net.countered.settlementroads.persistence.WorldDataHelper;
+import net.countered.settlementroads.persistence.neoforge.WorldDataHelper;
 import net.minecraft.server.level.ServerLevel;
 
 import java.util.List;

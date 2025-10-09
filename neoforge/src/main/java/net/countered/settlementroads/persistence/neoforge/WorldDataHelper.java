@@ -1,4 +1,4 @@
-package net.countered.settlementroads.persistence;
+package net.countered.settlementroads.persistence.neoforge;
 
 import com.mojang.serialization.Codec;
 import net.countered.settlementroads.SettlementRoads;

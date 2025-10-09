@@ -1,88 +1,92 @@
-package net.countered.settlementroads.config;
+package net.countered.settlementroads.config.neoforge;
+
+import net.countered.settlementroads.config.IModConfig;
 
 public class NeoForgeModConfigAdapter implements IModConfig {
+    private static final NeoForgeModConfig CONFIG = new NeoForgeModConfig();
+    
     @Override
     public String structureToLocate() {
-        return ModConfig.structureToLocate();
+        return CONFIG.structureToLocate();
     }
 
     @Override
     public int structureSearchRadius() {
-        return ModConfig.structureSearchRadius();
+        return CONFIG.structureSearchRadius();
     }
 
     @Override
     public int initialLocatingCount() {
-        return ModConfig.initialLocatingCount();
+        return CONFIG.initialLocatingCount();
     }
 
     @Override
     public int maxConcurrentRoadGeneration() {
-        return ModConfig.maxConcurrentRoadGeneration();
+        return CONFIG.maxConcurrentRoadGeneration();
     }
 
     @Override
     public int averagingRadius() {
-        return ModConfig.averagingRadius();
+        return CONFIG.averagingRadius();
     }
 
     @Override
     public boolean allowArtificial() {
-        return ModConfig.allowArtificial();
+        return CONFIG.allowArtificial();
     }
 
     @Override
     public boolean allowNatural() {
-        return ModConfig.allowNatural();
+        return CONFIG.allowNatural();
     }
 
     @Override
     public boolean placeWaypoints() {
-        return ModConfig.placeWaypoints();
+        return CONFIG.placeWaypoints();
     }
 
     @Override
     public boolean placeRoadFences() {
-        return ModConfig.placeRoadFences();
+        return CONFIG.placeRoadFences();
     }
 
     @Override
     public boolean placeSwings() {
-        return ModConfig.placeSwings();
+        return CONFIG.placeSwings();
     }
 
     @Override
     public boolean placeBenches() {
-        return ModConfig.placeBenches();
+        return CONFIG.placeBenches();
     }
 
     @Override
     public boolean placeGloriettes() {
-        return ModConfig.placeGloriettes();
+        return CONFIG.placeGloriettes();
     }
 
     @Override
     public int structureDistanceFromRoad() {
-        return ModConfig.structureDistanceFromRoad();
+        return CONFIG.structureDistanceFromRoad();
     }
 
     @Override
     public int maxHeightDifference() {
-        return ModConfig.maxHeightDifference();
+        return CONFIG.maxHeightDifference();
     }
 
     @Override
     public int maxTerrainStability() {
-        return ModConfig.maxTerrainStability();
+        return CONFIG.maxTerrainStability();
     }
 
     @Override
     public int manualMaxHeightDifference() {
-        return ModConfig.manualMaxHeightDifference();
+        return CONFIG.manualMaxHeightDifference();
     }
 
     @Override
     public int manualMaxTerrainStability() {
-        return ModConfig.manualMaxTerrainStability();
+        return CONFIG.manualMaxTerrainStability();
     }
 }

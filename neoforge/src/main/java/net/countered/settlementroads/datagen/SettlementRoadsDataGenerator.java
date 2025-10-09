@@ -1,8 +1,8 @@
 package net.countered.settlementroads.datagen;
 
 import net.countered.settlementroads.SettlementRoads;
-import net.countered.settlementroads.features.config.ModConfiguredFeatures;
-import net.countered.settlementroads.features.config.ModPlacedFeatures;
+import net.countered.settlementroads.features.config.neoforge.ModConfiguredFeatures;
+import net.countered.settlementroads.features.config.neoforge.ModPlacedFeatures;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistrySetBuilder;
 import net.minecraft.core.registries.Registries;
@@ -25,8 +25,9 @@ public class SettlementRoadsDataGenerator {
         PackOutput output = generator.getPackOutput();
         CompletableFuture<HolderLookup.Provider> lookupProvider = event.getLookupProvider();
 
-        // 注册世界生成数据
-        generator.addProvider(event.includeServer(), new DatapackBuiltinEntriesProvider(
+        // 注册世界生成数据（强制启用，避免 includeServer() 为 false 时跳过）
+        System.out.println("[RoadWeaver] Adding DatapackBuiltinEntriesProvider for configured/placed features");
+        generator.addProvider(true, new DatapackBuiltinEntriesProvider(
                 output,
                 lookupProvider,
                 new RegistrySetBuilder()

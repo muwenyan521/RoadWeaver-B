@@ -1,8 +1,9 @@
 package net.countered.settlementroads;
 
-import net.countered.settlementroads.config.ModConfig;
+import net.countered.settlementroads.config.neoforge.NeoForgeModConfig;
 import net.countered.settlementroads.events.ModEventHandler;
 import net.countered.settlementroads.features.config.RoadFeatureRegistry;
+import net.countered.settlementroads.datagen.SettlementRoadsDataGenerator;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
@@ -21,12 +22,14 @@ public class SettlementRoads {
 		LOGGER.info("Initializing roadWeaver (NeoForge)...");
 		
 		// 注册配置
-		modContainer.registerConfig(Type.SERVER, ModConfig.SERVER_SPEC);
+		modContainer.registerConfig(Type.SERVER, NeoForgeModConfig.SERVER_SPEC);
 		
 		// 注册通用设置事件
 		modEventBus.addListener(this::commonSetup);
+		// 注册数据生成事件（确保 runData 时 provider 被加入）
+		modEventBus.addListener(SettlementRoadsDataGenerator::gatherData);
 		
-		// 注册特性
+		// 注册特性（统一使用 common 的无参注册实现）
 		RoadFeatureRegistry.registerFeatures();
 		
 		// 注册事件处理器（使用 Architectury 事件的 common 实现）

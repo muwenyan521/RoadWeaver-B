@@ -23,6 +23,39 @@
 
 ---
 
+## 🗂️ 旧目录与排除策略（Legacy & Exclusions）
+
+为避免混淆与重复编译，本仓库存在的旧项目快照目录已被忽略与标注：
+
+- 旧目录：`/RoadWeaver/`（内含旧版 `fabric/`、`neoforge/`、`build.gradle` 等）
+  - `.gitignore` 已添加：
+    - `/RoadWeaver/`、`/RoadWeaver/**`
+  - 不在 `settings.gradle` 的 `include` 列表中（当前仅包含 `common`、`fabric`、`neoforge`）。
+  - 建议在 IDE 中将该目录标记为 Excluded（例如 IntelliJ：右键目录 → Mark Directory as → Excluded）。
+
+### 平台排除（避免重复类）
+
+- Fabric：`fabric/build.gradle` 中 `sourceSets.main.java` 已排除以下重复实现，统一走 `common/`：
+  - `net/countered/settlementroads/features/RoadFeature.java`
+  - `net/countered/settlementroads/events/ModEventHandler.java`
+  - `net/countered/settlementroads/features/config/RoadFeatureRegistry.java`
+
+- NeoForge：`neoforge/build.gradle` 中 `sourceSets.main.java` 已排除：
+  - `net/countered/settlementroads/features/config/RoadFeatureConfig.java`
+  - `net/countered/settlementroads/features/RoadFeature.java`
+  - `net/countered/settlementroads/events/ModEventHandler.java`
+  - `net/countered/settlementroads/features/config/RoadFeatureRegistry.java`
+
+上述排除确保公共实现仅由 `common/` 提供，平台侧只保留必要的桥接/引导逻辑。
+
+### 删除旧目录的时机
+
+- 当 Architectury 迁移完成并在两端稳定运行时，建议彻底删除 `/RoadWeaver/`，并更新任何引用旧路径的文档。
+
+参见：`DEPRECATED_DIRECTORIES.md` 获取旧目录说明与处理建议。
+
+---
+
 ## 📋 代码迁移步骤
 
 ### 阶段 1: 识别通用代码
