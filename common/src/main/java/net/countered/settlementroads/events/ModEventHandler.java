@@ -16,6 +16,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +36,10 @@ public class ModEventHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger("roadweaver");
     private static ExecutorService executor = Executors.newFixedThreadPool(THREAD_COUNT);
     private static final ConcurrentHashMap<String, Future<?>> runningTasks = new ConcurrentHashMap<>();
+    
+    // 添加初始化延迟机制
+    private static final ConcurrentHashMap<String, Integer> worldInitDelay = new ConcurrentHashMap<>();
+    private static final int INIT_DELAY_TICKS = 100; // 5秒延迟，确保注册表完全加载
 
     public static void register() {
         WorldDataProvider dataProvider = WorldDataProvider.getInstance();
@@ -44,11 +50,14 @@ public class ModEventHandler {
         // 世界卸载
         LifecycleEvent.SERVER_LEVEL_UNLOAD.register(level -> {
             if (!level.dimension().equals(Level.OVERWORLD)) return;
-            Future<?> task = runningTasks.remove(level.dimension().location().toString());
+            String worldKey = level.dimension().location().toString();
+            Future<?> task = runningTasks.remove(worldKey);
             if (task != null && !task.isDone()) {
                 task.cancel(true);
                 LOGGER.debug("Aborted running road task for world: {}", level.dimension().location());
             }
+            // 清理延迟计数器
+            worldInitDelay.remove(worldKey);
         });
 
         // 服务器 Tick（遍历所有世界）
@@ -74,6 +83,11 @@ public class ModEventHandler {
         restartExecutorIfNeeded();
         if (!level.dimension().equals(Level.OVERWORLD)) return;
 
+        // 初始化世界延迟计数器，确保注册表完全加载后再开始生成
+        String worldKey = level.dimension().location().toString();
+        worldInitDelay.put(worldKey, INIT_DELAY_TICKS);
+        LOGGER.info("RoadWeaver: 世界 {} 已加载，将在 {} ticks 后开始道路生成", worldKey, INIT_DELAY_TICKS);
+
         WorldDataProvider dataProvider = WorldDataProvider.getInstance();
         Records.StructureLocationData structureLocationData = dataProvider.getStructureLocations(level);
 
@@ -95,6 +109,21 @@ public class ModEventHandler {
     }
 
     private static void tryGenerateNewRoads(ServerLevel level, Boolean async, int steps) {
+        String worldKey = level.dimension().location().toString();
+        
+        // 检查初始化延迟
+        Integer delayTicks = worldInitDelay.get(worldKey);
+        if (delayTicks != null) {
+            if (delayTicks > 0) {
+                worldInitDelay.put(worldKey, delayTicks - 1);
+                return; // 还在延迟期内，跳过本次生成
+            } else {
+                // 延迟结束，移除计数器
+                worldInitDelay.remove(worldKey);
+                LOGGER.info("RoadWeaver: 世界 {} 初始化延迟结束，开始道路生成", worldKey);
+            }
+        }
+        
         IModConfig config = ConfigProvider.get();
         WorldDataProvider dataProvider = WorldDataProvider.getInstance();
 
@@ -119,59 +148,115 @@ public class ModEventHandler {
         }
 
         if (!StructureConnector.cachedStructureConnections.isEmpty()) {
-            Records.StructureConnection structureConnection = StructureConnector.cachedStructureConnections.poll();
-            
+            // 仅窥视队列，确保在资源未就绪时不丢弃任务
+            Records.StructureConnection structureConnection = StructureConnector.cachedStructureConnections.peek();
             if (structureConnection == null) {
-                return; // 队列为空（并发情况）
+                return; // 并发情况下可能为 null
             }
             
+            // 增强的注册表检查
+            final RoadFeatureConfig roadConfig = getRoadFeatureConfig(level);
+            if (roadConfig == null) {
+                // 注册表未就绪，等待下一个 tick
+                LOGGER.debug("RoadWeaver: 注册表未就绪，等待下一个 tick（队列大小: {}）", 
+                    StructureConnector.cachedStructureConnections.size());
+                return;
+            }
+
+            // 现在确认资源可用，再真正弹出队列并开始任务
+            StructureConnector.cachedStructureConnections.poll();
             LOGGER.info("🚧 Starting road generation: {} -> {} (running: {}/{}, queue: {})", 
                 structureConnection.from(), structureConnection.to(), 
                 currentRunning + 1, config.maxConcurrentRoadGeneration(),
                 StructureConnector.cachedStructureConnections.size());
-            
-            ConfiguredFeature<?, ?> feature = level.registryAccess()
-                    .registryOrThrow(Registries.CONFIGURED_FEATURE)
-                    .get(RoadFeature.ROAD_FEATURE_KEY);
-
-            if (feature != null && feature.config() instanceof RoadFeatureConfig roadConfig) {
-                if (async) {
-                    String taskId = level.dimension().location().toString() + "_" + System.nanoTime();
-                    Future<?> future = executor.submit(() -> {
-                        try {
-                            LOGGER.debug("🔨 Generating road: {} -> {}", 
-                                structureConnection.from(), structureConnection.to());
-                            new Road(level, structureConnection, roadConfig).generateRoad(steps);
-                            LOGGER.info("✅ Road generation completed: {} -> {}", 
-                                structureConnection.from(), structureConnection.to());
-                        } catch (Exception e) {
-                            LOGGER.error("❌ Error generating road {} -> {}: {}", 
-                                structureConnection.from(), structureConnection.to(), 
-                                e.getMessage(), e);
-                            
-                            // 异常时标记为 FAILED，避免重试
-                            try {
-                                markConnectionAsFailed(level, structureConnection);
-                            } catch (Exception ex) {
-                                LOGGER.error("Failed to mark connection as failed", ex);
-                            }
-                        } finally {
-                            runningTasks.remove(taskId);
-                        }
-                    });
-                    runningTasks.put(taskId, future);
-                } else {
+            if (async) {
+                String taskId = level.dimension().location().toString() + "_" + System.nanoTime();
+                Future<?> future = executor.submit(() -> {
                     try {
+                        LOGGER.debug("🔨 Generating road: {} -> {}", 
+                            structureConnection.from(), structureConnection.to());
                         new Road(level, structureConnection, roadConfig).generateRoad(steps);
+                        LOGGER.info("✅ Road generation completed: {} -> {}", 
+                            structureConnection.from(), structureConnection.to());
                     } catch (Exception e) {
-                        LOGGER.error("❌ Error generating road: {}", e.getMessage(), e);
-                        markConnectionAsFailed(level, structureConnection);
+                        LOGGER.error("❌ Error generating road {} -> {}: {}", 
+                            structureConnection.from(), structureConnection.to(), 
+                            e.getMessage(), e);
+                        
+                        // 异常时标记为 FAILED，避免重试
+                        try {
+                            markConnectionAsFailed(level, structureConnection);
+                        } catch (Exception ex) {
+                            LOGGER.error("Failed to mark connection as failed", ex);
+                        }
+                    } finally {
+                        runningTasks.remove(taskId);
                     }
-                }
+                });
+                runningTasks.put(taskId, future);
             } else {
-                LOGGER.warn("❌ RoadFeature or config not found!");
+                try {
+                    new Road(level, structureConnection, roadConfig).generateRoad(steps);
+                } catch (Exception e) {
+                    LOGGER.error("❌ Error generating road: {}", e.getMessage(), e);
+                    markConnectionAsFailed(level, structureConnection);
+                }
             }
         }
+    }
+
+    /**
+     * 获取道路特性配置，包含健壮的注册表检查
+     * @param level 服务器世界
+     * @return 配置对象，如果注册表未就绪则返回 null
+     */
+    private static RoadFeatureConfig getRoadFeatureConfig(ServerLevel level) {
+        try {
+            // 检查注册表是否可用
+            if (level.registryAccess() == null) {
+                LOGGER.debug("RoadWeaver: RegistryAccess is null");
+                return null;
+            }
+            
+            var registry = level.registryAccess().registry(Registries.CONFIGURED_FEATURE);
+            if (registry.isEmpty()) {
+                LOGGER.debug("RoadWeaver: ConfiguredFeature registry is not available");
+                return null;
+            }
+            
+            ConfiguredFeature<?, ?> feature = registry.get().get(RoadFeature.ROAD_FEATURE_KEY);
+            if (feature != null && feature.config() instanceof RoadFeatureConfig cfg) {
+                LOGGER.debug("RoadWeaver: Using registered RoadFeatureConfig");
+                return cfg;
+            } else {
+                // 使用 fallback 配置
+                LOGGER.debug("RoadWeaver: ConfiguredFeature {} missing or invalid, using fallback", 
+                    RoadFeature.ROAD_FEATURE_KEY.location());
+                return defaultRoadConfig();
+            }
+        } catch (Exception e) {
+            LOGGER.debug("RoadWeaver: Exception while getting RoadFeatureConfig: {}", e.getMessage());
+            return null; // 注册表未就绪，返回 null 等待下一个 tick
+        }
+    }
+
+    private static RoadFeatureConfig defaultRoadConfig() {
+        // 与 datagen 中的默认配置保持一致
+        List<List<BlockState>> artificialMaterials = List.of(
+                List.of(Blocks.MUD_BRICKS.defaultBlockState(), Blocks.PACKED_MUD.defaultBlockState()),
+                List.of(Blocks.POLISHED_ANDESITE.defaultBlockState(), Blocks.STONE_BRICKS.defaultBlockState()),
+                List.of(Blocks.STONE_BRICKS.defaultBlockState(), Blocks.MOSSY_STONE_BRICKS.defaultBlockState(), Blocks.CRACKED_STONE_BRICKS.defaultBlockState())
+        );
+
+        List<List<BlockState>> naturalMaterials = List.of(
+                List.of(Blocks.COARSE_DIRT.defaultBlockState(), Blocks.ROOTED_DIRT.defaultBlockState(), Blocks.PACKED_MUD.defaultBlockState()),
+                List.of(Blocks.COBBLESTONE.defaultBlockState(), Blocks.MOSSY_COBBLESTONE.defaultBlockState(), Blocks.CRACKED_STONE_BRICKS.defaultBlockState()),
+                List.of(Blocks.DIRT_PATH.defaultBlockState(), Blocks.COARSE_DIRT.defaultBlockState(), Blocks.PACKED_MUD.defaultBlockState())
+        );
+
+        List<Integer> widths = List.of(3);
+        List<Integer> qualities = List.of(1,2,3,4,5,6,7,8,9);
+        return new RoadFeatureConfig(artificialMaterials, naturalMaterials, widths, qualities);
     }
 
     /**

@@ -38,7 +38,7 @@
   "config.roadweaver.category.manual": "手动模式设置",
 
   "config.roadweaver.structureToLocate": "要定位的结构",
-  "config.roadweaver.structureToLocate.tooltip": "选择或输入要定位的结构。例如：#minecraft:village（村庄标签）, minecraft:village_plains（平原村庄）或 modid:custom_structure（模组结构）。支持结构标签和键。",
+  "config.roadweaver.structureToLocate.tooltip": "每行输入一个结构或标签。例如：#minecraft:village、minecraft:village_plains、modid:custom_structure。支持结构标签（#命名空间:路径）与直接ID。",
   "config.roadweaver.structureSearchRadius": "结构搜寻半径",
   "config.roadweaver.structureSearchRadius.tooltip": "搜寻结构的半径（区块数）。数值越大搜寻范围越广，但耗时越长。默认：100（1600方块）",
 
@@ -46,6 +46,8 @@
   "config.roadweaver.initialLocatingCount.tooltip": "选择世界加载时定位的结构数量。数量越大 = 加载时间越长",
   "config.roadweaver.maxConcurrentRoadGeneration": "同时生成道路数量上限",
   "config.roadweaver.maxConcurrentRoadGeneration.tooltip": "同时生成的道路任务数量上限。数值越小性能占用越低，但道路生成速度会变慢。默认：3",
+  "config.roadweaver.structureSearchTriggerDistance": "结构搜寻触发距离",
+  "config.roadweaver.structureSearchTriggerDistance.tooltip": "每加载多少个区块后触发一次新结构搜寻。范围150-1500，数值越小搜寻越频繁。默认：500",
 
   "config.roadweaver.averagingRadius": "地形平均半径",
   "config.roadweaver.averagingRadius.tooltip": "人工道路的地形平滑程度。数值越大越平滑，但可能不自然。默认：1",

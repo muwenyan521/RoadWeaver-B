@@ -50,9 +50,9 @@ public final class StructureLocatorImpl {
         List<BlockPos> knownLocations = new ArrayList<>(locationData.structureLocations());
         Set<BlockPos> newlyFound = new HashSet<>();
 
-        Optional<HolderSet<Structure>> targetStructures = resolveStructureTargets(level, config.structureToLocate());
+        Optional<HolderSet<Structure>> targetStructures = resolveStructureTargets(level, config.structuresToLocate());
         if (targetStructures.isEmpty()) {
-            LOGGER.warn("RoadWeaver: 无法解析结构目标 `{}`，跳过定位。", config.structureToLocate());
+            LOGGER.warn("RoadWeaver: 无法解析结构目标列表，跳过定位。");
             return;
         }
 
@@ -67,7 +67,7 @@ public final class StructureLocatorImpl {
 
             Pair<BlockPos, Holder<Structure>> result = level.getChunkSource()
                     .getGenerator()
-                    .findNearestMapStructure(level, targetStructures.get(), center, radius, false);
+                    .findNearestMapStructure(level, targetStructures.get(), center, radius, true);
 
             if (result != null) {
                 BlockPos structurePos = result.getFirst();
@@ -85,17 +85,141 @@ public final class StructureLocatorImpl {
         }
     }
 
-    private static Optional<HolderSet<Structure>> resolveStructureTargets(ServerLevel level, String identifier) {
+    private static Optional<HolderSet<Structure>> resolveStructureTargets(ServerLevel level, String identifiers) {
         Registry<Structure> registry = level.registryAccess().registryOrThrow(Registries.STRUCTURE);
-        if (identifier.startsWith("#")) {
-            ResourceLocation tagId = ResourceLocation.parse(identifier.substring(1));
-            TagKey<Structure> tag = TagKey.create(Registries.STRUCTURE, tagId);
-            return registry.getTag(tag).map(named -> (HolderSet<Structure>) named);
-        } else {
-            ResourceLocation id = ResourceLocation.parse(identifier);
-            ResourceKey<Structure> key = ResourceKey.create(Registries.STRUCTURE, id);
-            return registry.getHolder(key).map(HolderSet::direct);
+        List<Holder<Structure>> holders = new ArrayList<>();
+
+        if (identifiers == null || identifiers.isBlank()) {
+            return Optional.empty();
         }
+
+        String[] tokens = identifiers.split("[;,\\s]+");
+        for (String raw : tokens) {
+            if (raw == null) continue;
+            String token = raw.trim()
+                    .replace("\r", "")
+                    .replace("\n", "");
+            // 去除首尾引号/反引号，并去掉末尾标点（逗号/分号/中文标点）
+            token = token.replaceAll("^[\\\"'`]+|[\\\"'`]+$", "");
+            token = token.replaceAll("[,;，；]+$", "");
+            // 规范化：去除 BOM、替换全角符号
+            if (!token.isEmpty() && token.charAt(0) == '\uFEFF') token = token.substring(1);
+            token = token
+                    .replace('＃', '#')
+                    .replace('“', ' ')
+                    .replace('”', ' ')
+                    .replace('「', ' ')
+                    .replace('」', ' ')
+                    .replace('『', ' ')
+                    .replace('』', ' ')
+                    .replace('《', ' ')
+                    .replace('》', ' ')
+                    .trim();
+            if (token.isBlank()) continue;
+
+            // 若存在 #，不论位置，将其视为标签起始
+            int hashIdx = token.indexOf('#');
+            if (hashIdx >= 0) {
+                String tagToken = token.substring(hashIdx + 1).trim();
+                try {
+                    ResourceLocation tagId = ResourceLocation.parse(tagToken);
+                    TagKey<Structure> tag = TagKey.create(Registries.STRUCTURE, tagId);
+                    registry.getTag(tag).ifPresentOrElse(named -> {
+                        for (Holder<Structure> h : named) {
+                            holders.add(h);
+                        }
+                    }, () -> LOGGER.warn("RoadWeaver: structure tag not found: #{}", tagToken));
+                } catch (Exception ex) {
+                    LOGGER.warn("RoadWeaver: invalid structure tag token skipped: #{} (raw='{}')", tagToken, raw);
+                }
+            } else {
+                try {
+                    // 去掉前置非法字符（如意外的引号/符号）
+                    String cleaned = token.replaceAll("^[^a-z0-9_.:-]+", "");
+                    ResourceLocation id = ResourceLocation.parse(cleaned);
+                    ResourceKey<Structure> key = ResourceKey.create(Registries.STRUCTURE, id);
+                    registry.getHolder(key).ifPresentOrElse(holders::add,
+                            () -> LOGGER.warn("RoadWeaver: structure id not found: {}", cleaned));
+                } catch (Exception ex) {
+                    LOGGER.warn("RoadWeaver: invalid structure id token skipped: {} (raw='{}')", token, raw);
+                }
+            }
+        }
+
+        if (holders.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(HolderSet.direct(holders));
+    }
+
+    private static Optional<HolderSet<Structure>> resolveStructureTargets(ServerLevel level, java.util.List<String> identifiersList) {
+        Registry<Structure> registry = level.registryAccess().registryOrThrow(Registries.STRUCTURE);
+        List<Holder<Structure>> holders = new ArrayList<>();
+
+        if (identifiersList == null || identifiersList.isEmpty()) {
+            return Optional.empty();
+        }
+
+        for (String line : identifiersList) {
+            if (line == null) continue;
+            String norm = line.replace('\r', ' ').replace('\n', ' ').trim();
+            if (norm.isEmpty()) continue;
+            // 允许行内继续使用逗号/分号/空白再分割
+            String[] tokens = norm.split("[;,\\s]+");
+            for (String raw : tokens) {
+                if (raw == null) continue;
+                String token = raw.trim();
+                if (token.isEmpty()) continue;
+                // 重用单字符串解析的清洗逻辑
+                token = token
+                        .replace("\r", "")
+                        .replace("\n", "");
+                token = token.replaceAll("^[\\\"'`]+|[\\\"'`]+$", "");
+                token = token.replaceAll("[,;，；]+$", "");
+                if (!token.isEmpty() && token.charAt(0) == '\uFEFF') token = token.substring(1);
+                token = token
+                        .replace('＃', '#')
+                        .replace('“', ' ')
+                        .replace('”', ' ')
+                        .replace('「', ' ')
+                        .replace('」', ' ')
+                        .replace('『', ' ')
+                        .replace('』', ' ')
+                        .replace('《', ' ')
+                        .replace('》', ' ')
+                        .trim();
+                if (token.isEmpty()) continue;
+
+                int hashIdx = token.indexOf('#');
+                if (hashIdx >= 0) {
+                    String tagToken = token.substring(hashIdx + 1).trim();
+                    try {
+                        ResourceLocation tagId = ResourceLocation.parse(tagToken);
+                        TagKey<Structure> tag = TagKey.create(Registries.STRUCTURE, tagId);
+                        registry.getTag(tag).ifPresentOrElse(named -> {
+                            for (Holder<Structure> h : named) holders.add(h);
+                        }, () -> LOGGER.warn("RoadWeaver: structure tag not found: #{}", tagToken));
+                    } catch (Exception ex) {
+                        LOGGER.warn("RoadWeaver: invalid structure tag token skipped: #{} (line='{}')", tagToken, line);
+                    }
+                } else {
+                    try {
+                        String cleaned = token.replaceAll("^[^a-z0-9_.:-]+", "");
+                        ResourceLocation id = ResourceLocation.parse(cleaned);
+                        ResourceKey<Structure> key = ResourceKey.create(Registries.STRUCTURE, id);
+                        registry.getHolder(key).ifPresentOrElse(holders::add,
+                                () -> LOGGER.warn("RoadWeaver: structure id not found: {}", cleaned));
+                    } catch (Exception ex) {
+                        LOGGER.warn("RoadWeaver: invalid structure id token skipped: {} (line='{}')", token, line);
+                    }
+                }
+            }
+        }
+
+        if (holders.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(HolderSet.direct(holders));
     }
 
     private static List<BlockPos> collectSearchCenters(ServerLevel level, boolean locateAtPlayer) {

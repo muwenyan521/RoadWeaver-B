@@ -1,13 +1,12 @@
 package net.countered.settlementroads;
 
-import net.countered.settlementroads.config.neoforge.NeoForgeModConfig;
+import net.countered.settlementroads.config.neoforge.NeoForgeJsonConfig;
 import net.countered.settlementroads.events.ModEventHandler;
 import net.countered.settlementroads.features.config.RoadFeatureRegistry;
 import net.countered.settlementroads.datagen.SettlementRoadsDataGenerator;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.config.ModConfig.Type;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,8 +20,8 @@ public class SettlementRoads {
 	public SettlementRoads(IEventBus modEventBus, ModContainer modContainer) {
 		LOGGER.info("Initializing roadWeaver (NeoForge)...");
 		
-		// 注册配置
-		modContainer.registerConfig(Type.SERVER, NeoForgeModConfig.SERVER_SPEC);
+		// 加载 JSON 配置（与 Fabric 一致，写入 config/roadweaver.json）
+		NeoForgeJsonConfig.load();
 		
 		// 注册通用设置事件
 		modEventBus.addListener(this::commonSetup);

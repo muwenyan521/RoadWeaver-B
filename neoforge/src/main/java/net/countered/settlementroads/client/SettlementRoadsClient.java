@@ -1,5 +1,6 @@
 package net.countered.settlementroads.client;
 
+import net.countered.settlementroads.client.gui.ClothConfigScreen;
 import net.countered.settlementroads.client.gui.RoadDebugScreen;
 import net.countered.settlementroads.helpers.Records;
 import net.countered.settlementroads.persistence.neoforge.WorldDataHelper;
@@ -9,8 +10,10 @@ import net.minecraft.server.level.ServerLevel;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -30,6 +33,15 @@ public class SettlementRoadsClient {
                 "category.roadweaver"
         );
         event.register(debugMapKey);
+    }
+    
+    @SubscribeEvent
+    public static void onClientSetup(FMLClientSetupEvent event) {
+        // 注册配置屏幕工厂
+        event.enqueueWork(() -> {
+            // 这需要在 NeoForge 1.21+ 中通过不同方式注册
+            // 暂时使用 ClothConfigScreen 直接创建
+        });
     }
 
     @EventBusSubscriber(modid = "roadweaver", bus = EventBusSubscriber.Bus.GAME, value = Dist.CLIENT)

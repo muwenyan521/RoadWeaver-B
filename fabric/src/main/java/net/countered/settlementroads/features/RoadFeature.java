@@ -91,10 +91,11 @@ public class RoadFeature extends Feature<RoadFeatureConfig> {
     private void tryFindNewStructureConnection(List<BlockPos> villageLocations, ServerLevel serverLevel) {
         // 移除数量限制，改为基于距离的智能搜寻
         chunksForLocatingCounter++;
-        if (chunksForLocatingCounter > 300) {
-            serverLevel.getServer().execute(() -> {
-                StructureConnector.cacheNewConnection(serverLevel, true);
-            });
+        int triggerDistance = ConfigProvider.get().structureSearchTriggerDistance();
+        if (chunksForLocatingCounter > triggerDistance) {
+            LOGGER.info("🔍 Triggering new structure search (counter reached {}), current structures: {}", 
+                triggerDistance, villageLocations.size());
+            serverLevel.getServer().execute(() -> StructureConnector.cacheNewConnection(serverLevel, true));
             chunksForLocatingCounter = 1;
         }
     }

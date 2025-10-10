@@ -2,14 +2,16 @@ package net.countered.settlementroads.config.fabric;
 
 import net.countered.settlementroads.config.IModConfig;
 
+import java.util.List;
+
 /**
  * Adapter class to bridge FabricModConfig with IModConfig interface
  */
 public class FabricModConfigAdapter implements IModConfig {
     
     @Override
-    public String structureToLocate() {
-        return FabricModConfig.getStructureToLocate();
+    public List<String> structuresToLocate() {
+        return FabricModConfig.getStructuresToLocate();
     }
 
     @Override

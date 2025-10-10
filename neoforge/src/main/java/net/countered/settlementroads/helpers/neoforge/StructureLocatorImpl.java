@@ -31,24 +31,8 @@ public final class StructureLocatorImpl {
     private static final Logger LOGGER = LoggerFactory.getLogger("roadweaver");
 
     public static void locateConfiguredStructure(ServerLevel serverWorld, int locateCount, boolean locateAtPlayer) {
-        IModConfig config = ConfigProvider.get();
-        String structureId = config.structureToLocate();
-        LOGGER.debug("Locating {} {}", locateCount, structureId);
-        
-        for (int x = 0; x < locateCount; x++) {
-            BlockPos searchPos;
-            if (locateAtPlayer) {
-                // 以玩家位置为中心搜寻
-                List<ServerPlayer> players = serverWorld.players();
-                if (players.isEmpty()) continue;
-                searchPos = players.get(0).blockPosition();
-            } else {
-                // 以出生点为中心搜寻
-                searchPos = serverWorld.getSharedSpawnPos();
-            }
-            
-            executeLocateStructure(searchPos, serverWorld, structureId);
-        }
+        // 委托到 common 实现以复用“多结构同时搜寻”逻辑
+        net.countered.settlementroads.helpers.StructureLocatorImpl.locateConfiguredStructure(serverWorld, locateCount, locateAtPlayer);
     }
 
     private static void executeLocateStructure(BlockPos locatePos, ServerLevel serverWorld, String structureId) {

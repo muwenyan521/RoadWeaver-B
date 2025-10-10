@@ -38,7 +38,7 @@
   "config.roadweaver.category.manual": "Manual Mode Settings",
 
   "config.roadweaver.structureToLocate": "Structure to locate",
-  "config.roadweaver.structureToLocate.tooltip": "Select or type the structure you want to locate. E.g., #minecraft:village, minecraft:village_plains or modid:custom_structure. Allows structure tags and keys.",
+  "config.roadweaver.structureToLocate.tooltip": "Enter one structure or tag per line. Examples: #minecraft:village, minecraft:village_plains, modid:custom_structure. Tags (#namespace:path) and direct IDs are supported.",
   "config.roadweaver.structureSearchRadius": "Structure search radius",
   "config.roadweaver.structureSearchRadius.tooltip": "Search radius for structures (in chunks). Higher value = wider search area but slower. Default: 100 (1600 blocks)",
 
@@ -46,6 +46,8 @@
   "config.roadweaver.initialLocatingCount.tooltip": "Select the number of structures to locate on world load. Higher number = longer loading time",
   "config.roadweaver.maxConcurrentRoadGeneration": "Max Concurrent Road Generation",
   "config.roadweaver.maxConcurrentRoadGeneration.tooltip": "Maximum number of roads that can be generated simultaneously. Lower values reduce performance impact but slow down road generation. Default: 3",
+  "config.roadweaver.structureSearchTriggerDistance": "Structure Search Trigger Distance",
+  "config.roadweaver.structureSearchTriggerDistance.tooltip": "Number of chunks to load before triggering new structure search. Range 150-1500, lower values search more frequently. Default: 500",
 
   "config.roadweaver.averagingRadius": "Averaging radius",
   "config.roadweaver.averagingRadius.tooltip": "Amount of terrain averaging done for artificial roads. Higher values create smoother roads but may look unnatural. Default: 1",

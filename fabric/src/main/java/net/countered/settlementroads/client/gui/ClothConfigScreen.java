@@ -24,12 +24,12 @@ public class ClothConfigScreen {
         ConfigCategory structures = builder.getOrCreateCategory(
                 Component.translatable("config.roadweaver.category.structures"));
         
-        structures.addEntry(entryBuilder.startStrField(
+        structures.addEntry(entryBuilder.startStrList(
                 Component.translatable("config.roadweaver.structureToLocate"),
-                FabricModConfig.getStructureToLocate())
-                .setDefaultValue("#minecraft:village")
+                FabricModConfig.getStructuresToLocate())
                 .setTooltip(Component.translatable("config.roadweaver.structureToLocate.tooltip"))
-                .setSaveConsumer(FabricModConfig::setStructureToLocate)
+                .setExpanded(true)
+                .setSaveConsumer(FabricModConfig::setStructuresToLocate)
                 .build());
         
         structures.addEntry(entryBuilder.startIntSlider(
@@ -63,6 +63,15 @@ public class ClothConfigScreen {
                 .setMax(10)
                 .setTooltip(Component.translatable("config.roadweaver.maxConcurrentRoadGeneration.tooltip"))
                 .setSaveConsumer(FabricModConfig::setMaxConcurrentRoadGeneration)
+                .build());
+        
+        preGeneration.addEntry(entryBuilder.startIntSlider(
+                Component.translatable("config.roadweaver.structureSearchTriggerDistance"),
+                FabricModConfig.getStructureSearchTriggerDistance(),
+                150, 1500)
+                .setDefaultValue(500)
+                .setTooltip(Component.translatable("config.roadweaver.structureSearchTriggerDistance.tooltip"))
+                .setSaveConsumer(FabricModConfig::setStructureSearchTriggerDistance)
                 .build());
         
         // 道路配置分类

@@ -1,8 +1,10 @@
 package net.countered.settlementroads.config;
 
+import java.util.List;
+
 public interface IModConfig {
     // Structures
-    String structureToLocate();
+    List<String> structuresToLocate();
     int structureSearchRadius();
 
     // Pre-generation
