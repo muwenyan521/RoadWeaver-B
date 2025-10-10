@@ -136,7 +136,7 @@ public class NeoForgeJsonConfig {
         // 道路配置
         int averagingRadius = 1;
         boolean allowArtificial = true;
-        boolean allowNatural = true;
+        boolean allowNatural = false;
         int structureDistanceFromRoad = 4;
         int maxHeightDifference = 5;
         int maxTerrainStability = 4;
@@ -149,8 +149,8 @@ public class NeoForgeJsonConfig {
         boolean placeGloriettes = true;
 
         // 手动模式配置
-        int manualMaxHeightDifference = 8;
-        int manualMaxTerrainStability = 8;
+        int manualMaxHeightDifference = 10;
+        int manualMaxTerrainStability = 10;
         boolean manualIgnoreWater = false;
     }
 

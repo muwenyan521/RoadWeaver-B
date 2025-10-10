@@ -3,6 +3,7 @@
   "category.roadweaver": "RoadWeaver",
 
   "gui.roadweaver.config": "Config",
+  "gui.roadweaver.config_button": "RoadWeaver Config",
   "gui.roadweaver.debug_map.title": "RoadWeaver - Debug Map",
   "gui.roadweaver.debug_map.structures": "Structures: %s",
   "gui.roadweaver.debug_map.planned": "Planned: %s",

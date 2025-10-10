@@ -73,6 +73,7 @@ jar {
 			'Implementation-Title'    : project.name,
 			'Implementation-Version'  : project.version,
 			'Implementation-Vendor'   : 'Countered',
+			'MixinConfigs'            : 'roadweaver.mixins.json'
 		])
 	}
 }

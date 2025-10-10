@@ -4,7 +4,7 @@
 
 [![Minecraft](https://img.shields.io/badge/Minecraft-1.21.1-green.svg)](https://www.minecraft.net/)
 [![Fabric](https://img.shields.io/badge/Fabric-API-orange.svg)](https://fabricmc.net/)
-[![License](https://img.shields.io/badge/License-CC0--1.0-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ---
 
@@ -132,7 +132,7 @@ cd RoadWeaver
 
 ## 📄 许可证
 
-本项目采用 [CC0-1.0](LICENSE) 许可证。
+本项目采用 [MIT](LICENSE) 许可证。
 
 ## 🙏 致谢
 

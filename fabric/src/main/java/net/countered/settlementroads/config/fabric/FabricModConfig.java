@@ -130,12 +130,12 @@ public class FabricModConfig {
         // 预生成配置
         int initialLocatingCount = 7;
         int maxConcurrentRoadGeneration = 3;
-        int structureSearchTriggerDistance = 600;
+        int structureSearchTriggerDistance = 500;
         
         // 道路配置
         int averagingRadius = 1;
         boolean allowArtificial = true;
-        boolean allowNatural = true;
+        boolean allowNatural = false;
         int structureDistanceFromRoad = 4;
         int maxHeightDifference = 5;
         int maxTerrainStability = 4;
@@ -148,8 +148,8 @@ public class FabricModConfig {
         boolean placeGloriettes = true;
         
         // 手动模式配置
-        int manualMaxHeightDifference = 8;
-        int manualMaxTerrainStability = 8;
+        int manualMaxHeightDifference = 10;
+        int manualMaxTerrainStability = 10;
         boolean manualIgnoreWater = false;
     }
     

@@ -47,7 +47,7 @@ public class ClothConfigScreen {
                 NeoForgeJsonConfig.getInitialLocatingCount())
                 .setDefaultValue(7)
                 .setMin(1)
-                .setMax(20)
+                .setMax(50)
                 .setTooltip(Component.translatable("config.roadweaver.initialLocatingCount.tooltip"))
                 .setSaveConsumer(NeoForgeJsonConfig::setInitialLocatingCount)
                 .build());

@@ -3,6 +3,7 @@
   "category.roadweaver": "RoadWeaver",
 
   "gui.roadweaver.config": "配置",
+  "gui.roadweaver.config_button": "RoadWeaver 配置",
   "gui.roadweaver.debug_map.title": "RoadWeaver - 调试地图",
   "gui.roadweaver.debug_map.structures": "结构: %s",
   "gui.roadweaver.debug_map.planned": "计划中: %s",
