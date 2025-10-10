@@ -19,9 +19,10 @@
   "gui.roadweaver.debug_map.legend.roads": "道路",
   "gui.roadweaver.debug_map.legend.player": "玩家",
   "gui.roadweaver.debug_map.valid": "有效",
-  "gui.roadweaver.debug_map.lod": "LOD",
-  "gui.roadweaver.debug_map.blocks_per_grid": "%.0f块/格",
   "gui.roadweaver.debug_map.position": "位置",
+  "gui.roadweaver.debug_map.refresh": "刷新",
+  "gui.roadweaver.debug_map.refreshed": "数据已刷新",
+  "gui.roadweaver.debug_map.removed_failed": "已移除 %s 个失败连接",
 
   "gui.roadweaver.common.on": "开启",
   "gui.roadweaver.common.off": "关闭",
@@ -81,5 +82,7 @@
   "config.roadweaver.manualMaxHeightDifference": "手动模式最大高度差",
   "config.roadweaver.manualMaxHeightDifference.tooltip": "手动连接模式下允许的最大高度差。比普通模式更激进，用于重试失败的道路。默认：8",
   "config.roadweaver.manualMaxTerrainStability": "手动模式地形稳定性",
-  "config.roadweaver.manualMaxTerrainStability.tooltip": "手动连接模式下的地形稳定性阈值。比普通模式更宽松，提高通过率。默认：8"
+  "config.roadweaver.manualMaxTerrainStability.tooltip": "手动连接模式下的地形稳定性阈值。比普通模式更宽松，提高通过率。默认：8",
+  "config.roadweaver.manualIgnoreWater": "手动模式忽略水域",
+  "config.roadweaver.manualIgnoreWater.tooltip": "开启后，手动连接时将忽略水域成本，允许直接穿过海洋和河流。用于跨海连接。默认：关闭"
 }

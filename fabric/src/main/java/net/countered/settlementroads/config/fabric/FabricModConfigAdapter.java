@@ -98,4 +98,9 @@ public class FabricModConfigAdapter implements IModConfig {
     public int manualMaxTerrainStability() {
         return FabricModConfig.getManualMaxTerrainStability();
     }
+
+    @Override
+    public boolean manualIgnoreWater() {
+        return FabricModConfig.getManualIgnoreWater();
+    }
 }

@@ -59,10 +59,6 @@ public class UIRenderer {
             }
         }
 
-        double blocksPerPixel = 1.0 / (baseScale * zoom);
-        double blocksPerGrid = blocksPerPixel * 80;
-        String lodInfo = net.minecraft.network.chat.Component.translatable("gui.roadweaver.debug_map.blocks_per_grid", blocksPerGrid).getString();
-
         String[] labels = {
                 net.minecraft.network.chat.Component.translatable("gui.roadweaver.debug_map.structures", structureInfos.size()).getString(),
                 net.minecraft.network.chat.Component.translatable("gui.roadweaver.debug_map.planned", planned).getString(),
@@ -71,8 +67,7 @@ public class UIRenderer {
                 net.minecraft.network.chat.Component.translatable("gui.roadweaver.debug_map.failed", failed).getString(),
                 net.minecraft.network.chat.Component.translatable("gui.roadweaver.debug_map.roads", roads.size()).getString(),
                 net.minecraft.network.chat.Component.translatable("gui.roadweaver.debug_map.valid", validRoads).getString(),
-                net.minecraft.network.chat.Component.translatable("gui.roadweaver.debug_map.zoom", String.format("%.1f", zoom)).getString(),
-                net.minecraft.network.chat.Component.translatable("gui.roadweaver.debug_map.lod").getString() + ": " + lodInfo
+                net.minecraft.network.chat.Component.translatable("gui.roadweaver.debug_map.zoom", String.format("%.1f", zoom)).getString()
         };
 
         int[] colors = {
@@ -83,8 +78,7 @@ public class UIRenderer {
                 statusColors.get("failed"),
                 statusColors.get("road"),
                 0xFF00FF00,
-                0xFFFFFFFF,
-                0xFFFFFF00
+                0xFFFFFFFF
         };
 
         int maxWidth = 0;

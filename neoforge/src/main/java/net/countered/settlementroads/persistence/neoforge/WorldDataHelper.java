@@ -119,12 +119,12 @@ public class WorldDataHelper {
         }
         
         public static StructureLocationsData load(CompoundTag tag) {
-            List<BlockPos> locations = Records.StructureLocationData.CODEC
+            // 直接解析完整的 StructureLocationData 对象（包含 structureLocations 和 structureInfos）
+            Records.StructureLocationData data = Records.StructureLocationData.CODEC
                     .parse(NbtOps.INSTANCE, tag.get("data"))
                     .resultOrPartial(error -> SettlementRoads.getLogger().error("Failed to load structure locations: {}", error))
-                    .map(Records.StructureLocationData::structureLocations)
-                    .orElse(new ArrayList<>());
-            return new StructureLocationsData(locations);
+                    .orElse(new Records.StructureLocationData(new ArrayList<>()));
+            return new StructureLocationsData(data);
         }
         
         @Override

@@ -202,6 +202,14 @@ public class ClothConfigScreen {
                 .setSaveConsumer(FabricModConfig::setManualMaxTerrainStability)
                 .build());
         
+        manual.addEntry(entryBuilder.startBooleanToggle(
+                Component.translatable("config.roadweaver.manualIgnoreWater"),
+                FabricModConfig.getManualIgnoreWater())
+                .setDefaultValue(false)
+                .setTooltip(Component.translatable("config.roadweaver.manualIgnoreWater.tooltip"))
+                .setSaveConsumer(FabricModConfig::setManualIgnoreWater)
+                .build());
+        
         return builder.build();
     }
 }

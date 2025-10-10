@@ -34,12 +34,20 @@ public class RoadPathCalculator {
     ) {
         IModConfig cfg = ConfigProvider.get();
         return calculateAStarRoadPath(start, end, width, serverWorld, maxSteps,
-                cfg.maxHeightDifference(), cfg.maxTerrainStability());
+                cfg.maxHeightDifference(), cfg.maxTerrainStability(), false);
     }
 
     public static List<Records.RoadSegmentPlacement> calculateAStarRoadPath(
             BlockPos start, BlockPos end, int width, ServerLevel serverWorld, int maxSteps,
             int maxHeightDifference, int maxTerrainStability
+    ) {
+        return calculateAStarRoadPath(start, end, width, serverWorld, maxSteps,
+                maxHeightDifference, maxTerrainStability, false);
+    }
+
+    public static List<Records.RoadSegmentPlacement> calculateAStarRoadPath(
+            BlockPos start, BlockPos end, int width, ServerLevel serverWorld, int maxSteps,
+            int maxHeightDifference, int maxTerrainStability, boolean ignoreWater
     ) {
         PriorityQueue<Node> openSet = new PriorityQueue<>(Comparator.comparingDouble(n -> n.fScore));
         Map<BlockPos, Node> allNodes = new HashMap<>();
@@ -90,7 +98,8 @@ public class RoadPathCalculator {
                         || biomeHolder.is(BiomeTags.IS_DEEP_OCEAN);
                 // 水域成本：50 * 8 = 400（与原项目一致）
                 // 如果绕路成本更高（距离远、高度差大），仍会选择穿过水域
-                int biomeCost = isWater ? 50 : 0;
+                // 手动模式且忽略水域时，水域成本为 0（用于跨海连接）
+                int biomeCost = (isWater && !ignoreWater) ? 50 : 0;
                 int elevation = Math.abs(y - current.pos.getY());
                 if (elevation > maxHeightDifference) {
                     continue;

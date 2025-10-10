@@ -95,4 +95,9 @@ public class NeoForgeModConfigAdapter implements IModConfig {
     public int manualMaxTerrainStability() {
         return NeoForgeJsonConfig.getManualMaxTerrainStability();
     }
+
+    @Override
+    public boolean manualIgnoreWater() {
+        return NeoForgeJsonConfig.getManualIgnoreWater();
+    }
 }

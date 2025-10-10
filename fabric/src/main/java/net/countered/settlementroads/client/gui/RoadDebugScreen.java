@@ -80,6 +80,7 @@ public class RoadDebugScreen extends Screen {
     // 按钮
     private Button manualButton;
     private Button configButton;
+    private Button refreshButton;
 
     public RoadDebugScreen(List<Records.StructureInfo> structureInfos,
                            List<Records.StructureConnection> connections,
@@ -123,6 +124,18 @@ public class RoadDebugScreen extends Screen {
                 .build();
         this.addRenderableWidget(this.configButton);
         
+        // 右上角：刷新按钮（配置按钮左侧）
+        int refreshButtonW = 50;
+        int refreshButtonH = 16;
+        int refreshButtonX = configButtonX - refreshButtonW - 4;
+        int refreshButtonY = 8;
+        this.refreshButton = Button.builder(
+                Component.translatable("gui.roadweaver.debug_map.refresh"),
+                button -> refreshData())
+                .bounds(refreshButtonX, refreshButtonY, refreshButtonW, refreshButtonH)
+                .build();
+        this.addRenderableWidget(this.refreshButton);
+        
         // 左下角：手动连接模式开关
         int buttonW = 110;
         int buttonH = 16;
@@ -145,6 +158,76 @@ public class RoadDebugScreen extends Screen {
         if (manualButton != null) manualButton.setMessage(getManualModeLabel());
         String msg = Component.translatable(manualMode ? "toast.roadweaver.manual_mode_on" : "toast.roadweaver.manual_mode_off").getString();
         toast(msg, 2000);
+    }
+    
+    private void refreshData() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc == null || mc.getSingleplayerServer() == null) return;
+        
+        ServerLevel world = mc.getSingleplayerServer().overworld();
+        if (world == null) return;
+        
+        try {
+            // 重新加载数据
+            Records.StructureLocationData data = WorldDataProvider.getInstance().getStructureLocations(world);
+            List<Records.StructureConnection> newConnections = WorldDataProvider.getInstance().getStructureConnections(world);
+            List<Records.RoadData> newRoads = WorldDataProvider.getInstance().getRoadDataList(world);
+            
+            // 清理失败的连接
+            int failedCount = 0;
+            if (newConnections != null) {
+                List<Records.StructureConnection> filteredConnections = new ArrayList<>();
+                for (Records.StructureConnection conn : newConnections) {
+                    if (conn.status() == Records.ConnectionStatus.FAILED) {
+                        failedCount++;
+                    } else {
+                        filteredConnections.add(conn);
+                    }
+                }
+                
+                // 如果有失败的连接被移除，更新到存档
+                if (failedCount > 0) {
+                    WorldDataProvider.getInstance().setStructureConnections(world, filteredConnections);
+                    newConnections = filteredConnections;
+                }
+            }
+            
+            // 更新列表
+            this.structureInfos.clear();
+            if (data != null && data.structureInfos() != null) {
+                this.structureInfos.addAll(data.structureInfos());
+            }
+            
+            this.connections.clear();
+            if (newConnections != null) {
+                this.connections.addAll(newConnections);
+            }
+            
+            this.roads.clear();
+            if (newRoads != null) {
+                this.roads.addAll(newRoads);
+            }
+            
+            // 重新计算边界
+            if (!this.structureInfos.isEmpty()) {
+                minX = this.structureInfos.stream().mapToInt(info -> info.pos().getX()).min().orElse(0);
+                maxX = this.structureInfos.stream().mapToInt(info -> info.pos().getX()).max().orElse(0);
+                minZ = this.structureInfos.stream().mapToInt(info -> info.pos().getZ()).min().orElse(0);
+                maxZ = this.structureInfos.stream().mapToInt(info -> info.pos().getZ()).max().orElse(0);
+            }
+            
+            // 标记需要重新布局
+            layoutDirty = true;
+            
+            // 显示提示
+            String message = Component.translatable("gui.roadweaver.debug_map.refreshed").getString();
+            if (failedCount > 0) {
+                message += " (" + Component.translatable("gui.roadweaver.debug_map.removed_failed", failedCount).getString() + ")";
+            }
+            toast(message, 2000);
+        } catch (Exception e) {
+            toast("Refresh failed: " + e.getMessage(), 2000);
+        }
     }
 
     @Override

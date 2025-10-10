@@ -49,9 +49,10 @@ public class Road {
 
         int maxHeightDiff = structureConnection.manual() ? cfg.manualMaxHeightDifference() : cfg.maxHeightDifference();
         int maxStability = structureConnection.manual() ? cfg.manualMaxTerrainStability() : cfg.maxTerrainStability();
+        boolean ignoreWater = structureConnection.manual() && cfg.manualIgnoreWater();
 
         List<Records.RoadSegmentPlacement> roadSegmentPlacementList = RoadPathCalculator.calculateAStarRoadPath(
-                start, end, width, serverWorld, maxSteps, maxHeightDiff, maxStability);
+                start, end, width, serverWorld, maxSteps, maxHeightDiff, maxStability, ignoreWater);
 
         if (roadSegmentPlacementList.isEmpty()) {
             updateConnectionStatus(Records.ConnectionStatus.FAILED);

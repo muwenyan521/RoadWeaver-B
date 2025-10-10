@@ -78,6 +78,9 @@ public class FabricModConfig {
     public static int getManualMaxTerrainStability() { return data.manualMaxTerrainStability; }
     public static void setManualMaxTerrainStability(int value) { data.manualMaxTerrainStability = value; }
     
+    public static boolean getManualIgnoreWater() { return data.manualIgnoreWater; }
+    public static void setManualIgnoreWater(boolean value) { data.manualIgnoreWater = value; }
+    
     public static void load() {
         if (Files.exists(CONFIG_PATH)) {
             try {
@@ -147,6 +150,7 @@ public class FabricModConfig {
         // 手动模式配置
         int manualMaxHeightDifference = 8;
         int manualMaxTerrainStability = 8;
+        boolean manualIgnoreWater = false;
     }
     
     private static List<String> tokenizeToList(String raw) {

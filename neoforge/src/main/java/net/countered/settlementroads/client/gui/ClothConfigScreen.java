@@ -199,6 +199,14 @@ public class ClothConfigScreen {
                 .setSaveConsumer(NeoForgeJsonConfig::setManualMaxTerrainStability)
                 .build());
         
+        manual.addEntry(entryBuilder.startBooleanToggle(
+                Component.translatable("config.roadweaver.manualIgnoreWater"),
+                NeoForgeJsonConfig.getManualIgnoreWater())
+                .setDefaultValue(false)
+                .setTooltip(Component.translatable("config.roadweaver.manualIgnoreWater.tooltip"))
+                .setSaveConsumer(NeoForgeJsonConfig::setManualIgnoreWater)
+                .build());
+        
         return builder.build();
     }
 }

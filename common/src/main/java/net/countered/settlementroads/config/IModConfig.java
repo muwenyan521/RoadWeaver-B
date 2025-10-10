@@ -28,4 +28,5 @@ public interface IModConfig {
     // 手动连接时更激进的阈值
     int manualMaxHeightDifference();
     int manualMaxTerrainStability();
+    boolean manualIgnoreWater();
 }
