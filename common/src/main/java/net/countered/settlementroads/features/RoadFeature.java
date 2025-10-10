@@ -51,11 +51,11 @@ public class RoadFeature extends Feature<RoadFeatureConfig> {
 
     public static int chunksForLocatingCounter = 1;
 
-    // 供 Fabric 端注册/引用，NeoForge 端不强制使用
+    // 供 Fabric 端注册/引用，Forge 端不强制使用
     public static final ResourceKey<ConfiguredFeature<?, ?>> ROAD_FEATURE_KEY =
-            ResourceKey.create(Registries.CONFIGURED_FEATURE, ResourceLocation.fromNamespaceAndPath("roadweaver", "road_feature"));
+            ResourceKey.create(Registries.CONFIGURED_FEATURE, new ResourceLocation("roadweaver", "road_feature"));
     public static final ResourceKey<net.minecraft.world.level.levelgen.placement.PlacedFeature> ROAD_FEATURE_PLACED_KEY =
-            ResourceKey.create(Registries.PLACED_FEATURE, ResourceLocation.fromNamespaceAndPath("roadweaver", "road_feature_placed"));
+            ResourceKey.create(Registries.PLACED_FEATURE, new ResourceLocation("roadweaver", "road_feature_placed"));
 
     public static final Feature<RoadFeatureConfig> ROAD_FEATURE = new RoadFeature(RoadFeatureConfig.CODEC);
 

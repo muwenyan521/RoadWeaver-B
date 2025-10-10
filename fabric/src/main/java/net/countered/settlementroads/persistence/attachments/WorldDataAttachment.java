@@ -15,18 +15,18 @@ public class WorldDataAttachment {
     private static final Logger LOGGER = LoggerFactory.getLogger(SettlementRoads.MOD_ID);
 
     public static final AttachmentType<List<Records.StructureConnection>> CONNECTED_STRUCTURES = AttachmentRegistry.createPersistent(
-            ResourceLocation.fromNamespaceAndPath(SettlementRoads.MOD_ID, "connected_villages"),
+            new ResourceLocation(SettlementRoads.MOD_ID, "connected_villages"),
             Codec.list(Records.StructureConnection.CODEC)
     );
 
 
     public static final AttachmentType<Records.StructureLocationData> STRUCTURE_LOCATIONS = AttachmentRegistry.createPersistent(
-            ResourceLocation.fromNamespaceAndPath(SettlementRoads.MOD_ID, "village_locations"),
+            new ResourceLocation(SettlementRoads.MOD_ID, "village_locations"),
             Records.StructureLocationData.CODEC
     );
 
     public static final AttachmentType<List<Records.RoadData>> ROAD_DATA_LIST = AttachmentRegistry.createPersistent(
-            ResourceLocation.fromNamespaceAndPath(SettlementRoads.MOD_ID, "road_chunk_data_map"),
+            new ResourceLocation(SettlementRoads.MOD_ID, "road_chunk_data_map"),
             Codec.list(Records.RoadData.CODEC)
     );
 

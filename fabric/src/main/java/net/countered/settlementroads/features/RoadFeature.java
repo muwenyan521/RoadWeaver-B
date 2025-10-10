@@ -55,9 +55,9 @@ public class RoadFeature extends Feature<RoadFeatureConfig> {
     public static int chunksForLocatingCounter = 1;
 
     public static final ResourceKey<ConfiguredFeature<?, ?>> ROAD_FEATURE_KEY =
-            ResourceKey.create(Registries.CONFIGURED_FEATURE, ResourceLocation.fromNamespaceAndPath(SettlementRoads.MOD_ID, "road_feature"));
+            ResourceKey.create(Registries.CONFIGURED_FEATURE, new ResourceLocation(SettlementRoads.MOD_ID, "road_feature"));
     public static final ResourceKey<net.minecraft.world.level.levelgen.placement.PlacedFeature> ROAD_FEATURE_PLACED_KEY =
-            ResourceKey.create(Registries.PLACED_FEATURE, ResourceLocation.fromNamespaceAndPath(SettlementRoads.MOD_ID, "road_feature_placed"));
+            ResourceKey.create(Registries.PLACED_FEATURE, new ResourceLocation(SettlementRoads.MOD_ID, "road_feature_placed"));
     public static final Feature<RoadFeatureConfig> ROAD_FEATURE = new RoadFeature(RoadFeatureConfig.CODEC);
     public RoadFeature(Codec<RoadFeatureConfig> codec) {
         super(codec);

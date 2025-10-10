@@ -132,7 +132,7 @@ public final class StructureLocatorImpl {
             if (hashIdx >= 0) {
                 String tagToken = token.substring(hashIdx + 1).trim();
                 try {
-                    ResourceLocation tagId = ResourceLocation.parse(tagToken);
+                    ResourceLocation tagId = new ResourceLocation(tagToken);
                     TagKey<Structure> tag = TagKey.create(Registries.STRUCTURE, tagId);
                     registry.getTag(tag).ifPresentOrElse(named -> {
                         for (Holder<Structure> h : named) {
@@ -165,7 +165,7 @@ public final class StructureLocatorImpl {
                         }
                     } else {
                         // 精确匹配
-                        ResourceLocation id = ResourceLocation.parse(cleaned);
+                        ResourceLocation id = new ResourceLocation(cleaned);
                         ResourceKey<Structure> key = ResourceKey.create(Registries.STRUCTURE, id);
                         registry.getHolder(key).ifPresentOrElse(holders::add,
                                 () -> LOGGER.warn("RoadWeaver: structure id not found: {}", cleaned));
@@ -224,7 +224,7 @@ public final class StructureLocatorImpl {
                 if (hashIdx >= 0) {
                     String tagToken = token.substring(hashIdx + 1).trim();
                     try {
-                        ResourceLocation tagId = ResourceLocation.parse(tagToken);
+                        ResourceLocation tagId = new ResourceLocation(tagToken);
                         TagKey<Structure> tag = TagKey.create(Registries.STRUCTURE, tagId);
                         registry.getTag(tag).ifPresentOrElse(named -> {
                             for (Holder<Structure> h : named) holders.add(h);
@@ -254,7 +254,7 @@ public final class StructureLocatorImpl {
                             }
                         } else {
                             // 精确匹配
-                            ResourceLocation id = ResourceLocation.parse(cleaned);
+                            ResourceLocation id = new ResourceLocation(cleaned);
                             ResourceKey<Structure> key = ResourceKey.create(Registries.STRUCTURE, id);
                             registry.getHolder(key).ifPresentOrElse(holders::add,
                                     () -> LOGGER.warn("RoadWeaver: structure id not found: {}", cleaned));

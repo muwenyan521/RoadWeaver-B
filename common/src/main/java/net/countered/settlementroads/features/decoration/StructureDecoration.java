@@ -67,7 +67,7 @@ public abstract class StructureDecoration extends OrientedDecoration implements 
 
     protected StructureTemplate loadStructureTemplate() {
         try {
-            ResourceLocation structureId = ResourceLocation.fromNamespaceAndPath("roadweaver", "structures/" + structureName);
+            ResourceLocation structureId = new ResourceLocation("roadweaver", "structures/" + structureName);
             StructureTemplate template = new StructureTemplate();
             InputStream inputStream = getClass().getResourceAsStream("/data/roadweaver/structures/" + structureName + ".nbt");
             if (inputStream != null) {
@@ -118,7 +118,7 @@ public abstract class StructureDecoration extends OrientedDecoration implements 
     }
 
     protected boolean shouldReplaceWithAir(BlockState state) {
-        return state.getBlock().equals(Blocks.SHORT_GRASS)
+        return state.getBlock().equals(Blocks.GRASS)
                 || state.getBlock().equals(Blocks.TALL_GRASS)
                 || state.is(BlockTags.FLOWERS)
                 || state.is(BlockTags.SAPLINGS)

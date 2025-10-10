@@ -16,7 +16,7 @@ public class RoadFeatureRegistry {
 
     public static void registerFeatures() {
         LOGGER.info("Registering road_feature");
-        Registry.register(BuiltInRegistries.FEATURE, ResourceLocation.fromNamespaceAndPath(SettlementRoads.MOD_ID, "road_feature"), RoadFeature.ROAD_FEATURE);
+        Registry.register(BuiltInRegistries.FEATURE, new ResourceLocation(SettlementRoads.MOD_ID, "road_feature"), RoadFeature.ROAD_FEATURE);
         BiomeModifications.addFeature(
                 BiomeSelectors.all(),
                 GenerationStep.Decoration.LOCAL_MODIFICATIONS,
