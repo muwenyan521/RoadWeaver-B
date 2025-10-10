@@ -127,7 +127,7 @@ public class FabricModConfig {
         // 预生成配置
         int initialLocatingCount = 7;
         int maxConcurrentRoadGeneration = 3;
-        int structureSearchTriggerDistance = 500;
+        int structureSearchTriggerDistance = 600;
         
         // 道路配置
         int averagingRadius = 1;

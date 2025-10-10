@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -29,7 +30,7 @@ import static net.countered.settlementroads.SettlementRoads.MOD_ID;
 
 public class ModEventHandler {
 
-    private static final int THREAD_COUNT= 7;
+    private static final int THREAD_COUNT = 128;
     private static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
     private static ExecutorService executor = Executors.newFixedThreadPool(THREAD_COUNT);
     private static final ConcurrentHashMap<String, Future<?>> runningTasks = new ConcurrentHashMap<>();
@@ -93,8 +94,9 @@ public class ModEventHandler {
             return;
         }
         
-        if (!StructureConnector.cachedStructureConnections.isEmpty()) {
-            Records.StructureConnection structureConnection = StructureConnector.cachedStructureConnections.poll();
+        Queue<Records.StructureConnection> queue = StructureConnector.getQueueForWorld(level);
+        if (!queue.isEmpty()) {
+            Records.StructureConnection structureConnection = queue.poll();
             ConfiguredFeature<?, ?> feature = level.registryAccess()
                     .registryOrThrow(Registries.CONFIGURED_FEATURE)
                     .get(RoadFeature.ROAD_FEATURE_KEY);
@@ -149,7 +151,7 @@ public class ModEventHandler {
                             connection.to(), 
                             Records.ConnectionStatus.PLANNED
                     );
-                    StructureConnector.cachedStructureConnections.add(resetConnection);
+                    StructureConnector.getQueueForWorld(level).add(resetConnection);
                     
                     // 更新世界数据中的状态
                     List<Records.StructureConnection> updatedConnections = new ArrayList<>(connections);
@@ -159,7 +161,7 @@ public class ModEventHandler {
                         dataProvider.setStructureConnections(level, updatedConnections);
                     }
                 } else {
-                    StructureConnector.cachedStructureConnections.add(connection);
+                    StructureConnector.getQueueForWorld(level).add(connection);
                 }
                 restoredCount++;
             }

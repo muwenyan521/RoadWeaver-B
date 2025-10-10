@@ -417,7 +417,7 @@ public class RoadDebugScreen extends Screen {
             // 添加新的计划连接
             list.add(newConn);
             provider.setStructureConnections(world, list);
-            StructureConnector.cachedStructureConnections.add(newConn);
+            StructureConnector.getQueueForWorld(world).add(newConn);
         });
 
         // 立即在客户端侧可视化：移除失败连接，添加新连接

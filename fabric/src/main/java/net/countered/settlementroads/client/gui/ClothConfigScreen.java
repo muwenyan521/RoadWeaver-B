@@ -58,9 +58,9 @@ public class ClothConfigScreen {
         preGeneration.addEntry(entryBuilder.startIntField(
                 Component.translatable("config.roadweaver.maxConcurrentRoadGeneration"),
                 FabricModConfig.getMaxConcurrentRoadGeneration())
-                .setDefaultValue(3)
+                .setDefaultValue(128)
                 .setMin(1)
-                .setMax(10)
+                .setMax(256)
                 .setTooltip(Component.translatable("config.roadweaver.maxConcurrentRoadGeneration.tooltip"))
                 .setSaveConsumer(FabricModConfig::setMaxConcurrentRoadGeneration)
                 .build());

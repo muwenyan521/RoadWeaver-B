@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.*;
 
 
@@ -32,7 +33,7 @@ import java.util.concurrent.*;
  */
 public class ModEventHandler {
 
-    private static final int THREAD_COUNT = 7;
+    private static final int THREAD_COUNT = 128;
     private static final Logger LOGGER = LoggerFactory.getLogger("roadweaver");
     private static ExecutorService executor = Executors.newFixedThreadPool(THREAD_COUNT);
     private static final ConcurrentHashMap<String, Future<?>> runningTasks = new ConcurrentHashMap<>();
@@ -56,8 +57,9 @@ public class ModEventHandler {
                 task.cancel(true);
                 LOGGER.debug("Aborted running road task for world: {}", level.dimension().location());
             }
-            // 清理延迟计数器
+            // 清理延迟计数器和队列
             worldInitDelay.remove(worldKey);
+            StructureConnector.clearQueueForWorld(level);
         });
 
         // 服务器 Tick（遍历所有世界）
@@ -104,7 +106,7 @@ public class ModEventHandler {
             }
             
             LOGGER.info("Initial structure search completed, queue size: {}", 
-                StructureConnector.cachedStructureConnections.size());
+                StructureConnector.getQueueForWorld(level).size());
         }
     }
 
@@ -147,9 +149,10 @@ public class ModEventHandler {
             return;
         }
 
-        if (!StructureConnector.cachedStructureConnections.isEmpty()) {
+        Queue<Records.StructureConnection> queue = StructureConnector.getQueueForWorld(level);
+        if (!queue.isEmpty()) {
             // 仅窥视队列，确保在资源未就绪时不丢弃任务
-            Records.StructureConnection structureConnection = StructureConnector.cachedStructureConnections.peek();
+            Records.StructureConnection structureConnection = queue.peek();
             if (structureConnection == null) {
                 return; // 并发情况下可能为 null
             }
@@ -159,16 +162,16 @@ public class ModEventHandler {
             if (roadConfig == null) {
                 // 注册表未就绪，等待下一个 tick
                 LOGGER.debug("RoadWeaver: 注册表未就绪，等待下一个 tick（队列大小: {}）", 
-                    StructureConnector.cachedStructureConnections.size());
+                    queue.size());
                 return;
             }
 
             // 现在确认资源可用，再真正弹出队列并开始任务
-            StructureConnector.cachedStructureConnections.poll();
+            queue.poll();
             LOGGER.info("🚧 Starting road generation: {} -> {} (running: {}/{}, queue: {})", 
                 structureConnection.from(), structureConnection.to(), 
                 currentRunning + 1, config.maxConcurrentRoadGeneration(),
-                StructureConnector.cachedStructureConnections.size());
+                queue.size());
             if (async) {
                 String taskId = level.dimension().location().toString() + "_" + System.nanoTime();
                 Future<?> future = executor.submit(() -> {
@@ -316,11 +319,11 @@ public class ModEventHandler {
                             connection.manual()
                     );
                     updatedConnections.set(i, resetConnection);
-                    StructureConnector.cachedStructureConnections.add(resetConnection);
+                    StructureConnector.getQueueForWorld(level).add(resetConnection);
                     needsUpdate = true;
                 } else {
                     // PLANNED 状态直接加入队列
-                    StructureConnector.cachedStructureConnections.add(connection);
+                    StructureConnector.getQueueForWorld(level).add(connection);
                 }
                 restoredCount++;
             }
@@ -334,7 +337,7 @@ public class ModEventHandler {
 
         if (restoredCount > 0) {
             LOGGER.info("RoadWeaver: 恢复了 {} 个未完成的道路生成任务（队列大小: {}）", 
-                restoredCount, StructureConnector.cachedStructureConnections.size());
+                restoredCount, StructureConnector.getQueueForWorld(level).size());
         }
     }
 }

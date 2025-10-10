@@ -55,9 +55,9 @@ public class ClothConfigScreen {
         preGeneration.addEntry(entryBuilder.startIntField(
                 Component.translatable("config.roadweaver.maxConcurrentRoadGeneration"),
                 NeoForgeJsonConfig.getMaxConcurrentRoadGeneration())
-                .setDefaultValue(3)
+                .setDefaultValue(128)
                 .setMin(1)
-                .setMax(10)
+                .setMax(256)
                 .setTooltip(Component.translatable("config.roadweaver.maxConcurrentRoadGeneration.tooltip"))
                 .setSaveConsumer(NeoForgeJsonConfig::setMaxConcurrentRoadGeneration)
                 .build());
