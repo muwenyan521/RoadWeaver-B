@@ -212,14 +212,42 @@ public class RoadFeature extends Feature<RoadFeatureConfig> {
             int fenceLength = random.nextInt(1, 4);
             roadDecorationPlacementPositions.add(new RoadFenceDecoration(shiftedPos, orthogonalVector, level, leftRoadSide, fenceLength));
         }
-        // 大型装饰（TODO：待实现实际结构）
+        // 大型装饰（秋千、长椅、凉亭）
         else if (segmentIndex % 80 == 0) {
             List<String> availableStructures = new ArrayList<>();
             if (config.placeSwings()) availableStructures.add("swing");
             if (config.placeBenches()) availableStructures.add("bench");
             if (config.placeGloriettes()) availableStructures.add("gloriette");
             if (availableStructures.isEmpty()) return;
-            // 预留占位，不放置真实结构
+            
+            // 随机选择一个装饰类型
+            String chosenStructure = availableStructures.get(random.nextInt(availableStructures.size()));
+            
+            // 放置在道路边，距离由配置决定
+            boolean leftRoadSide = random.nextBoolean();
+            int distanceFromRoad = config.structureDistanceFromRoad();
+            shiftedPos = leftRoadSide 
+                ? placePos.offset(orthogonalVector.multiply(distanceFromRoad)) 
+                : placePos.offset(orthogonalVector.multiply(-distanceFromRoad));
+            shiftedPos = shiftedPos.atY(level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, shiftedPos.getX(), shiftedPos.getZ()));
+            
+            // 检查高度差是否合适
+            if (Math.abs(shiftedPos.getY() - placePos.getY()) > 2) {
+                return;
+            }
+            
+            // 根据类型创建对应的装饰
+            switch (chosenStructure) {
+                case "swing":
+                    roadDecorationPlacementPositions.add(new SwingDecoration(shiftedPos, orthogonalVector, level));
+                    break;
+                case "bench":
+                    roadDecorationPlacementPositions.add(new BenchDecoration(shiftedPos, orthogonalVector, level));
+                    break;
+                case "gloriette":
+                    roadDecorationPlacementPositions.add(new GlorietteDecoration(shiftedPos, orthogonalVector, level));
+                    break;
+            }
         }
     }
 

@@ -85,5 +85,10 @@
   "config.roadweaver.manualMaxTerrainStability": "Manual Mode Terrain Stability",
   "config.roadweaver.manualMaxTerrainStability.tooltip": "Terrain stability threshold in manual connect mode. More lenient than normal mode to improve success rate. Default: 8",
   "config.roadweaver.manualIgnoreWater": "Manual Mode Ignore Water",
-  "config.roadweaver.manualIgnoreWater.tooltip": "When enabled, manual connections will ignore water biome costs, allowing roads to go directly through oceans and rivers. Useful for cross-sea connections. Default: OFF"
+  "config.roadweaver.manualIgnoreWater.tooltip": "When enabled, manual connections will ignore water biome costs, allowing roads to go directly through oceans and rivers. Useful for cross-sea connections. Default: OFF",
+
+  "sign.roadweaver.distance.next_location": "Next Location",
+  "sign.roadweaver.distance.welcome": "Welcome",
+  "sign.roadweaver.distance.traveller": "traveller",
+  "sign.roadweaver.distance.separator": "----------"
 }

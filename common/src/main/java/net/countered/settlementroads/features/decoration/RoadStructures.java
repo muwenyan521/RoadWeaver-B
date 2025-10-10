@@ -35,6 +35,14 @@ public class RoadStructures {
                     swingDecoration.setWoodType(WoodSelector.forBiome(swingDecoration.getWorld(), swingDecoration.getPos()));
                     swingDecoration.place();
                 }
+                if (roadDecoration instanceof BenchDecoration benchDecoration) {
+                    benchDecoration.setWoodType(WoodSelector.forBiome(benchDecoration.getWorld(), benchDecoration.getPos()));
+                    benchDecoration.place();
+                }
+                if (roadDecoration instanceof GlorietteDecoration glorietteDecoration) {
+                    glorietteDecoration.setWoodType(WoodSelector.forBiome(glorietteDecoration.getWorld(), glorietteDecoration.getPos()));
+                    glorietteDecoration.place();
+                }
                 if (roadDecoration instanceof NbtStructureDecoration nbtStructureDecoration) {
                     nbtStructureDecoration.setWoodType(WoodSelector.forBiome(nbtStructureDecoration.getWorld(), nbtStructureDecoration.getPos()));
                     nbtStructureDecoration.place();

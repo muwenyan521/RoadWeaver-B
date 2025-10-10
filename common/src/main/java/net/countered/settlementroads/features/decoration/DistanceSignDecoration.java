@@ -59,17 +59,17 @@ public class DistanceSignDecoration extends OrientedDecoration implements BiomeW
             if (signEntity instanceof HangingSignBlockEntity signBlockEntity) {
                 signBlockEntity.setLevel(worldGenLevel.getLevel());
                 SignText signText = signBlockEntity.getFrontText();
-                signText = (signText.setMessage(0, Component.literal("----------")));
-                signText = (signText.setMessage(1, Component.literal("Next Village")));
+                signText = (signText.setMessage(0, Component.translatable("sign.roadweaver.distance.separator")));
+                signText = (signText.setMessage(1, Component.translatable("sign.roadweaver.distance.next_location")));
                 signText = (signText.setMessage(2, Component.literal(text + "m")));
-                signText = (signText.setMessage(3, Component.literal("----------")));
+                signText = (signText.setMessage(3, Component.translatable("sign.roadweaver.distance.separator")));
                 signBlockEntity.setText(signText, true);
 
                 SignText signTextBack = signBlockEntity.getBackText();
-                signTextBack = signTextBack.setMessage(0, Component.literal("----------"));
-                signTextBack = signTextBack.setMessage(1, Component.literal("Welcome"));
-                signTextBack = signTextBack.setMessage(2, Component.literal("traveller"));
-                signTextBack = signTextBack.setMessage(3, Component.literal("----------"));
+                signTextBack = signTextBack.setMessage(0, Component.translatable("sign.roadweaver.distance.separator"));
+                signTextBack = signTextBack.setMessage(1, Component.translatable("sign.roadweaver.distance.welcome"));
+                signTextBack = signTextBack.setMessage(2, Component.translatable("sign.roadweaver.distance.traveller"));
+                signTextBack = signTextBack.setMessage(3, Component.translatable("sign.roadweaver.distance.separator"));
                 signBlockEntity.setText(signTextBack, false);
 
                 signBlockEntity.setChanged();

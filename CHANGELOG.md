@@ -1,5 +1,40 @@
 # RoadWeaver 更新日志
 
+## [未发布] - 2025-10-11
+
+### 🎨 新增装饰功能
+- **长椅装饰 (BenchDecoration)**: 新增道路旁长椅装饰，支持 NBT 结构加载
+- **大型装饰系统完善**: 实现了秋千、长椅、凉亭的完整放置逻辑
+  - 随机选择装饰类型
+  - 地形高度检查
+  - 生物群系感知的木材适配
+  - NBT 结构文件整合到 Common 模块
+
+### 🌍 国际化改进
+- **距离标志国际化**: 将硬编码文本改为翻译键
+  - 新增 4 个翻译键：`sign.roadweaver.distance.*`
+  - 支持中文和英文自动切换
+  - 使用 `Component.translatable()` API
+
+### ⚙️ 配置变更
+- **大型装饰默认关闭**: 将 `placeSwings`, `placeBenches`, `placeGloriettes` 默认值改为 `false`
+  - 原因：这些功能还在完善中
+  - 玩家可在配置文件中手动启用
+  - 不影响已有配置文件
+
+### 📚 文档
+- **路边装饰系统完善说明.md**: 详细的技术文档和使用说明
+- **距离标志国际化说明.md**: 国际化实现细节
+- **配置默认值变更说明.md**: 配置变更说明和启用指南
+- **DECORATION_UPDATE_CHECKLIST.md**: 更新检查清单
+
+### 🔧 技术改进
+- 完善 `RoadFeature.addDecoration()` 方法
+- 更新 `RoadStructures.tryPlaceDecorations()` 支持新装饰
+- 统一 Fabric 和 NeoForge 配置默认值
+
+---
+
 ## [未发布] - 2025-10-09
 
 ### 🐛 修复

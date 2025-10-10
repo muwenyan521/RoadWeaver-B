@@ -85,5 +85,10 @@
   "config.roadweaver.manualMaxTerrainStability": "手动模式地形稳定性",
   "config.roadweaver.manualMaxTerrainStability.tooltip": "手动连接模式下的地形稳定性阈值。比普通模式更宽松，提高通过率。默认：8",
   "config.roadweaver.manualIgnoreWater": "手动模式忽略水域",
-  "config.roadweaver.manualIgnoreWater.tooltip": "开启后，手动连接时将忽略水域成本，允许直接穿过海洋和河流。用于跨海连接。默认：关闭"
+  "config.roadweaver.manualIgnoreWater.tooltip": "开启后，手动连接时将忽略水域成本，允许直接穿过海洋和河流。用于跨海连接。默认：关闭",
+
+  "sign.roadweaver.distance.next_location": "下个地点",
+  "sign.roadweaver.distance.welcome": "欢迎",
+  "sign.roadweaver.distance.traveller": "旅行者",
+  "sign.roadweaver.distance.separator": "----------"
 }

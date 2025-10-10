@@ -144,9 +144,9 @@ public class NeoForgeJsonConfig {
         // 装饰配置
         boolean placeWaypoints = false;
         boolean placeRoadFences = true;
-        boolean placeSwings = true;
-        boolean placeBenches = true;
-        boolean placeGloriettes = true;
+        boolean placeSwings = false;
+        boolean placeBenches = false;
+        boolean placeGloriettes = false;
 
         // 手动模式配置
         int manualMaxHeightDifference = 10;
