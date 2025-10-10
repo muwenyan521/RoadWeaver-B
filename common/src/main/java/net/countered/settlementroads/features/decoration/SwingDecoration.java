@@ -24,7 +24,7 @@ public class SwingDecoration extends StructureDecoration {
             BlockPos checkPos = basePos.above(y);
             BlockState state = world.getBlockState(checkPos);
             if (!state.isAir()
-                    && !state.getBlock().equals(Blocks.SHORT_GRASS)
+                    && !state.getBlock().equals(Blocks.GRASS)
                     && !state.getBlock().equals(Blocks.TALL_GRASS)
                     && !state.is(BlockTags.FLOWERS)
                     && !state.is(BlockTags.LEAVES)) {

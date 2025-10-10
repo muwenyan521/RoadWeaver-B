@@ -1,0 +1,57 @@
+package net.countered.settlementroads;
+
+import net.countered.settlementroads.client.gui.ClothConfigScreen;
+import net.countered.settlementroads.config.forge.ForgeJsonConfig;
+import net.countered.settlementroads.events.ModEventHandler;
+import net.countered.settlementroads.features.config.RoadFeatureRegistry;
+import net.countered.settlementroads.datagen.SettlementRoadsDataGenerator;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+@Mod(SettlementRoads.MOD_ID)
+public class SettlementRoads {
+
+	public static final String MOD_ID = "roadweaver";
+	private static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+
+	public SettlementRoads() {
+		LOGGER.info("Initializing RoadWeaver (Forge)...");
+		
+		IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+		
+		// 加载 JSON 配置（与 Fabric 一致，写入 config/roadweaver.json）
+		ForgeJsonConfig.load();
+		
+		// 注册配置屏幕（Forge 模组菜单集成）
+		ModLoadingContext.get().registerExtensionPoint(
+			net.minecraftforge.client.ConfigScreenHandler.ConfigScreenFactory.class,
+			() -> new net.minecraftforge.client.ConfigScreenHandler.ConfigScreenFactory(
+				(client, parent) -> ClothConfigScreen.createConfigScreen(parent)
+			)
+		);
+		
+		// 注册通用设置事件
+		modEventBus.addListener(this::commonSetup);
+		// 注册数据生成事件（确保 runData 时 provider 被加入）
+		modEventBus.addListener(SettlementRoadsDataGenerator::gatherData);
+		
+		// 注册特性（统一使用 common 的无参注册实现）
+		RoadFeatureRegistry.registerFeatures();
+		
+		// 注册事件处理器（使用 Architectury 事件的 common 实现）
+		ModEventHandler.register();
+	}
+
+	private void commonSetup(final FMLCommonSetupEvent event) {
+		LOGGER.info("RoadWeaver common setup completed");
+	}
+	
+	public static Logger getLogger() {
+		return LOGGER;
+	}
+}

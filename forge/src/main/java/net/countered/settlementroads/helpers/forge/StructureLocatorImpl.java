@@ -1,4 +1,4 @@
-package net.countered.settlementroads.helpers.fabric;
+package net.countered.settlementroads.helpers.forge;
 
 import com.mojang.datafixers.util.Pair;
 import net.countered.settlementroads.config.ConfigProvider;
@@ -19,20 +19,19 @@ import net.minecraft.world.level.levelgen.structure.Structure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 /**
- * Architectury @ExpectPlatform 实现类（Fabric）。
- * 位置必须为：net.countered.settlementroads.helpers.fabric.StructureLocatorImpl
+ * Architectury @ExpectPlatform 实现类（Forge）。
+ * 位置必须为：net.countered.settlementroads.helpers.forge.StructureLocatorImpl
  */
 public final class StructureLocatorImpl {
     
     private static final Logger LOGGER = LoggerFactory.getLogger("roadweaver");
 
     public static void locateConfiguredStructure(ServerLevel serverWorld, int locateCount, boolean locateAtPlayer) {
-        // 委托到 common 实现以复用“多结构同时搜寻”逻辑
+        // 委托到 common 实现以复用"多结构同时搜寻"逻辑
         net.countered.settlementroads.helpers.StructureLocatorImpl.locateConfiguredStructure(serverWorld, locateCount, locateAtPlayer);
     }
 

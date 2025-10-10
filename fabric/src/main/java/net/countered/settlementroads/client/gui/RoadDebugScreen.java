@@ -231,7 +231,7 @@ public class RoadDebugScreen extends Screen {
     }
 
     @Override
-    public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void renderBackground(GuiGraphics guiGraphics) {
         // 不画默认背景
     }
 
@@ -386,9 +386,9 @@ public class RoadDebugScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
         double old = zoom;
-        zoom = verticalAmount > 0 ? zoom * 1.1 : zoom / 1.1;
+        zoom = delta > 0 ? zoom * 1.1 : zoom / 1.1;
         zoom = Math.max(0.1, Math.min(10.0, zoom));
         offsetX = (offsetX - mouseX + PADDING) * (zoom / old) + mouseX - PADDING;
         offsetY = (offsetY - mouseY + PADDING) * (zoom / old) + mouseY - PADDING;
