@@ -2,6 +2,26 @@
 
 ## [未发布] - 2025-10-11
 
+### 📦 依赖内嵌优化
+- **内嵌 Architectury API (13.0.8)**: 减少玩家需要下载的前置模组数量
+  - Fabric: 前置从 4 个减少到 3 个
+  - NeoForge: 前置从 2 个减少到 1 个
+  - 使用 JiJ (Jar-in-Jar) 技术，不会与手动安装的版本冲突
+  - 模组文件大小增加约 500KB
+
+### 🎮 NeoForge 模组菜单集成
+- **新增 NeoForge 配置界面集成**: 现在可以在 NeoForge 的模组列表中直接打开配置界面
+  - 使用 `ModContainer.registerExtensionPoint` 注册配置屏幕
+  - 与 Fabric 版本功能对等
+  - 无需额外依赖（Cloth Config 为可选依赖）
+  - 访问方式: 主菜单 → Mods → RoadWeaver → Config 按钮
+
+### 🖼️ 模组图标修复
+- **修复模组图标不显示问题**: 将图标调整为正方形（512x512）
+  - 图标已正确放置在 common/fabric/neoforge 三个模块
+  - 符合 Mod Menu 的正方形要求
+  - 在两个平台的模组列表中正常显示
+
 ### 🎨 新增装饰功能
 - **长椅装饰 (BenchDecoration)**: 新增道路旁长椅装饰，支持 NBT 结构加载
 - **大型装饰系统完善**: 实现了秋千、长椅、凉亭的完整放置逻辑

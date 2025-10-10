@@ -37,12 +37,13 @@ side = "BOTH"
 # ordering = "NONE"
 # side = "BOTH"
 
-[[dependencies.roadweaver]]
-modId = "architectury"
-type = "required"
-versionRange = "[13.0,)"
-ordering = "AFTER"
-side = "BOTH"
+# Architectury API 已内嵌到模组中，无需外部依赖
+# [[dependencies.roadweaver]]
+# modId = "architectury"
+# type = "required"
+# versionRange = "[13.0,)"
+# ordering = "AFTER"
+# side = "BOTH"
 
 [[dependencies.roadweaver]]
 modId = "cloth_config"

@@ -37,11 +37,8 @@ public class SettlementRoadsClient {
     
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
-        // 注册配置屏幕工厂
-        event.enqueueWork(() -> {
-            // 这需要在 NeoForge 1.21+ 中通过不同方式注册
-            // 暂时使用 ClothConfigScreen 直接创建
-        });
+        // 配置屏幕已在主类中通过 ModContainer.registerExtensionPoint 注册
+        // 这里不需要额外操作
     }
 
     @EventBusSubscriber(modid = "roadweaver", bus = EventBusSubscriber.Bus.GAME, value = Dist.CLIENT)

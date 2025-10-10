@@ -47,10 +47,11 @@ dependencies {
 	// Fabric API
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	
-	// Architectury API
+	// Architectury API - 内嵌到模组中
 	modImplementation("dev.architectury:architectury-fabric:13.0.8") {
 		exclude group: "net.fabricmc.fabric-api"
 	}
+	include("dev.architectury:architectury-fabric:13.0.8")
 	
 	// Cloth Config API for Fabric
 	modApi("me.shedaniel.cloth:cloth-config-fabric:15.0.140") {

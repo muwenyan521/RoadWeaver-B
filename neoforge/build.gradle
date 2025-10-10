@@ -122,8 +122,9 @@ dependencies {
     // NeoForge 平台
     neoForge "net.neoforged:neoforge:${project.neoforge_version}"
 
-    // Architectury API
+    // Architectury API - 内嵌到模组中
     modImplementation "dev.architectury:architectury-neoforge:13.0.8"
+    implementation(include("dev.architectury:architectury-neoforge:13.0.8"))
 
     // Cloth Config API for NeoForge (可选)
     modCompileOnly "me.shedaniel.cloth:cloth-config-neoforge:15.0.140"

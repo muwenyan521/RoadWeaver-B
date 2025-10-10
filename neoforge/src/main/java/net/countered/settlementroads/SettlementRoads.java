@@ -1,5 +1,6 @@
 package net.countered.settlementroads;
 
+import net.countered.settlementroads.client.gui.ClothConfigScreen;
 import net.countered.settlementroads.config.neoforge.NeoForgeJsonConfig;
 import net.countered.settlementroads.events.ModEventHandler;
 import net.countered.settlementroads.features.config.RoadFeatureRegistry;
@@ -22,6 +23,12 @@ public class SettlementRoads {
 		
 		// 加载 JSON 配置（与 Fabric 一致，写入 config/roadweaver.json）
 		NeoForgeJsonConfig.load();
+		
+		// 注册配置屏幕（NeoForge 模组菜单集成）
+		modContainer.registerExtensionPoint(
+			net.neoforged.neoforge.client.gui.IConfigScreenFactory.class,
+			(client, parent) -> ClothConfigScreen.createConfigScreen(parent)
+		);
 		
 		// 注册通用设置事件
 		modEventBus.addListener(this::commonSetup);
