@@ -23,21 +23,49 @@ public final class Records {
     public record RoadDecoration(BlockPos placePos, Vec3i vector, int centerBlockCount, String signText, boolean isStart) {}
 
     /**
-     * 结构位置集合
+     * 单个结构位置与类型
      */
-    public record StructureLocationData(List<BlockPos> structureLocations) {
+    public record StructureInfo(BlockPos pos, String structureId) {
+        public static final Codec<StructureInfo> CODEC = RecordCodecBuilder.create(instance ->
+                instance.group(
+                        BlockPos.CODEC.fieldOf("pos").forGetter(StructureInfo::pos),
+                        Codec.STRING.optionalFieldOf("structure_id", "unknown").forGetter(StructureInfo::structureId)
+                ).apply(instance, StructureInfo::new)
+        );
+    }
+
+    /**
+     * 结构位置集合（升级版，包含类型信息）
+     */
+    public record StructureLocationData(List<BlockPos> structureLocations, List<StructureInfo> structureInfos) {
+        public StructureLocationData(List<BlockPos> structureLocations, List<StructureInfo> structureInfos) {
+            this.structureLocations = new ArrayList<>(structureLocations != null ? structureLocations : new ArrayList<>());
+            this.structureInfos = new ArrayList<>(structureInfos != null ? structureInfos : new ArrayList<>());
+        }
+        
+        // 兼容旧版本：只有位置列表
         public StructureLocationData(List<BlockPos> structureLocations) {
-            this.structureLocations = new ArrayList<>(structureLocations);
+            this(structureLocations, new ArrayList<>());
         }
 
         public void addStructure(BlockPos pos) {
             structureLocations.add(pos);
         }
+        
+        public void addStructureInfo(StructureInfo info) {
+            structureInfos.add(info);
+            if (!structureLocations.contains(info.pos())) {
+                structureLocations.add(info.pos());
+            }
+        }
 
-        // 为兼容历史数据，使用 listOf + xmap 的简洁编码
-        public static final Codec<StructureLocationData> CODEC = BlockPos.CODEC
-                .listOf()
-                .xmap(StructureLocationData::new, StructureLocationData::structureLocations);
+        // 兼容历史数据：支持旧格式（只有 BlockPos 列表）和新格式（包含 StructureInfo）
+        public static final Codec<StructureLocationData> CODEC = RecordCodecBuilder.create(instance ->
+                instance.group(
+                        BlockPos.CODEC.listOf().optionalFieldOf("structure_locations", new ArrayList<>()).forGetter(StructureLocationData::structureLocations),
+                        StructureInfo.CODEC.listOf().optionalFieldOf("structure_infos", new ArrayList<>()).forGetter(StructureLocationData::structureInfos)
+                ).apply(instance, StructureLocationData::new)
+        );
     }
 
     /**

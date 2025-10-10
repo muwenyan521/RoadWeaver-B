@@ -17,6 +17,11 @@
   "gui.roadweaver.debug_map.legend.generating": "Generating",
   "gui.roadweaver.debug_map.legend.failed": "Failed",
   "gui.roadweaver.debug_map.legend.roads": "Roads",
+  "gui.roadweaver.debug_map.legend.player": "Player",
+  "gui.roadweaver.debug_map.valid": "Valid",
+  "gui.roadweaver.debug_map.lod": "LOD",
+  "gui.roadweaver.debug_map.blocks_per_grid": "%.0f blocks/grid",
+  "gui.roadweaver.debug_map.position": "Position",
 
   "gui.roadweaver.common.on": "ON",
   "gui.roadweaver.common.off": "OFF",

@@ -17,6 +17,11 @@
   "gui.roadweaver.debug_map.legend.generating": "生成中",
   "gui.roadweaver.debug_map.legend.failed": "失败",
   "gui.roadweaver.debug_map.legend.roads": "道路",
+  "gui.roadweaver.debug_map.legend.player": "玩家",
+  "gui.roadweaver.debug_map.valid": "有效",
+  "gui.roadweaver.debug_map.lod": "LOD",
+  "gui.roadweaver.debug_map.blocks_per_grid": "%.0f块/格",
+  "gui.roadweaver.debug_map.position": "位置",
 
   "gui.roadweaver.common.on": "开启",
   "gui.roadweaver.common.off": "关闭",

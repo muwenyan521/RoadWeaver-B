@@ -62,8 +62,8 @@ public class SettlementRoadsClient implements ClientModInitializer {
             List<Records.StructureConnection> connections = WorldDataProvider.getInstance().getStructureConnections(world);
             List<Records.RoadData> roads = WorldDataProvider.getInstance().getRoadDataList(world);
 
-            List<net.minecraft.core.BlockPos> structures = data != null ? new ArrayList<>(data.structureLocations()) : new ArrayList<>();
-            client.setScreen(new RoadDebugScreen(structures, connections, roads));
+            List<Records.StructureInfo> structureInfos = data != null ? new ArrayList<>(data.structureInfos()) : new ArrayList<>();
+            client.setScreen(new RoadDebugScreen(structureInfos, connections, roads));
         } catch (Exception e) {
             client.setScreen(new RoadDebugScreen(new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
         }

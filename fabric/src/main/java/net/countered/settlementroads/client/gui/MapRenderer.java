@@ -32,10 +32,12 @@ public class MapRenderer {
 
     private final Map<String, Integer> statusColors;
     private final RoadDebugScreen.ScreenBounds bounds;
+    private final StructureColorManager colorManager;
 
-    public MapRenderer(Map<String, Integer> statusColors, RoadDebugScreen.ScreenBounds bounds) {
+    public MapRenderer(Map<String, Integer> statusColors, RoadDebugScreen.ScreenBounds bounds, StructureColorManager colorManager) {
         this.statusColors = statusColors;
         this.bounds = bounds;
+        this.colorManager = colorManager;
     }
 
     public LODLevel getLODLevel(double zoom) {
@@ -138,14 +140,18 @@ public class MapRenderer {
         };
     }
 
-    public void drawStructures(GuiGraphics ctx, List<BlockPos> structures,
+    public void drawStructures(GuiGraphics ctx, List<net.countered.settlementroads.helpers.Records.StructureInfo> structureInfos,
                                BlockPos hoveredStructure, BlockPos manualFirst, LODLevel lod,
                                WorldToScreenConverter converter) {
-        if (structures == null || structures.isEmpty()) return;
+        if (structureInfos == null || structureInfos.isEmpty()) return;
 
         int adaptiveRadius = getAdaptiveNodeRadius(lod, 3.0);
 
-        for (BlockPos structure : structures) {
+        for (net.countered.settlementroads.helpers.Records.StructureInfo info : structureInfos) {
+            BlockPos structure = info.pos();
+            String structureId = info.structureId();
+            int structureColor = colorManager.getColorForStructure(structureId);
+            
             RoadDebugScreen.ScreenPos pos = converter.worldToScreen(structure.getX(), structure.getZ());
 
             if (!bounds.isInBounds(pos.x(), pos.y(), adaptiveRadius + 6)) continue;
@@ -172,10 +178,12 @@ public class MapRenderer {
                         ctx.fill(pos.x() - crossSize, pos.y() - 1, pos.x() + crossSize, pos.y() + 1, 0xFFFFD700);
                         ctx.fill(pos.x() - 1, pos.y() - crossSize, pos.x() + 1, pos.y() + crossSize, 0xFFFFD700);
                     } else {
-                        int glowColor = 0x402ECC71;
+                        // 使用结构类型的颜色
+                        int glowColor = (structureColor & 0x00FFFFFF) | 0x40000000;
                         RenderUtils.fillCircle(ctx, pos.x(), pos.y(), radius + 1, glowColor);
-                        RenderUtils.fillCircle(ctx, pos.x(), pos.y(), radius, statusColors.get("structure"));
-                        RenderUtils.drawCircleOutline(ctx, pos.x(), pos.y(), radius, 0xFF1E7E34);
+                        RenderUtils.fillCircle(ctx, pos.x(), pos.y(), radius, structureColor);
+                        int outlineColor = darkenColor(structureColor);
+                        RenderUtils.drawCircleOutline(ctx, pos.x(), pos.y(), radius, outlineColor);
 
                         int highlightSize = Math.max(1, radius / 3);
                         ctx.fill(pos.x() - highlightSize, pos.y() - highlightSize,
@@ -188,28 +196,35 @@ public class MapRenderer {
                         RenderUtils.fillCircle(ctx, pos.x(), pos.y(), radius, 0xFFFFD700);
                         RenderUtils.drawCircleOutline(ctx, pos.x(), pos.y(), radius, 0xFFFFAA00);
                     } else {
-                        RenderUtils.fillCircle(ctx, pos.x(), pos.y(), radius, statusColors.get("structure"));
-                        RenderUtils.drawCircleOutline(ctx, pos.x(), pos.y(), radius, 0xFF1E7E34);
+                        RenderUtils.fillCircle(ctx, pos.x(), pos.y(), radius, structureColor);
+                        RenderUtils.drawCircleOutline(ctx, pos.x(), pos.y(), radius, darkenColor(structureColor));
                     }
                     if (radius >= 3) {
                         ctx.fill(pos.x() - 1, pos.y() - 1, pos.x() + 1, pos.y() + 1, 0x60FFFFFF);
                     }
                 }
                 case LOW -> {
-                    RenderUtils.fillCircle(ctx, pos.x(), pos.y(), radius, statusColors.get("structure"));
+                    RenderUtils.fillCircle(ctx, pos.x(), pos.y(), radius, structureColor);
                     if (radius >= 4) {
-                        RenderUtils.drawCircleOutline(ctx, pos.x(), pos.y(), radius, 0xFF1E7E34);
+                        RenderUtils.drawCircleOutline(ctx, pos.x(), pos.y(), radius, darkenColor(structureColor));
                     }
                 }
                 case MINIMAL -> {
                     if (adaptiveRadius >= 2) {
-                        ctx.fill(pos.x() - 1, pos.y() - 1, pos.x() + 2, pos.y() + 2, statusColors.get("structure"));
+                        ctx.fill(pos.x() - 1, pos.y() - 1, pos.x() + 2, pos.y() + 2, structureColor);
                     } else {
-                        RenderUtils.fillCircle(ctx, pos.x(), pos.y(), adaptiveRadius, statusColors.get("structure"));
+                        RenderUtils.fillCircle(ctx, pos.x(), pos.y(), adaptiveRadius, structureColor);
                     }
                 }
             }
         }
+    }
+    
+    private int darkenColor(int color) {
+        int r = ((color >> 16) & 0xFF) * 2 / 3;
+        int g = ((color >> 8) & 0xFF) * 2 / 3;
+        int b = (color & 0xFF) * 2 / 3;
+        return 0xFF000000 | (r << 16) | (g << 8) | b;
     }
 
     public void drawPlayerMarker(GuiGraphics ctx, LODLevel lod, double zoom,

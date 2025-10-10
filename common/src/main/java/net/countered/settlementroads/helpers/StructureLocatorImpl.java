@@ -48,6 +48,7 @@ public final class StructureLocatorImpl {
         }
 
         List<BlockPos> knownLocations = new ArrayList<>(locationData.structureLocations());
+        List<Records.StructureInfo> structureInfos = new ArrayList<>(locationData.structureInfos());
         Set<BlockPos> newlyFound = new HashSet<>();
 
         Optional<HolderSet<Structure>> targetStructures = resolveStructureTargets(level, config.structuresToLocate());
@@ -71,16 +72,25 @@ public final class StructureLocatorImpl {
 
             if (result != null) {
                 BlockPos structurePos = result.getFirst();
+                Holder<Structure> structureHolder = result.getSecond();
+                
                 if (!containsBlockPos(knownLocations, structurePos)) {
                     knownLocations.add(structurePos);
                     newlyFound.add(structurePos);
+                    
+                    // 保存结构类型信息
+                    String structureId = structureHolder.unwrapKey()
+                            .map(key -> key.location().toString())
+                            .orElse("unknown");
+                    structureInfos.add(new Records.StructureInfo(structurePos, structureId));
+                    
                     locateCount--;
                 }
             }
         }
 
         if (!newlyFound.isEmpty()) {
-            dataProvider.setStructureLocations(level, new Records.StructureLocationData(knownLocations));
+            dataProvider.setStructureLocations(level, new Records.StructureLocationData(knownLocations, structureInfos));
             LOGGER.debug("RoadWeaver: 定位到 {} 个新结构: {}", newlyFound.size(), newlyFound);
         }
     }
@@ -134,12 +144,32 @@ public final class StructureLocatorImpl {
                 }
             } else {
                 try {
-                    // 去掉前置非法字符（如意外的引号/符号）
-                    String cleaned = token.replaceAll("^[^a-z0-9_.:-]+", "");
-                    ResourceLocation id = ResourceLocation.parse(cleaned);
-                    ResourceKey<Structure> key = ResourceKey.create(Registries.STRUCTURE, id);
-                    registry.getHolder(key).ifPresentOrElse(holders::add,
-                            () -> LOGGER.warn("RoadWeaver: structure id not found: {}", cleaned));
+                    // 去掉前置非法字符（如意外的引号/符号），保留斜杠
+                    String cleaned = token.replaceAll("^[^a-z0-9_.:/\\-]+", "");
+                    
+                    // 支持通配符匹配（例如：modid:structure_*）
+                    if (cleaned.contains("*")) {
+                        String pattern = cleaned.replace("*", "");
+                        int matchCount = 0;
+                        for (var entry : registry.entrySet()) {
+                            String structureId = entry.getKey().location().toString();
+                            if (structureId.startsWith(pattern)) {
+                                registry.getHolder(entry.getKey()).ifPresent(holders::add);
+                                matchCount++;
+                            }
+                        }
+                        if (matchCount > 0) {
+                            LOGGER.info("RoadWeaver: 通配符 '{}' 匹配到 {} 个结构", cleaned, matchCount);
+                        } else {
+                            LOGGER.warn("RoadWeaver: 通配符 '{}' 未匹配到任何结构", cleaned);
+                        }
+                    } else {
+                        // 精确匹配
+                        ResourceLocation id = ResourceLocation.parse(cleaned);
+                        ResourceKey<Structure> key = ResourceKey.create(Registries.STRUCTURE, id);
+                        registry.getHolder(key).ifPresentOrElse(holders::add,
+                                () -> LOGGER.warn("RoadWeaver: structure id not found: {}", cleaned));
+                    }
                 } catch (Exception ex) {
                     LOGGER.warn("RoadWeaver: invalid structure id token skipped: {} (raw='{}')", token, raw);
                 }
@@ -204,11 +234,31 @@ public final class StructureLocatorImpl {
                     }
                 } else {
                     try {
-                        String cleaned = token.replaceAll("^[^a-z0-9_.:-]+", "");
-                        ResourceLocation id = ResourceLocation.parse(cleaned);
-                        ResourceKey<Structure> key = ResourceKey.create(Registries.STRUCTURE, id);
-                        registry.getHolder(key).ifPresentOrElse(holders::add,
-                                () -> LOGGER.warn("RoadWeaver: structure id not found: {}", cleaned));
+                        String cleaned = token.replaceAll("^[^a-z0-9_.:/\\-]+", "");
+                        
+                        // 支持通配符匹配（例如：modid:structure_*）
+                        if (cleaned.contains("*")) {
+                            String pattern = cleaned.replace("*", "");
+                            int matchCount = 0;
+                            for (var entry : registry.entrySet()) {
+                                String structureId = entry.getKey().location().toString();
+                                if (structureId.startsWith(pattern)) {
+                                    registry.getHolder(entry.getKey()).ifPresent(holders::add);
+                                    matchCount++;
+                                }
+                            }
+                            if (matchCount > 0) {
+                                LOGGER.info("RoadWeaver: 通配符 '{}' 匹配到 {} 个结构", cleaned, matchCount);
+                            } else {
+                                LOGGER.warn("RoadWeaver: 通配符 '{}' 未匹配到任何结构", cleaned);
+                            }
+                        } else {
+                            // 精确匹配
+                            ResourceLocation id = ResourceLocation.parse(cleaned);
+                            ResourceKey<Structure> key = ResourceKey.create(Registries.STRUCTURE, id);
+                            registry.getHolder(key).ifPresentOrElse(holders::add,
+                                    () -> LOGGER.warn("RoadWeaver: structure id not found: {}", cleaned));
+                        }
                     } catch (Exception ex) {
                         LOGGER.warn("RoadWeaver: invalid structure id token skipped: {} (line='{}')", token, line);
                     }

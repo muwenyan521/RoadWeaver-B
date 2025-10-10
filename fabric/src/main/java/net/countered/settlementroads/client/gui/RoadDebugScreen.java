@@ -24,9 +24,10 @@ public class RoadDebugScreen extends Screen {
 
     private static final int PADDING = 20;
 
-    private final List<BlockPos> structures;
+    private final List<Records.StructureInfo> structureInfos;
     private final List<Records.StructureConnection> connections;
     private final List<Records.RoadData> roads;
+    private final StructureColorManager colorManager;
 
     private final Map<String, Integer> statusColors = Map.of(
             "structure", 0xFF27AE60,
@@ -53,6 +54,7 @@ public class RoadDebugScreen extends Screen {
     private double lastOffsetY = 0;
 
     private BlockPos hoveredStructure = null;
+    private String hoveredStructureId = null;
 
     // 手动连接模式
     private boolean manualMode = false;
@@ -79,25 +81,26 @@ public class RoadDebugScreen extends Screen {
     private Button manualButton;
     private Button configButton;
 
-    public RoadDebugScreen(List<BlockPos> structures,
+    public RoadDebugScreen(List<Records.StructureInfo> structureInfos,
                            List<Records.StructureConnection> connections,
                            List<Records.RoadData> roads) {
         super(Component.translatable("gui.roadweaver.debug_map.title"));
-        this.structures = structures != null ? new ArrayList<>(structures) : new ArrayList<>();
+        this.structureInfos = structureInfos != null ? new ArrayList<>(structureInfos) : new ArrayList<>();
         this.connections = connections != null ? new ArrayList<>(connections) : new ArrayList<>();
         this.roads = roads != null ? new ArrayList<>(roads) : new ArrayList<>();
+        this.colorManager = new StructureColorManager();
 
-        if (!this.structures.isEmpty()) {
-            minX = this.structures.stream().mapToInt(BlockPos::getX).min().orElse(0);
-            maxX = this.structures.stream().mapToInt(BlockPos::getX).max().orElse(0);
-            minZ = this.structures.stream().mapToInt(BlockPos::getZ).min().orElse(0);
-            maxZ = this.structures.stream().mapToInt(BlockPos::getZ).max().orElse(0);
+        if (!this.structureInfos.isEmpty()) {
+            minX = this.structureInfos.stream().mapToInt(info -> info.pos().getX()).min().orElse(0);
+            maxX = this.structureInfos.stream().mapToInt(info -> info.pos().getX()).max().orElse(0);
+            minZ = this.structureInfos.stream().mapToInt(info -> info.pos().getZ()).min().orElse(0);
+            maxZ = this.structureInfos.stream().mapToInt(info -> info.pos().getZ()).max().orElse(0);
         }
 
         this.bounds = new ScreenBounds();
-        this.mapRenderer = new MapRenderer(statusColors, bounds);
+        this.mapRenderer = new MapRenderer(statusColors, bounds, colorManager);
         this.gridRenderer = new GridRenderer();
-        this.uiRenderer = new UIRenderer(statusColors);
+        this.uiRenderer = new UIRenderer(statusColors, colorManager);
     }
 
     @Override
@@ -150,7 +153,7 @@ public class RoadDebugScreen extends Screen {
     }
 
     private void computeLayout() {
-        if (structures.isEmpty()) {
+        if (structureInfos.isEmpty()) {
             baseScale = 1.0;
             return;
         }
@@ -219,13 +222,16 @@ public class RoadDebugScreen extends Screen {
 
         mapRenderer.drawRoadPaths(ctx, roads, lod, baseScale, zoom, converter);
         mapRenderer.drawConnections(ctx, connections, roads, lod, converter);
-        mapRenderer.drawStructures(ctx, structures, hoveredStructure, manualFirst, lod, converter);
+        mapRenderer.drawStructures(ctx, structureInfos, hoveredStructure, manualFirst, lod, converter);
         mapRenderer.drawPlayerMarker(ctx, lod, zoom, converter);
+
+        // 过滤可见结构
+        List<Records.StructureInfo> visibleStructures = getVisibleStructures(converter);
 
         // UI 面板
         uiRenderer.drawTitle(ctx, width);
-        uiRenderer.drawStatsPanel(ctx, width, structures, connections, roads, zoom, baseScale);
-        uiRenderer.drawLegendPanel(ctx, height);
+        uiRenderer.drawStatsPanel(ctx, width, structureInfos, connections, roads, zoom, baseScale);
+        uiRenderer.drawLegendPanel(ctx, height, visibleStructures);
 
         // 渲染默认控件（按钮）
         ctx.pose().pushPose();
@@ -233,8 +239,8 @@ public class RoadDebugScreen extends Screen {
         super.render(ctx, mouseX, mouseY, delta);
         ctx.pose().popPose();
 
-        if (hoveredStructure != null) {
-            uiRenderer.drawTooltip(ctx, hoveredStructure, mouseX, mouseY, width);
+        if (hoveredStructure != null && hoveredStructureId != null) {
+            uiRenderer.drawTooltip(ctx, hoveredStructure, hoveredStructureId, mouseX, mouseY, width);
         }
 
         updateHoveredStructure(mouseX, mouseY);
@@ -328,8 +334,9 @@ public class RoadDebugScreen extends Screen {
             
             // 只有在没有拖动时才处理点击
             if (!hasDragged) {
-                BlockPos clicked = findClickedStructure(mouseX, mouseY);
-                if (clicked != null) {
+                Records.StructureInfo clickedInfo = findClickedStructure(mouseX, mouseY);
+                if (clickedInfo != null) {
+                    BlockPos clicked = clickedInfo.pos();
                     if (manualMode) {
                         handleManualClick(clicked);
                     } else {
@@ -357,16 +364,24 @@ public class RoadDebugScreen extends Screen {
     }
 
     private void updateHoveredStructure(int mouseX, int mouseY) {
-        hoveredStructure = findClickedStructure(mouseX, mouseY);
+        Records.StructureInfo info = findClickedStructure(mouseX, mouseY);
+        if (info != null) {
+            hoveredStructure = info.pos();
+            hoveredStructureId = info.structureId();
+        } else {
+            hoveredStructure = null;
+            hoveredStructureId = null;
+        }
     }
 
-    private BlockPos findClickedStructure(double mouseX, double mouseY) {
-        for (BlockPos structure : structures) {
+    private Records.StructureInfo findClickedStructure(double mouseX, double mouseY) {
+        for (Records.StructureInfo info : structureInfos) {
+            BlockPos structure = info.pos();
             ScreenPos pos = worldToScreen(structure.getX(), structure.getZ());
             double dx = pos.x - mouseX;
             double dy = pos.y - mouseY;
             if (Math.sqrt(dx * dx + dy * dy) <= 7) {
-                return structure;
+                return info;
             }
         }
         return null;
@@ -442,6 +457,21 @@ public class RoadDebugScreen extends Screen {
     public boolean isPauseScreen() { return false; }
 
     // --- 辅助类型 ---
+    private List<Records.StructureInfo> getVisibleStructures(MapRenderer.WorldToScreenConverter converter) {
+        List<Records.StructureInfo> visible = new ArrayList<>();
+        for (Records.StructureInfo info : structureInfos) {
+            BlockPos pos = info.pos();
+            ScreenPos screenPos = converter.worldToScreen(pos.getX(), pos.getZ());
+            
+            // 检查是否在屏幕范围内（带一些边距）
+            if (screenPos.x >= -50 && screenPos.x <= width + 50 &&
+                screenPos.y >= -50 && screenPos.y <= height + 50) {
+                visible.add(info);
+            }
+        }
+        return visible;
+    }
+
     public record ScreenPos(int x, int y) {}
 
     public static class ScreenBounds {

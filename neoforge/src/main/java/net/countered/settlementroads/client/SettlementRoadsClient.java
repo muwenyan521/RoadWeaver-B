@@ -79,10 +79,10 @@ public class SettlementRoadsClient {
             List<Records.StructureConnection> connections = WorldDataHelper.getConnectedStructures(world);
             List<Records.RoadData> roads = WorldDataHelper.getRoadDataList(world);
 
-            List<net.minecraft.core.BlockPos> structures = structureData != null ?
-                new ArrayList<>(structureData.structureLocations()) : new ArrayList<>();
+            List<Records.StructureInfo> structureInfos = structureData != null ?
+                new ArrayList<>(structureData.structureInfos()) : new ArrayList<>();
 
-            client.execute(() -> client.setScreen(new RoadDebugScreen(structures, connections, roads)));
+            client.execute(() -> client.setScreen(new RoadDebugScreen(structureInfos, connections, roads)));
         } catch (Exception e) {
             // 如果获取数据失败，打开空屏幕（仍然在渲染线程调度）
             client.execute(() -> client.setScreen(new RoadDebugScreen(new ArrayList<>(), new ArrayList<>(), new ArrayList<>())));
