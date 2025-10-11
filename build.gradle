@@ -1,7 +1,7 @@
 // 根项目配置 - 多模块项目
 plugins {
 	id 'architectury-plugin' version '3.4-SNAPSHOT'
-	id 'dev.architectury.loom' version '1.0.308' apply false
+	id 'dev.architectury.loom' version '1.6-SNAPSHOT' apply false
 }
 
 architectury {
@@ -14,7 +14,7 @@ allprojects {
 	apply plugin: 'maven-publish'
 	
 	group = 'net.countered.settlementroads'
-	version = '1.0.0'
+	version = '1.0.2'
 	
 	repositories {
 		maven { url = 'https://maven.architectury.dev/' }

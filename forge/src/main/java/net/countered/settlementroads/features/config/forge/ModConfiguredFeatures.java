@@ -4,7 +4,7 @@ import net.countered.settlementroads.SettlementRoads;
 import net.countered.settlementroads.features.RoadFeature;
 import net.countered.settlementroads.features.config.RoadFeatureConfig;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.BootstrapContext;
+import net.minecraft.data.worldgen.BootstapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Blocks;
@@ -24,7 +24,7 @@ public class ModConfiguredFeatures {
             new ResourceLocation(SettlementRoads.MOD_ID, "road_feature")
     );
     
-    public static void bootstrap(BootstrapContext<ConfiguredFeature<?, ?>> context) {
+    public static void bootstrap(BootstapContext<ConfiguredFeature<?, ?>> context) {
         LOGGER.info("Bootstrapping configured features for Forge...");
         
         // 人工道路材料（不同质量等级）

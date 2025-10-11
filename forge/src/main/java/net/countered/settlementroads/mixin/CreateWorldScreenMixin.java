@@ -39,6 +39,7 @@ public abstract class CreateWorldScreenMixin extends Screen {
                 .bounds(x, y, buttonWidth, buttonHeight)
                 .build();
         
-        ((ScreenAccessor) this).invokeAddRenderableWidget(configButton);
+        // 直接调用继承的 addRenderableWidget 方法
+        this.addRenderableWidget(configButton);
     }
 }

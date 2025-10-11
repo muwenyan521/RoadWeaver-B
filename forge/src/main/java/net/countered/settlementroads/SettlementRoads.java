@@ -3,7 +3,7 @@ package net.countered.settlementroads;
 import net.countered.settlementroads.client.gui.ClothConfigScreen;
 import net.countered.settlementroads.config.forge.ForgeJsonConfig;
 import net.countered.settlementroads.events.ModEventHandler;
-import net.countered.settlementroads.features.config.RoadFeatureRegistry;
+import net.countered.settlementroads.features.config.forge.ForgeRoadFeatureRegistry;
 import net.countered.settlementroads.datagen.SettlementRoadsDataGenerator;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -35,13 +35,14 @@ public class SettlementRoads {
 			)
 		);
 		
+		// 使用 Forge 原生的 DeferredRegister 注册特性
+		// 避免 Architectury DeferredRegister 的事件总线注册时序问题
+		ForgeRoadFeatureRegistry.register(modEventBus);
+		
 		// 注册通用设置事件
 		modEventBus.addListener(this::commonSetup);
 		// 注册数据生成事件（确保 runData 时 provider 被加入）
 		modEventBus.addListener(SettlementRoadsDataGenerator::gatherData);
-		
-		// 注册特性（统一使用 common 的无参注册实现）
-		RoadFeatureRegistry.registerFeatures();
 		
 		// 注册事件处理器（使用 Architectury 事件的 common 实现）
 		ModEventHandler.register();
