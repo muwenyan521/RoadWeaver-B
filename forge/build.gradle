@@ -114,11 +114,9 @@ dependencies {
     // Forge 平台
     forge "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    // Architectury API - 内嵌到模组中
-    // 开发环境使用 modApi
+    // Architectury API - 使用 Jar-in-Jar 内嵌
     modApi("dev.architectury:architectury-forge:9.2.14")
-    // 生产环境内嵌
-    shadowCommon("dev.architectury:architectury-forge:9.2.14") { transitive false }
+    include("dev.architectury:architectury-forge:9.2.14")
 
     // Cloth Config API for Forge
     modCompileOnly "me.shedaniel.cloth:cloth-config-forge:11.1.136"

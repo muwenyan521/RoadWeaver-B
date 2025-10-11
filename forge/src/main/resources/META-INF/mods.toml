@@ -7,14 +7,6 @@ license = "MIT"
 [[mixins]]
 config = "roadweaver.mixins.json"
 
-# Architectury API 内嵌声明
-[[mods]]
-modId = "architectury"
-version = "9.2.14"
-displayName = "Architectury API"
-authors = "shedaniel"
-description = "An intermediary api aimed at easing developing multiplatform mods."
-
 [[mods]]
 modId = "roadweaver"
 version = "${mod_version}"
@@ -51,3 +43,11 @@ mandatory = false
 versionRange = "[11.0,)"
 ordering = "NONE"
 side = "CLIENT"
+
+# Architectury API 已内嵌，不需要外部依赖
+# [[dependencies.roadweaver]]
+# modId = "architectury"
+# mandatory = true
+# versionRange = "[9.0,10.0)"
+# ordering = "AFTER"
+# side = "BOTH"

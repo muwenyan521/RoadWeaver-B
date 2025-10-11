@@ -4,15 +4,15 @@
 [Architectury Transformer DEBUG] ============================
 [Architectury Transformer DEBUG] 
 [Architectury Transformer DEBUG] Transforming 5 transformer(s) from E:\mod\RoadWeaver\common\build\devlibs\roadweaver-common-1.0.2-dev.jar to E:\mod\RoadWeaver\common\build\libs\roadweaver-common-1.0.2-transformProductionFabric.jar: 
-[Architectury Transformer DEBUG]  - dev.architectury.transformer.transformers.RemapMixinVariables@36cc225a
-[Architectury Transformer DEBUG]  - dev.architectury.transformer.transformers.TransformExpectPlatform@3c39f89e
-[Architectury Transformer DEBUG]  - dev.architectury.transformer.transformers.RemapInjectables@3452983b
+[Architectury Transformer DEBUG]  - dev.architectury.transformer.transformers.RemapMixinVariables@3b98b52e
+[Architectury Transformer DEBUG]  - dev.architectury.transformer.transformers.TransformExpectPlatform@74f4b63b
+[Architectury Transformer DEBUG]  - dev.architectury.transformer.transformers.RemapInjectables@67b0b900
 [Architectury Transformer DEBUG]  - AddRefmapName(enabled=() -> kotlin.Boolean)
-[Architectury Transformer DEBUG]  - dev.architectury.transformer.transformers.TransformPlatformOnly@550ffdf2
+[Architectury Transformer DEBUG]  - dev.architectury.transformer.transformers.TransformPlatformOnly@139132e2
 [Architectury Transformer DEBUG] Transforming from E:\mod\RoadWeaver\common\build\devlibs\roadweaver-common-1.0.2-dev.jar to E:\mod\RoadWeaver\common\build\libs\roadweaver-common-1.0.2-transformProductionFabric.jar with 5 transformer(s) on dev.architectury.transformer.handler.SimpleTransformerHandler
 [Architectury Transformer DEBUG] Reading mixin mappings file: E:\mod\RoadWeaver\fabric\build\loom-cache\mixin-map-loom.mappings.1_20_1.layered+hash.40359-v2.main.tiny
 [Architectury Transformer DEBUG] Remapping with 1 mapping provider(s):
-[Architectury Transformer DEBUG]  - dev.architectury.transformer.shadowed.impl.dev.architectury.tinyremapper.TinyUtils$$Lambda$3594/0x000001883bf5c650@3a0d400f
+[Architectury Transformer DEBUG]  - dev.architectury.transformer.shadowed.impl.dev.architectury.tinyremapper.TinyUtils$$Lambda$3420/0x000001b93df4add8@4ceb604f
 [Architectury Transformer DEBUG] Provided 59 classpath jar(s):
 [Architectury Transformer DEBUG]  - C:\Users\shiroha\scoop\apps\gradle\current\.gradle\caches\modules-2\files-2.1\dev.architectury\architectury-injectables\1.0.10\62db2a366d662606d1b23ad02ccc3212ed37ec3\architectury-injectables-1.0.10.jar
 [Architectury Transformer DEBUG]  - C:\Users\shiroha\scoop\apps\gradle\current\.gradle\caches\modules-2\files-2.1\net.fabricmc\fabric-loader\0.17.3\deafaba5de4d9bbd76105783ff4e21ce0773874f\fabric-loader-0.17.3.jar
@@ -73,68 +73,68 @@
 [Architectury Transformer DEBUG]  - C:\Users\shiroha\scoop\apps\gradle\current\.gradle\caches\modules-2\files-2.1\io.netty\netty-transport-native-epoll\4.1.82.Final\c7350a71920f3ae9142945e25fed4846cce53374\netty-transport-native-epoll-4.1.82.Final-linux-x86_64.jar
 [Architectury Transformer DEBUG]  - C:\Users\shiroha\scoop\apps\gradle\current\.gradle\caches\modules-2\files-2.1\io.netty\netty-transport-native-epoll\4.1.82.Final\476409d6255001ca53a55f65b01c13822f8dc93a\netty-transport-native-epoll-4.1.82.Final-linux-aarch_64.jar
 [Architectury Transformer DEBUG]  - E:\mod\RoadWeaver\.gradle\loom-cache\remapped_mods\loom_mappings_1_20_1_layered_hash_40359_v2\dev\architectury\architectury\9.2.14\architectury-9.2.14.jar
-[Architectury Transformer] Read classpath in 867.3 ms
+[Architectury Transformer] Read classpath in 1.198 s
 [Architectury Transformer DEBUG] Remapping Classes:
 [Architectury Transformer DEBUG] Found class transformer
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/persistence/WorldDataProvider with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/helpers/StructureLocatorImpl with maxs=true frames=true
-[Architectury Transformer DEBUG] Writing net/countered/settlementroads/helpers/StructureConnector with maxs=true frames=true
-[Architectury Transformer DEBUG] Writing net/countered/settlementroads/helpers/Records$StructureLocationData with maxs=true frames=true
-[Architectury Transformer DEBUG] Writing net/countered/settlementroads/helpers/Records$StructureConnection with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/helpers/Records$RoadDecoration with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/helpers/Records$ConnectionStatus with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/helpers/Records$StructureInfo with maxs=true frames=true
+[Architectury Transformer DEBUG] Writing net/countered/settlementroads/helpers/StructureConnector with maxs=true frames=true
+[Architectury Transformer DEBUG] Writing net/countered/settlementroads/helpers/Records$StructureConnection with maxs=true frames=true
+[Architectury Transformer DEBUG] Writing net/countered/settlementroads/helpers/Records$StructureLocationData with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/helpers/Records$RoadData with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/helpers/Records$RoadSegmentPlacement with maxs=true frames=true
-[Architectury Transformer DEBUG] Writing net/countered/settlementroads/helpers/Records$WoodAssets with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/helpers/StructureLocator with maxs=true frames=true
+[Architectury Transformer DEBUG] Writing net/countered/settlementroads/helpers/Records$WoodAssets with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/helpers/Records with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/RoadFeature with maxs=true frames=true
-[Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/roadlogic/Road with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/roadlogic/RoadPathCalculator with maxs=true frames=true
-[Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/roadlogic/RoadDirection with maxs=true frames=true
+[Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/roadlogic/Road with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/roadlogic/RoadPathCalculator$Node with maxs=true frames=true
-[Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/RoadFenceDecoration with maxs=true frames=true
-[Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/SwingDecoration with maxs=true frames=true
-[Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/LamppostDecoration with maxs=true frames=true
-[Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/OrientedDecoration$DirectionProperties with maxs=true frames=true
+[Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/roadlogic/RoadDirection with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/StructureDecoration with maxs=true frames=true
+[Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/RoadFenceDecoration with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/RoadPlacementRules with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/DistanceSignDecoration with maxs=true frames=true
+[Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/OrientedDecoration$DirectionProperties with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/OrientedDecoration with maxs=true frames=true
+[Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/SwingDecoration with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/FenceWaypointDecoration with maxs=true frames=true
-[Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/RoadStructures with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/GlorietteDecoration with maxs=true frames=true
-[Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/BenchDecoration with maxs=true frames=true
-[Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/Decoration with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/NbtStructureDecoration with maxs=true frames=true
+[Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/BenchDecoration with maxs=true frames=true
+[Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/RoadStructures with maxs=true frames=true
+[Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/Decoration with maxs=true frames=true
+[Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/LamppostDecoration with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/util/WoodSelector with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/util/BiomeWoodAware with maxs=true frames=true
-[Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/config/RoadFeatureConfig with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/config/RoadFeatureRegistry with maxs=true frames=true
+[Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/config/RoadFeatureConfig with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/events/ModEventHandler with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/config/IModConfig with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/config/ConfigProvider with maxs=true frames=true
 [Architectury Transformer DEBUG] Closed File Systems for E:\mod\RoadWeaver\common\build\libs\roadweaver-common-1.0.2-transformProductionFabric.jar
-[Architectury Transformer] Transformed jar with 5 transformer(s) in 1.324 s
+[Architectury Transformer] Transformed jar with 5 transformer(s) in 1.683 s
 [Architectury Transformer DEBUG] 
 [Architectury Transformer DEBUG] ============================
 [Architectury Transformer DEBUG] Transforming from E:\mod\RoadWeaver\common\build\devlibs\roadweaver-common-1.0.2-dev.jar to E:\mod\RoadWeaver\common\build\libs\roadweaver-common-1.0.2-transformProductionForge.jar
 [Architectury Transformer DEBUG] ============================
 [Architectury Transformer DEBUG] 
 [Architectury Transformer DEBUG] Transforming 7 transformer(s) from E:\mod\RoadWeaver\common\build\devlibs\roadweaver-common-1.0.2-dev.jar to E:\mod\RoadWeaver\common\build\libs\roadweaver-common-1.0.2-transformProductionForge.jar: 
-[Architectury Transformer DEBUG]  - dev.architectury.transformer.transformers.TransformExpectPlatform@67d52d43
-[Architectury Transformer DEBUG]  - dev.architectury.transformer.transformers.RemapInjectables@3317c513
+[Architectury Transformer DEBUG]  - dev.architectury.transformer.transformers.TransformExpectPlatform@2dce5b80
+[Architectury Transformer DEBUG]  - dev.architectury.transformer.transformers.RemapInjectables@a633b2c
 [Architectury Transformer DEBUG]  - AddRefmapName(enabled=() -> kotlin.Boolean)
-[Architectury Transformer DEBUG]  - dev.architectury.transformer.transformers.TransformPlatformOnly@1e348b99
-[Architectury Transformer DEBUG]  - dev.architectury.transformer.transformers.TransformForgeAnnotations@bbd348
-[Architectury Transformer DEBUG]  - dev.architectury.transformer.transformers.TransformForgeEnvironment@ad9960
-[Architectury Transformer DEBUG]  - dev.architectury.transformer.transformers.FixForgeMixin@5469f55e
+[Architectury Transformer DEBUG]  - dev.architectury.transformer.transformers.TransformPlatformOnly@62c7919
+[Architectury Transformer DEBUG]  - dev.architectury.transformer.transformers.TransformForgeAnnotations@444baeb6
+[Architectury Transformer DEBUG]  - dev.architectury.transformer.transformers.TransformForgeEnvironment@5abd48a0
+[Architectury Transformer DEBUG]  - dev.architectury.transformer.transformers.FixForgeMixin@400919f2
 [Architectury Transformer DEBUG] Transforming from E:\mod\RoadWeaver\common\build\devlibs\roadweaver-common-1.0.2-dev.jar to E:\mod\RoadWeaver\common\build\libs\roadweaver-common-1.0.2-transformProductionForge.jar with 7 transformer(s) on dev.architectury.transformer.handler.SimpleTransformerHandler
 [Architectury Transformer DEBUG] Reading mixin mappings file: E:\mod\RoadWeaver\fabric\build\loom-cache\mixin-map-loom.mappings.1_20_1.layered+hash.40359-v2.main.tiny
 [Architectury Transformer DEBUG] Remapping with 2 mapping provider(s):
-[Architectury Transformer DEBUG]  - dev.architectury.transformer.transformers.TransformForgeEnvironment$$Lambda$3736/0x000001883bfcb878@56ea062f
-[Architectury Transformer DEBUG]  - dev.architectury.transformer.transformers.TransformForgeEnvironment$$Lambda$3735/0x000001883bfcb650@15637df9
+[Architectury Transformer DEBUG]  - dev.architectury.transformer.transformers.TransformForgeEnvironment$$Lambda$3751/0x000001b93dd5ef18@1ced129b
+[Architectury Transformer DEBUG]  - dev.architectury.transformer.transformers.TransformForgeEnvironment$$Lambda$3752/0x000001b93dd5f140@65bfe7d6
 [Architectury Transformer DEBUG] Provided 59 classpath jar(s):
 [Architectury Transformer DEBUG]  - C:\Users\shiroha\scoop\apps\gradle\current\.gradle\caches\modules-2\files-2.1\dev.architectury\architectury-injectables\1.0.10\62db2a366d662606d1b23ad02ccc3212ed37ec3\architectury-injectables-1.0.10.jar
 [Architectury Transformer DEBUG]  - C:\Users\shiroha\scoop\apps\gradle\current\.gradle\caches\modules-2\files-2.1\net.fabricmc\fabric-loader\0.17.3\deafaba5de4d9bbd76105783ff4e21ce0773874f\fabric-loader-0.17.3.jar
@@ -195,42 +195,42 @@
 [Architectury Transformer DEBUG]  - C:\Users\shiroha\scoop\apps\gradle\current\.gradle\caches\modules-2\files-2.1\io.netty\netty-transport-native-epoll\4.1.82.Final\c7350a71920f3ae9142945e25fed4846cce53374\netty-transport-native-epoll-4.1.82.Final-linux-x86_64.jar
 [Architectury Transformer DEBUG]  - C:\Users\shiroha\scoop\apps\gradle\current\.gradle\caches\modules-2\files-2.1\io.netty\netty-transport-native-epoll\4.1.82.Final\476409d6255001ca53a55f65b01c13822f8dc93a\netty-transport-native-epoll-4.1.82.Final-linux-aarch_64.jar
 [Architectury Transformer DEBUG]  - E:\mod\RoadWeaver\.gradle\loom-cache\remapped_mods\loom_mappings_1_20_1_layered_hash_40359_v2\dev\architectury\architectury\9.2.14\architectury-9.2.14.jar
-[Architectury Transformer] Read classpath in 710.9 ms
+[Architectury Transformer] Read classpath in 754.6 ms
 [Architectury Transformer DEBUG] Remapping Classes:
 [Architectury Transformer DEBUG] net/fabricmc/api/EnvType -> net/minecraftforge/api/distmarker/Dist
 [Architectury Transformer DEBUG] net/fabricmc/api/Environment -> net/minecraftforge/api/distmarker/OnlyIn
 [Architectury Transformer DEBUG] Found class transformer
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/persistence/WorldDataProvider with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/helpers/StructureLocatorImpl with maxs=true frames=true
+[Architectury Transformer DEBUG] Writing net/countered/settlementroads/helpers/Records with maxs=true frames=true
+[Architectury Transformer DEBUG] Writing net/countered/settlementroads/helpers/Records$WoodAssets with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/helpers/Records$RoadDecoration with maxs=true frames=true
-[Architectury Transformer DEBUG] Writing net/countered/settlementroads/helpers/Records$StructureInfo with maxs=true frames=true
-[Architectury Transformer DEBUG] Writing net/countered/settlementroads/helpers/Records$ConnectionStatus with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/helpers/Records$StructureConnection with maxs=true frames=true
+[Architectury Transformer DEBUG] Writing net/countered/settlementroads/helpers/Records$ConnectionStatus with maxs=true frames=true
+[Architectury Transformer DEBUG] Writing net/countered/settlementroads/helpers/Records$StructureInfo with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/helpers/StructureConnector with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/helpers/Records$RoadData with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/helpers/Records$StructureLocationData with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/helpers/Records$RoadSegmentPlacement with maxs=true frames=true
-[Architectury Transformer DEBUG] Writing net/countered/settlementroads/helpers/Records$WoodAssets with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/helpers/StructureLocator with maxs=true frames=true
-[Architectury Transformer DEBUG] Writing net/countered/settlementroads/helpers/Records with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/RoadFeature with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/roadlogic/Road with maxs=true frames=true
-[Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/roadlogic/RoadPathCalculator with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/roadlogic/RoadPathCalculator$Node with maxs=true frames=true
+[Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/roadlogic/RoadPathCalculator with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/roadlogic/RoadDirection with maxs=true frames=true
+[Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/DistanceSignDecoration with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/RoadFenceDecoration with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/OrientedDecoration$DirectionProperties with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/RoadPlacementRules with maxs=true frames=true
-[Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/GlorietteDecoration with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/OrientedDecoration with maxs=true frames=true
+[Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/LamppostDecoration with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/SwingDecoration with maxs=true frames=true
+[Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/GlorietteDecoration with maxs=true frames=true
+[Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/NbtStructureDecoration with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/FenceWaypointDecoration with maxs=true frames=true
-[Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/DistanceSignDecoration with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/RoadStructures with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/Decoration with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/StructureDecoration with maxs=true frames=true
-[Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/LamppostDecoration with maxs=true frames=true
-[Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/NbtStructureDecoration with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/BenchDecoration with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/util/WoodSelector with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing net/countered/settlementroads/features/decoration/util/BiomeWoodAware with maxs=true frames=true
@@ -242,5 +242,5 @@
 [Architectury Transformer DEBUG] Injecting MixinConfigs into /META-INF/MANIFEST.MF
 [Architectury Transformer DEBUG] Remapping refmap from intermediary to srg: roadweaver-common-common-refmap.json
 [Architectury Transformer DEBUG] Closed File Systems for E:\mod\RoadWeaver\common\build\libs\roadweaver-common-1.0.2-transformProductionForge.jar
-[Architectury Transformer] Transformed jar with 7 transformer(s) in 961.1 ms
+[Architectury Transformer] Transformed jar with 7 transformer(s) in 1.061 s
 [Architectury Transformer DEBUG] Closed File Systems for E:\mod\RoadWeaver\common\build\libs\roadweaver-common-1.0.2.jar

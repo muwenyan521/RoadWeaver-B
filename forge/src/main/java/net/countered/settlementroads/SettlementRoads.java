@@ -5,6 +5,7 @@ import net.countered.settlementroads.config.forge.ForgeJsonConfig;
 import net.countered.settlementroads.events.ModEventHandler;
 import net.countered.settlementroads.features.config.forge.ForgeRoadFeatureRegistry;
 import net.countered.settlementroads.datagen.SettlementRoadsDataGenerator;
+import net.countered.settlementroads.network.RoadWeaverNetworkManager;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -49,6 +50,11 @@ public class SettlementRoads {
 	}
 
 	private void commonSetup(final FMLCommonSetupEvent event) {
+		// 注册网络包
+		event.enqueueWork(() -> {
+			RoadWeaverNetworkManager.registerPackets();
+			LOGGER.info("Network packets registered");
+		});
 		LOGGER.info("RoadWeaver common setup completed");
 	}
 	

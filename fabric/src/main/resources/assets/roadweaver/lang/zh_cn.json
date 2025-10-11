@@ -90,5 +90,10 @@
   "sign.roadweaver.distance.next_location": "下个地点",
   "sign.roadweaver.distance.welcome": "欢迎",
   "sign.roadweaver.distance.traveller": "旅行者",
-  "sign.roadweaver.distance.separator": "----------"
+  "sign.roadweaver.distance.separator": "----------",
+
+  "roadweaver.debug_map.no_permission": "你没有权限打开调试地图（需要管理员权限）",
+  "roadweaver.debug_map.multiplayer_not_supported": "多人服务器暂不支持调试地图功能",
+  "roadweaver.debug_map.loading": "正在加载调试数据...",
+  "roadweaver.debug_map.timeout": "加载调试数据超时，请重试"
 }

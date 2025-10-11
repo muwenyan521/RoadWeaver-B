@@ -90,5 +90,10 @@
   "sign.roadweaver.distance.next_location": "Next Location",
   "sign.roadweaver.distance.welcome": "Welcome",
   "sign.roadweaver.distance.traveller": "traveller",
-  "sign.roadweaver.distance.separator": "----------"
+  "sign.roadweaver.distance.separator": "----------",
+
+  "roadweaver.debug_map.no_permission": "You don't have permission to open the debug map (requires admin permission)",
+  "roadweaver.debug_map.multiplayer_not_supported": "Debug map is not supported on multiplayer servers yet",
+  "roadweaver.debug_map.loading": "Loading debug data...",
+  "roadweaver.debug_map.timeout": "Failed to load debug data, please try again"
 }
