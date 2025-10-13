@@ -22,3 +22,4 @@
 # Legacy nested project snapshot (kept for reference, excluded from VCS and build)
 /RoadWeaver/
 /RoadWeaver/**
+common/.gradle/.architectury-transformer/debug.log
