@@ -74,6 +74,32 @@ public class ClothConfigScreen {
                 .setSaveConsumer(FabricModConfig::setStructureSearchTriggerDistance)
                 .build());
         
+        preGeneration.addEntry(entryBuilder.startIntSlider(
+                Component.translatable("config.roadweaver.structureBatchSize"),
+                FabricModConfig.getStructureBatchSize(),
+                1, 50)
+                .setDefaultValue(5)
+                .setTooltip(Component.translatable("config.roadweaver.structureBatchSize.tooltip"))
+                .setSaveConsumer(FabricModConfig::setStructureBatchSize)
+                .build());
+        
+        preGeneration.addEntry(entryBuilder.startIntSlider(
+                Component.translatable("config.roadweaver.structureSearchThreads"),
+                FabricModConfig.getStructureSearchThreads(),
+                1, 8)
+                .setDefaultValue(3)
+                .setTooltip(Component.translatable("config.roadweaver.structureSearchThreads.tooltip"))
+                .setSaveConsumer(FabricModConfig::setStructureSearchThreads)
+                .build());
+        
+        preGeneration.addEntry(entryBuilder.startBooleanToggle(
+                Component.translatable("config.roadweaver.enableAsyncStructureSearch"),
+                FabricModConfig.getEnableAsyncStructureSearch())
+                .setDefaultValue(true)
+                .setTooltip(Component.translatable("config.roadweaver.enableAsyncStructureSearch.tooltip"))
+                .setSaveConsumer(FabricModConfig::setEnableAsyncStructureSearch)
+                .build());
+        
         // 道路配置分类
         ConfigCategory roads = builder.getOrCreateCategory(
                 Component.translatable("config.roadweaver.category.roads"));

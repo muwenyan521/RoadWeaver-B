@@ -32,6 +32,21 @@ public class ForgeModConfigAdapter implements IModConfig {
     }
 
     @Override
+    public int structureBatchSize() {
+        return ForgeJsonConfig.getStructureBatchSize();
+    }
+
+    @Override
+    public int structureSearchThreads() {
+        return ForgeJsonConfig.getStructureSearchThreads();
+    }
+    
+    @Override
+    public boolean enableAsyncStructureSearch() {
+        return ForgeJsonConfig.getEnableAsyncStructureSearch();
+    }
+
+    @Override
     public int averagingRadius() {
         return ForgeJsonConfig.getAveragingRadius();
     }

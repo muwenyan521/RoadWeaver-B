@@ -71,6 +71,32 @@ public class ClothConfigScreen {
                 .setSaveConsumer(ForgeJsonConfig::setStructureSearchTriggerDistance)
                 .build());
         
+        preGeneration.addEntry(entryBuilder.startIntSlider(
+                Component.translatable("config.roadweaver.structureBatchSize"),
+                ForgeJsonConfig.getStructureBatchSize(),
+                1, 50)
+                .setDefaultValue(5)
+                .setTooltip(Component.translatable("config.roadweaver.structureBatchSize.tooltip"))
+                .setSaveConsumer(ForgeJsonConfig::setStructureBatchSize)
+                .build());
+        
+        preGeneration.addEntry(entryBuilder.startIntSlider(
+                Component.translatable("config.roadweaver.structureSearchThreads"),
+                ForgeJsonConfig.getStructureSearchThreads(),
+                1, 8)
+                .setDefaultValue(3)
+                .setTooltip(Component.translatable("config.roadweaver.structureSearchThreads.tooltip"))
+                .setSaveConsumer(ForgeJsonConfig::setStructureSearchThreads)
+                .build());
+        
+        preGeneration.addEntry(entryBuilder.startBooleanToggle(
+                Component.translatable("config.roadweaver.enableAsyncStructureSearch"),
+                ForgeJsonConfig.getEnableAsyncStructureSearch())
+                .setDefaultValue(true)
+                .setTooltip(Component.translatable("config.roadweaver.enableAsyncStructureSearch.tooltip"))
+                .setSaveConsumer(ForgeJsonConfig::setEnableAsyncStructureSearch)
+                .build());
+        
         // 道路配置分类
         ConfigCategory roads = builder.getOrCreateCategory(
                 Component.translatable("config.roadweaver.category.roads"));

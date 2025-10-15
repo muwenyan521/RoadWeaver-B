@@ -17,7 +17,9 @@ RoadWeaver automatically generates beautiful road networks between structures (e
 - 🏮 Decoration System: Lampposts (redstone lamps with day/night auto control), intermittent fences, distance signs, wayfinding; large decorations (swings, benches, gazebos) with random placement
 - 🧭 Visual Debugging: Road network map; status colors (planned/generating/completed/failed); interactions (drag/zoom/click-to-teleport); statistics for counts, length, and states
 - 🚀 Performance: Multi-threaded async generation with concurrency control; height/terrain caching to reduce redundant computations
-- 📚 Multi-Structure Support （1.0.2 or later）
+- 📚 Multi-Structure Support (1.0.2 or later)
+- ⚡ Async Structure Search (1.0.5 or later): Non-blocking structure search with configurable thread pool (1-8 threads); round-robin search to avoid cache overflow; batch planning to prevent messy connections
+- 🌳 Minimum Spanning Tree (1.0.5 or later): Kruskal's algorithm ensures all structures are connected with shortest total path length
 
 ### 🗺️ Roadmap
 - More decorations? Enrich roadside and pathway ornamentation
@@ -67,6 +69,8 @@ RoadWeaver 能在世界中的结构（如村庄、前哨站等）之间自动生
 - 🧭 可视化调试：道路网络地图；状态颜色（计划/生成/完成/失败）；交互（拖拽、缩放、点击传送）；统计道路数量、长度与状态
 - 🚀 性能优化：多线程异步生成并发控制（最高128线程）；高度与地形缓存减少重复计算
 - 📚 多结构同时链接支持（1.0.2版本以上）
+- ⚡ 异步结构搜索（1.0.5版本以上）：非阻塞式结构搜索，可配置线程池（1-8线程）；轮询搜索避免缓存溢出；批量规划防止混乱连接
+- 🌳 最小生成树算法（1.0.5版本以上）：Kruskal 算法确保所有结构连通且总路径最短
 
 ### 🗺️ 未来更新计划（Roadmap）
 - 更多装饰？引入更丰富的道路与路边装饰元素

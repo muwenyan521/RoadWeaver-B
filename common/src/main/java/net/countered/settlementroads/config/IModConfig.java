@@ -11,6 +11,9 @@ public interface IModConfig {
     int initialLocatingCount();
     int maxConcurrentRoadGeneration();
     int structureSearchTriggerDistance();
+    int structureBatchSize(); // 批量累积：累积多少个结构后再统一加入道路规划
+    int structureSearchThreads(); // 结构搜索线程池大小
+    boolean enableAsyncStructureSearch(); // 是否启用异步多线程结构搜索
 
     // Roads
     int averagingRadius();

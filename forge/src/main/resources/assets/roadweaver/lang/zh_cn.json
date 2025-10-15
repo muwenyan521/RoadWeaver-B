@@ -55,6 +55,12 @@
   "config.roadweaver.maxConcurrentRoadGeneration.tooltip": "同时生成的道路任务数量上限。数值越小性能占用越低，但道路生成速度会变慢。默认：3",
   "config.roadweaver.structureSearchTriggerDistance": "结构搜寻触发距离",
   "config.roadweaver.structureSearchTriggerDistance.tooltip": "每加载多少个区块后触发一次新结构搜寻。范围150-1500，数值越小搜寻越频繁。默认：500",
+  "config.roadweaver.structureBatchSize": "结构批量累积大小",
+  "config.roadweaver.structureBatchSize.tooltip": "累积多少个结构后再统一加入道路规划。数值越大越能防止远距离结构先连接，创建更有序的道路网络。范围1-50，默认：5",
+  "config.roadweaver.structureSearchThreads": "结构搜索线程数",
+  "config.roadweaver.structureSearchThreads.tooltip": "并行结构搜索的线程池大小。数值越大搜索越快但消耗更多CPU。需要重启服务器才能生效。范围1-8，默认：3",
+  "config.roadweaver.enableAsyncStructureSearch": "启用异步结构搜索",
+  "config.roadweaver.enableAsyncStructureSearch.tooltip": "启用多线程异步结构搜索。禁用时结构搜索在主线程执行（可能导致卡顿）。需要重启服务器才能生效。默认：true",
 
   "config.roadweaver.averagingRadius": "地形平均半径",
   "config.roadweaver.averagingRadius.tooltip": "人工道路的地形平滑程度。数值越大越平滑，但可能不自然。默认：1",

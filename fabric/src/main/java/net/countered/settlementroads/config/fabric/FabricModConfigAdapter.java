@@ -35,6 +35,21 @@ public class FabricModConfigAdapter implements IModConfig {
     }
 
     @Override
+    public int structureBatchSize() {
+        return FabricModConfig.getStructureBatchSize();
+    }
+
+    @Override
+    public int structureSearchThreads() {
+        return FabricModConfig.getStructureSearchThreads();
+    }
+    
+    @Override
+    public boolean enableAsyncStructureSearch() {
+        return FabricModConfig.getEnableAsyncStructureSearch();
+    }
+
+    @Override
     public int averagingRadius() {
         return FabricModConfig.getAveragingRadius();
     }

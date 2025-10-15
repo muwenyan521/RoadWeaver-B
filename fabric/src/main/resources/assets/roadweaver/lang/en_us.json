@@ -55,6 +55,12 @@
   "config.roadweaver.maxConcurrentRoadGeneration.tooltip": "Maximum number of roads that can be generated simultaneously. Lower values reduce performance impact but slow down road generation. Default: 3",
   "config.roadweaver.structureSearchTriggerDistance": "Structure Search Trigger Distance",
   "config.roadweaver.structureSearchTriggerDistance.tooltip": "Number of chunks to load before triggering new structure search. Range 150-1500, lower values search more frequently. Default: 500",
+  "config.roadweaver.structureBatchSize": "Structure Batch Size",
+  "config.roadweaver.structureBatchSize.tooltip": "Number of structures to accumulate before adding them to road planning. Higher values prevent distant structures from connecting first, creating more organized road networks. Range 1-50, Default: 5",
+  "config.roadweaver.structureSearchThreads": "Structure Search Threads",
+  "config.roadweaver.structureSearchThreads.tooltip": "Number of threads for parallel structure searching. Higher values speed up structure discovery but use more CPU. Requires server restart to take effect. Range 1-8, Default: 3",
+  "config.roadweaver.enableAsyncStructureSearch": "Enable Async Structure Search",
+  "config.roadweaver.enableAsyncStructureSearch.tooltip": "Enable multi-threaded asynchronous structure searching. When disabled, structure search runs on main thread (may cause lag). Requires server restart to take effect. Default: true",
 
   "config.roadweaver.averagingRadius": "Averaging radius",
   "config.roadweaver.averagingRadius.tooltip": "Amount of terrain averaging done for artificial roads. Higher values create smoother roads but may look unnatural. Default: 1",

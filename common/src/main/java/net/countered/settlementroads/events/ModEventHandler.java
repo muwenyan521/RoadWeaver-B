@@ -8,8 +8,11 @@ import net.countered.settlementroads.features.RoadFeature;
 import net.countered.settlementroads.features.config.RoadFeatureConfig;
 import net.countered.settlementroads.features.roadlogic.Road;
 import net.countered.settlementroads.features.roadlogic.RoadPathCalculator;
+import net.countered.settlementroads.helpers.AsyncStructureLocator;
 import net.countered.settlementroads.helpers.Records;
 import net.countered.settlementroads.helpers.StructureConnector;
+import net.countered.settlementroads.helpers.StructureLocator;
+import net.countered.settlementroads.helpers.StructureLocatorImpl;
 import net.countered.settlementroads.persistence.WorldDataProvider;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.MinecraftServer;
@@ -66,6 +69,9 @@ public class ModEventHandler {
         TickEvent.SERVER_PRE.register(server -> {
             for (ServerLevel level : server.getAllLevels()) {
                 if (level.dimension().equals(Level.OVERWORLD)) {
+                    // 处理异步结构搜索结果
+                    processAsyncStructureResults(level);
+                    // 尝试生成新道路
                     tryGenerateNewRoads(level, true, 5000);
                 }
             }
@@ -77,6 +83,8 @@ public class ModEventHandler {
             runningTasks.values().forEach(future -> future.cancel(true));
             runningTasks.clear();
             executor.shutdownNow();
+            // 关闭异步结构定位器
+            AsyncStructureLocator.shutdown();
             LOGGER.debug("RoadWeaver: ExecutorService shut down.");
         });
     }
@@ -98,15 +106,14 @@ public class ModEventHandler {
 
         IModConfig config = ConfigProvider.get();
         if (structureLocationData.structureLocations().size() < config.initialLocatingCount()) {
-            LOGGER.info("Initializing world with {} structures", config.initialLocatingCount());
+            int needed = config.initialLocatingCount() - structureLocationData.structureLocations().size();
+            LOGGER.info("RoadWeaver: 初始化世界，需要搜索 {} 个结构（使用异步搜索）", needed);
             
-            // 只搜寻结构，不立即生成道路（由 tick 事件处理）
-            for (int i = 0; i < config.initialLocatingCount(); i++) {
-                StructureConnector.cacheNewConnection(level, false);
-            }
+            // 使用异步搜索，避免阻塞主线程和缓存溢出
+            // 轮询机制会自动分散搜索，每次只搜索一种结构
+            StructureLocator.locateConfiguredStructure(level, needed, false);
             
-            LOGGER.info("Initial structure search completed, queue size: {}", 
-                StructureConnector.getQueueForWorld(level).size());
+            LOGGER.info("RoadWeaver: 已提交 {} 个异步结构搜索任务", needed);
         }
     }
 
@@ -338,6 +345,31 @@ public class ModEventHandler {
         if (restoredCount > 0) {
             LOGGER.info("RoadWeaver: 恢复了 {} 个未完成的道路生成任务（队列大小: {}）", 
                 restoredCount, StructureConnector.getQueueForWorld(level).size());
+        }
+    }
+    
+    /**
+     * 处理异步结构搜索结果
+     * 在每个 tick 中调用，检查并处理完成的异步搜索任务
+     */
+    private static void processAsyncStructureResults(ServerLevel level) {
+        // 调用 StructureLocatorImpl 处理异步结果
+        StructureLocatorImpl.processAsyncResults(level);
+        
+        // 检查是否有新结构被发现，如果有则创建连接
+        WorldDataProvider dataProvider = WorldDataProvider.getInstance();
+        Records.StructureLocationData locationData = dataProvider.getStructureLocations(level);
+        
+        if (locationData != null && locationData.structureLocations().size() >= 2) {
+            // 检查是否需要创建新连接
+            List<Records.StructureConnection> connections = dataProvider.getStructureConnections(level);
+            int existingConnectionCount = connections != null ? connections.size() : 0;
+            int structureCount = locationData.structureLocations().size();
+            
+            // 如果结构数量增加了，尝试创建新连接
+            if (structureCount > existingConnectionCount + 1) {
+                StructureConnector.createNewStructureConnection(level);
+            }
         }
     }
 }

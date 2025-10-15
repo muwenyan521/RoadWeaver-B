@@ -38,6 +38,21 @@ public class ForgeJsonConfig {
     public static void setStructureSearchTriggerDistance(int value) { 
         data.structureSearchTriggerDistance = Math.max(150, Math.min(1500, value)); 
     }
+    
+    public static int getStructureBatchSize() { return data.structureBatchSize; }
+    public static void setStructureBatchSize(int value) { 
+        data.structureBatchSize = Math.max(1, Math.min(50, value)); 
+    }
+    
+    public static int getStructureSearchThreads() { return data.structureSearchThreads; }
+    public static void setStructureSearchThreads(int value) { 
+        data.structureSearchThreads = Math.max(1, Math.min(8, value)); 
+    }
+    
+    public static boolean getEnableAsyncStructureSearch() { return data.enableAsyncStructureSearch; }
+    public static void setEnableAsyncStructureSearch(boolean value) { 
+        data.enableAsyncStructureSearch = value; 
+    }
 
     // 道路配置
     public static int getAveragingRadius() { return data.averagingRadius; }
@@ -132,6 +147,9 @@ public class ForgeJsonConfig {
         int initialLocatingCount = 7;
         int maxConcurrentRoadGeneration = 3;
         int structureSearchTriggerDistance = 600;
+        int structureBatchSize = 5; // 批量累积：累积多少个结构后再统一加入道路规划
+        int structureSearchThreads = 3; // 结构搜索线程池大小
+        boolean enableAsyncStructureSearch = true; // 是否启用异步多线程结构搜索
 
         // 道路配置
         int averagingRadius = 1;

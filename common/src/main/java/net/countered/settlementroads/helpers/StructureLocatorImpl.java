@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 通用结构定位实现（Common）。
@@ -31,9 +32,25 @@ import java.util.Set;
 public final class StructureLocatorImpl {
 
     private static final Logger LOGGER = LoggerFactory.getLogger("roadweaver");
+    
+    // 轮询索引：记录当前搜索到哪个结构类型
+    private static int currentStructureIndex = 0;
+    // 缓存解析后的结构列表，避免重复解析
+    private static List<Holder<Structure>> cachedStructureList = null;
+    
+    // 批量累积缓冲区：按世界存储待加入的结构
+    private static final ConcurrentHashMap<String, List<Records.StructureInfo>> pendingStructures = new ConcurrentHashMap<>();
+    // 记录每个世界缓冲区的最后更新时间
+    private static final ConcurrentHashMap<String, Long> lastUpdateTime = new ConcurrentHashMap<>();
+    // 自动刷新超时时间（毫秒）：30秒
+    private static final long AUTO_FLUSH_TIMEOUT = 30000;
 
     private StructureLocatorImpl() {}
 
+    /**
+     * 异步定位结构（新方法）
+     * 提交异步搜索任务，不阻塞主线程
+     */
     public static void locateConfiguredStructure(ServerLevel level, int locateCount, boolean locateAtPlayer) {
         if (locateCount <= 0) {
             return;
@@ -48,51 +65,184 @@ public final class StructureLocatorImpl {
         }
 
         List<BlockPos> knownLocations = new ArrayList<>(locationData.structureLocations());
-        List<Records.StructureInfo> structureInfos = new ArrayList<>(locationData.structureInfos());
-        Set<BlockPos> newlyFound = new HashSet<>();
 
-        Optional<HolderSet<Structure>> targetStructures = resolveStructureTargets(level, config.structuresToLocate());
-        if (targetStructures.isEmpty()) {
-            LOGGER.warn("RoadWeaver: 无法解析结构目标列表，跳过定位。");
+        // 获取并缓存结构列表
+        if (cachedStructureList == null || cachedStructureList.isEmpty()) {
+            Optional<HolderSet<Structure>> targetStructures = resolveStructureTargets(level, config.structuresToLocate());
+            if (targetStructures.isEmpty()) {
+                LOGGER.warn("RoadWeaver: 无法解析结构目标列表，跳过定位。");
+                return;
+            }
+            cachedStructureList = new ArrayList<>(targetStructures.get().stream().toList());
+            currentStructureIndex = 0;
+            LOGGER.info("RoadWeaver: 已解析 {} 种结构类型用于轮询搜索", cachedStructureList.size());
+        }
+        
+        if (cachedStructureList.isEmpty()) {
+            LOGGER.warn("RoadWeaver: 结构列表为空，跳过定位。");
             return;
         }
 
         List<BlockPos> centers = collectSearchCenters(level, locateAtPlayer);
         int radius = Math.max(config.structureSearchRadius(), 1);
-        LOGGER.debug("RoadWeaver: locating up to {} structure(s) - centers={}, radius={}, atPlayer={}", locateCount, centers.size(), radius, locateAtPlayer);
+        
+        int structureTypeCount = cachedStructureList.size();
+        int totalSubmitted = 0;
+        
+        LOGGER.info("RoadWeaver: 开始轮询搜索 {} 个任务，共 {} 种结构类型", locateCount, structureTypeCount);
 
-        for (BlockPos center : centers) {
-            if (locateCount <= 0) {
-                break;
+        // 严格轮询：每次只搜索一种结构的一个位置
+        for (int i = 0; i < locateCount; i++) {
+            // 轮询选择结构类型
+            Holder<Structure> currentStructure = cachedStructureList.get(currentStructureIndex);
+            String structureName = currentStructure.unwrapKey()
+                .map(key -> key.location().toString())
+                .orElse("unknown");
+            
+            // 移动到下一个结构类型
+            currentStructureIndex = (currentStructureIndex + 1) % cachedStructureList.size();
+            
+            // 选择搜索中心（轮流使用）
+            BlockPos center = centers.get(i % centers.size());
+            
+            // 生成唯一任务ID
+            String taskId = generateTaskId(level, center) + "_" + i + "_" + structureName.hashCode();
+            
+            // 创建只包含当前结构的 HolderSet
+            HolderSet<Structure> singleStructureSet = HolderSet.direct(currentStructure);
+            
+            // 提交异步搜索（会被线程池并行执行）
+            AsyncStructureLocator.locateStructureAsync(
+                level,
+                singleStructureSet,
+                center,
+                radius,
+                taskId
+            );
+            
+            totalSubmitted++;
+            
+            if ((i + 1) % structureTypeCount == 0) {
+                LOGGER.debug("RoadWeaver: 已完成一轮轮询（{} 种结构）", structureTypeCount);
             }
+        }
+        
+        LOGGER.info("RoadWeaver: 总共提交 {} 个异步结构搜索任务（并行执行）", totalSubmitted);
+    }
+    
+    /**
+     * 处理异步搜索结果
+     * 在主线程的 tick 事件中调用，检查并处理完成的搜索任务
+     */
+    public static void processAsyncResults(ServerLevel level) {
+        IModConfig config = ConfigProvider.get();
+        int batchSize = config.structureBatchSize();
+        
+        WorldDataProvider dataProvider = WorldDataProvider.getInstance();
+        Records.StructureLocationData locationData = dataProvider.getStructureLocations(level);
+        if (locationData == null) {
+            locationData = new Records.StructureLocationData(new ArrayList<>());
+        }
 
-            Pair<BlockPos, Holder<Structure>> result = level.getChunkSource()
-                    .getGenerator()
-                    .findNearestMapStructure(level, targetStructures.get(), center, radius, true);
+        List<BlockPos> knownLocations = new ArrayList<>(locationData.structureLocations());
+        List<Records.StructureInfo> structureInfos = new ArrayList<>(locationData.structureInfos());
+        
+        // 获取当前世界的缓冲区
+        String worldKey = level.dimension().location().toString();
+        List<Records.StructureInfo> pending = pendingStructures.computeIfAbsent(worldKey, k -> new ArrayList<>());
 
-            if (result != null) {
-                BlockPos structurePos = result.getFirst();
-                Holder<Structure> structureHolder = result.getSecond();
-                
-                if (!containsBlockPos(knownLocations, structurePos)) {
-                    knownLocations.add(structurePos);
-                    newlyFound.add(structurePos);
-                    
-                    // 保存结构类型信息
-                    String structureId = structureHolder.unwrapKey()
-                            .map(key -> key.location().toString())
-                            .orElse("unknown");
-                    structureInfos.add(new Records.StructureInfo(structurePos, structureId));
-                    
-                    locateCount--;
+        // 检查所有完成的任务，加入缓冲区
+        for (String taskId : new ArrayList<>(AsyncStructureLocator.LOCATE_RESULTS.keySet())) {
+            AsyncStructureLocator.StructureLocateResult result = 
+                AsyncStructureLocator.getAndRemoveResult(taskId);
+            
+            if (result != null && result.completed()) {
+                if (result.position() != null) {
+                    // 找到了结构，先加入缓冲区
+                    if (!containsBlockPos(knownLocations, result.position()) && 
+                        !containsStructureInfo(pending, result.position())) {
+                        
+                        Records.StructureInfo newStructure = new Records.StructureInfo(
+                            result.position(), 
+                            result.structureId()
+                        );
+                        pending.add(newStructure);
+                        // 更新最后修改时间
+                        lastUpdateTime.put(worldKey, System.currentTimeMillis());
+                        
+                        LOGGER.info("RoadWeaver: 异步搜索发现新结构 {} 于 {} (缓冲区: {}/{})", 
+                            result.structureId(), result.position(), pending.size(), batchSize);
+                    }
                 }
             }
         }
 
-        if (!newlyFound.isEmpty()) {
-            dataProvider.setStructureLocations(level, new Records.StructureLocationData(knownLocations, structureInfos));
-            LOGGER.debug("RoadWeaver: 定位到 {} 个新结构: {}", newlyFound.size(), newlyFound);
+        // 检查是否需要刷新缓冲区
+        boolean shouldFlush = false;
+        String flushReason = "";
+        
+        if (pending.size() >= batchSize) {
+            // 缓冲区已满
+            shouldFlush = true;
+            flushReason = "缓冲区已满";
+        } else if (!pending.isEmpty()) {
+            // 缓冲区有结构但未满，检查是否超时
+            long lastUpdate = lastUpdateTime.getOrDefault(worldKey, 0L);
+            long timeSinceLastUpdate = System.currentTimeMillis() - lastUpdate;
+            if (timeSinceLastUpdate > AUTO_FLUSH_TIMEOUT) {
+                shouldFlush = true;
+                flushReason = String.format("超时自动刷新 (%d秒)", timeSinceLastUpdate / 1000);
+            }
         }
+        
+        // 当缓冲区达到批量大小或超时时，统一加入道路规划
+        if (shouldFlush) {
+            LOGGER.info("RoadWeaver: {} ({} 个结构)，开始批量加入道路规划", flushReason, pending.size());
+            
+            // 将缓冲区中的结构加入已知列表
+            for (Records.StructureInfo structure : pending) {
+                knownLocations.add(structure.pos());
+                structureInfos.add(structure);
+            }
+            
+            // 保存到数据库
+            dataProvider.setStructureLocations(level, 
+                new Records.StructureLocationData(knownLocations, structureInfos));
+            
+            LOGGER.info("RoadWeaver: 已批量加入 {} 个结构，总计 {} 个结构位置", 
+                pending.size(), knownLocations.size());
+            
+            // 清空缓冲区和时间戳
+            pending.clear();
+            lastUpdateTime.remove(worldKey);
+            
+            // 触发道路规划
+            if (knownLocations.size() >= 2) {
+                LOGGER.info("RoadWeaver: 触发道路规划检查");
+                StructureConnector.createNewStructureConnection(level);
+            }
+        }
+    }
+    
+    /**
+     * 检查结构信息列表中是否包含指定位置
+     */
+    private static boolean containsStructureInfo(List<Records.StructureInfo> list, BlockPos pos) {
+        for (Records.StructureInfo info : list) {
+            if (info.pos().equals(pos)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * 生成任务ID
+     */
+    private static String generateTaskId(ServerLevel level, BlockPos center) {
+        return level.dimension().location().toString() + "_" + 
+               center.getX() + "_" + center.getZ() + "_" + 
+               System.currentTimeMillis();
     }
 
     private static Optional<HolderSet<Structure>> resolveStructureTargets(ServerLevel level, String identifiers) {
