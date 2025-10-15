@@ -3,6 +3,8 @@ package net.countered.settlementroads.config.forge;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.minecraftforge.fml.loading.FMLPaths;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,6 +17,7 @@ import java.util.List;
  * Forge 端与 Fabric 一致的 JSON 配置实现（保存在 config/roadweaver.json）。
  */
 public class ForgeJsonConfig {
+    private static final Logger LOGGER = LoggerFactory.getLogger("roadweaver");
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Path CONFIG_PATH = FMLPaths.CONFIGDIR.get().resolve("roadweaver.json");
 
@@ -116,7 +119,7 @@ public class ForgeJsonConfig {
                     save();
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                LOGGER.error("Failed to load config file: {}", CONFIG_PATH, e);
             }
         } else {
             if (data.structuresToLocate == null || data.structuresToLocate.isEmpty()) {
@@ -131,7 +134,7 @@ public class ForgeJsonConfig {
             Files.createDirectories(CONFIG_PATH.getParent());
             Files.writeString(CONFIG_PATH, GSON.toJson(data));
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error("Failed to save config file: {}", CONFIG_PATH, e);
         }
     }
 

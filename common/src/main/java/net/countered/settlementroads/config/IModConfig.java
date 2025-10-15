@@ -32,4 +32,9 @@ public interface IModConfig {
     int manualMaxHeightDifference();
     int manualMaxTerrainStability();
     boolean manualIgnoreWater();
+
+    // 性能配置
+    default int heightCacheMaxSize() {
+        return 100_000; // 默认10万个条目
+    }
 }

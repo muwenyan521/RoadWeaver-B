@@ -40,6 +40,7 @@ public class RoadFeature extends Feature<RoadFeatureConfig> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger("roadweaver");
 
+    // 道路放置相关常量
     public static final Set<Block> dontPlaceHere = new HashSet<>();
     static {
         dontPlaceHere.add(Blocks.PACKED_ICE);
@@ -49,7 +50,21 @@ public class RoadFeature extends Feature<RoadFeatureConfig> {
         dontPlaceHere.add(Blocks.MANGROVE_ROOTS);
     }
 
+    // 结构搜索相关常量
     public static int chunksForLocatingCounter = 1;
+    
+    // 道路放置边界：避免在结构附近放置道路（单位：方块段）
+    private static final int STRUCTURE_EDGE_OFFSET = 60;
+    
+    // 装饰放置相关常量
+    private static final int SIGN_PLACEMENT_OFFSET = 65;
+    private static final int LAMPPOST_DECORATION_SPACING = 59;
+    private static final int FENCE_DECORATION_SPACING = 15;
+    private static final int LARGE_DECORATION_SPACING = 80;
+    private static final int WAYPOINT_SPACING = 25;
+    
+    // 清理常量：清理道路上方的空气
+    private static final int CLEAR_HEIGHT_ABOVE_ROAD = 3;
 
     // 供 Fabric 端注册/引用，Forge 端不强制使用
     public static final ResourceKey<ConfiguredFeature<?, ?>> ROAD_FEATURE_KEY =
@@ -65,7 +80,10 @@ public class RoadFeature extends Feature<RoadFeatureConfig> {
 
     @Override
     public boolean place(FeaturePlaceContext<RoadFeatureConfig> context) {
-        if (RoadPathCalculator.heightCache.size() > 100_000) {
+        // 使用配置控制缓存大小，避免内存溢出
+        IModConfig config = ConfigProvider.get();
+        if (RoadPathCalculator.heightCache.size() > config.heightCacheMaxSize()) {
+            LOGGER.debug("Height cache size exceeded limit ({}), clearing cache", config.heightCacheMaxSize());
             RoadPathCalculator.heightCache.clear();
         }
         WorldGenLevel level = context.level();
@@ -127,7 +145,7 @@ public class RoadFeature extends Feature<RoadFeatureConfig> {
                 Records.RoadSegmentPlacement segment = segmentList.get(i);
                 BlockPos segmentMiddlePos = segment.middlePos();
                 // 靠近结构处不铺路
-                if (segmentIndex < 60 || segmentIndex > segmentList.size() - 60) continue;
+                if (segmentIndex < STRUCTURE_EDGE_OFFSET || segmentIndex > segmentList.size() - STRUCTURE_EDGE_OFFSET) continue;
                 ChunkPos middleChunkPos = new ChunkPos(segmentMiddlePos);
                 if (!middleChunkPos.equals(currentChunkPos)) continue;
 
@@ -168,7 +186,7 @@ public class RoadFeature extends Feature<RoadFeatureConfig> {
         BlockState blockStateAtPos = level.getBlockState(surfacePos.below());
         // 水面在 placeOnSurface 中处理
         if (config.placeWaypoints()) {
-            if (segmentIndex % 25 == 0) {
+            if (segmentIndex % WAYPOINT_SPACING == 0) {
                 roadDecorationPlacementPositions.add(new FenceWaypointDecoration(surfacePos, level));
             }
             return;
@@ -181,13 +199,13 @@ public class RoadFeature extends Feature<RoadFeatureConfig> {
         Vec3i directionVector = new Vec3i(normDx, 0, normDz);
 
         Vec3i orthogonalVector = new Vec3i(-directionVector.getZ(), 0, directionVector.getX());
-        boolean isEnd = segmentIndex != middleBlockPositions.size() - 65;
+        boolean isEnd = segmentIndex != middleBlockPositions.size() - SIGN_PLACEMENT_OFFSET;
         BlockPos shiftedPos;
-        if (segmentIndex == 65 || segmentIndex == middleBlockPositions.size() - 65) {
+        if (segmentIndex == SIGN_PLACEMENT_OFFSET || segmentIndex == middleBlockPositions.size() - SIGN_PLACEMENT_OFFSET) {
             shiftedPos = isEnd ? placePos.offset(orthogonalVector.multiply(2)) : placePos.offset(orthogonalVector.multiply(-2));
             roadDecorationPlacementPositions.add(new DistanceSignDecoration(shiftedPos, orthogonalVector, level, isEnd, String.valueOf(middleBlockPositions.size())));
         }
-        else if (segmentIndex % 59 == 0) {
+        else if (segmentIndex % LAMPPOST_DECORATION_SPACING == 0) {
             boolean leftRoadSide = random.nextBoolean();
             shiftedPos = leftRoadSide ? placePos.offset(orthogonalVector.multiply(2)) : placePos.offset(orthogonalVector.multiply(-2));
             shiftedPos = shiftedPos.atY(level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, shiftedPos.getX(), shiftedPos.getZ()));
@@ -202,7 +220,7 @@ public class RoadFeature extends Feature<RoadFeatureConfig> {
             }
         }
         // 间断栏杆装饰
-        else if (config.placeRoadFences() && segmentIndex % 15 == 0) {
+        else if (config.placeRoadFences() && segmentIndex % FENCE_DECORATION_SPACING == 0) {
             boolean leftRoadSide = random.nextBoolean();
             shiftedPos = leftRoadSide ? placePos.offset(orthogonalVector.multiply(2)) : placePos.offset(orthogonalVector.multiply(-2));
             shiftedPos = shiftedPos.atY(level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, shiftedPos.getX(), shiftedPos.getZ()));
@@ -213,7 +231,7 @@ public class RoadFeature extends Feature<RoadFeatureConfig> {
             roadDecorationPlacementPositions.add(new RoadFenceDecoration(shiftedPos, orthogonalVector, level, leftRoadSide, fenceLength));
         }
         // 大型装饰（秋千、长椅、凉亭）
-        else if (segmentIndex % 80 == 0) {
+        else if (segmentIndex % LARGE_DECORATION_SPACING == 0) {
             List<String> availableStructures = new ArrayList<>();
             if (config.placeSwings()) availableStructures.add("swing");
             if (config.placeBenches()) availableStructures.add("bench");
@@ -282,7 +300,8 @@ public class RoadFeature extends Feature<RoadFeatureConfig> {
         BlockState material = materials.get(deterministicRandom.nextInt(materials.size()));
         level.setBlock(surfacePos.below(), material, 3);
 
-        for (int i = 0; i < 3; i++) {
+        // 清理道路上方的方块
+        for (int i = 0; i < CLEAR_HEIGHT_ABOVE_ROAD; i++) {
             BlockState blockStateUp = level.getBlockState(surfacePos.above(i));
             if (!blockStateUp.getBlock().equals(Blocks.AIR) && !blockStateUp.is(BlockTags.LOGS) && !blockStateUp.is(BlockTags.FENCES)) {
                 level.setBlock(surfacePos.above(i), Blocks.AIR.defaultBlockState(), 3);

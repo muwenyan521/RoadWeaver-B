@@ -108,7 +108,7 @@ modrinth {
     uploadFile = remapJar
     gameVersions = ["1.20.1"]
     loaders = ["fabric"]
-    changelog = file("${rootProject.projectDir}/changelog.md").text
+    changelog = file("${rootProject.projectDir}/docs/CHANGELOG.md").text
     versionName = "RoadWeaver ${project.version} (Fabric)"
     dependencies {
         embedded.project "midnightlib"
@@ -120,7 +120,7 @@ tasks.register("curseforge", TaskPublishCurseForge) {
 	apiToken = System.getenv("CURSEFORGE_TOKEN")
 	def projectId = "1140708"
 	def mainFile = upload(projectId, remapJar)
-	mainFile.changelog = file("${rootProject.projectDir}/changelog.md")
+	mainFile.changelog = file("${rootProject.projectDir}/docs/CHANGELOG.md")
 	mainFile.changelogType = "markdown"
 	mainFile.displayName = "RoadWeaver ${project.version} (Fabric)"
 	mainFile.addGameVersion("Fabric")
@@ -141,14 +141,23 @@ publishing {
     }
 }
 
-// 使用 common 中的 roadFeature，避免重复类定义
+// 使用 common 中的代码，避免重复类定义
 sourceSets {
     main {
         java {
+            // 使用 common 中的特性类
             exclude 'net/countered/settlementroads/features/RoadFeature.java'
             exclude 'net/countered/settlementroads/events/ModEventHandler.java'
-            // Use common's unified registry instead of platform-specific one
             exclude 'net/countered/settlementroads/features/config/RoadFeatureRegistry.java'
+            
+            // 使用 common 中的 GUI 类（除了平台特定的配置屏幕）
+            exclude 'net/countered/settlementroads/client/gui/GridRenderer.java'
+            exclude 'net/countered/settlementroads/client/gui/MapRenderer.java'
+            exclude 'net/countered/settlementroads/client/gui/RenderUtils.java'
+            exclude 'net/countered/settlementroads/client/gui/RoadDebugScreen.java'
+            exclude 'net/countered/settlementroads/client/gui/UIRenderer.java'
+            // StructureColorManager 已经在 common 中，这里也排除
+            exclude 'net/countered/settlementroads/client/gui/StructureColorManager.java'
         }
         resources {
             // Use common data-driven configured/placed features

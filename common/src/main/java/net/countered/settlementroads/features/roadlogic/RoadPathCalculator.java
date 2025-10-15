@@ -15,20 +15,90 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * 道路路径计算器
+ * <p>
+ * 使用A*算法计算两点之间的最优道路路径。
+ * 考虑地形高度、地形稳定性、生物群系类型等因素。
+ * </p>
+ * <p>
+ * 核心特性：
+ * <ul>
+ *   <li>A*寻路算法：启发式搜索最短路径</li>
+ *   <li>高度缓存：避免重复采样地形高度</li>
+ *   <li>地形适应：考虑高度差和地形稳定性</li>
+ *   <li>生物群系感知：水域增加额外成本</li>
+ * </ul>
+ * </p>
+ * 
+ * @see Records.RoadSegmentPlacement
+ * @see Node
+ */
 public class RoadPathCalculator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger("roadweaver");
 
+    // ========== 路径计算常量 ==========
+    
+    /** 相邻节点之间的距离（方块数） */
     private static final int NEIGHBOR_DISTANCE = 4;
-
-    // Cache for height values, mapping hashed (x, z) to height (y)
+    
+    /** 水域生物群系的基础成本倍数 */
+    private static final int WATER_BIOME_COST = 50;
+    
+    /** 高度差的成本倍数 */
+    private static final int ELEVATION_COST_MULTIPLIER = 40;
+    
+    /** 生物群系成本倍数 */
+    private static final int BIOME_COST_MULTIPLIER = 8;
+    
+    /** 海平面高度的成本倍数 */
+    private static final int SEA_LEVEL_COST_MULTIPLIER = 8;
+    
+    /** 地形稳定性成本倍数 */
+    private static final int TERRAIN_STABILITY_MULTIPLIER = 16;
+    
+    /** 对角线移动的成本倍数 */
+    private static final double DIAGONAL_COST_MULTIPLIER = 1.5;
+    
+    /** 启发式估算中的距离倍数 */
+    private static final int HEURISTIC_DISTANCE_MULTIPLIER = 30;
+    
+    /** 启发式估算中的对角线优化系数 */
+    private static final double HEURISTIC_DIAGONAL_FACTOR = 0.6;
+    
+    // ========== 缓存 ==========
+    
+    /** 高度值缓存：映射哈希后的(x,z)坐标到高度(y) */
     public static final Map<Long, Integer> heightCache = new ConcurrentHashMap<>();
 
+    /**
+     * 将x和z坐标哈希为一个long值
+     * <p>
+     * 用于高度缓存的键值，将2D坐标映射为唯一的long值。
+     * </p>
+     * 
+     * @param x X坐标
+     * @param z Z坐标
+     * @return 哈希后的long值
+     */
     private static long hashXZ(int x, int z) {
         return ((long) x << 32) | (z & 0xFFFFFFFFL);
     }
 
-    // Backward-compatible overload using current config defaults
+    /**
+     * 计算A*道路路径（向后兼容重载）
+     * <p>
+     * 使用配置文件中的默认参数进行路径计算。
+     * </p>
+     * 
+     * @param start 起点坐标
+     * @param end 终点坐标
+     * @param width 道路宽度
+     * @param serverWorld 服务器世界
+     * @param maxSteps 最大搜索步数
+     * @return 道路段列表，如果未找到路径则返回空列表
+     */
     public static List<Records.RoadSegmentPlacement> calculateAStarRoadPath(
             BlockPos start, BlockPos end, int width, ServerLevel serverWorld, int maxSteps
     ) {
@@ -37,6 +107,18 @@ public class RoadPathCalculator {
                 cfg.maxHeightDifference(), cfg.maxTerrainStability(), false);
     }
 
+    /**
+     * 计算A*道路路径（不忽略水域）
+     * 
+     * @param start 起点坐标
+     * @param end 终点坐标
+     * @param width 道路宽度
+     * @param serverWorld 服务器世界
+     * @param maxSteps 最大搜索步数
+     * @param maxHeightDifference 最大允许高度差
+     * @param maxTerrainStability 最大地形稳定性值
+     * @return 道路段列表，如果未找到路径则返回空列表
+     */
     public static List<Records.RoadSegmentPlacement> calculateAStarRoadPath(
             BlockPos start, BlockPos end, int width, ServerLevel serverWorld, int maxSteps,
             int maxHeightDifference, int maxTerrainStability
@@ -45,6 +127,39 @@ public class RoadPathCalculator {
                 maxHeightDifference, maxTerrainStability, false);
     }
 
+    /**
+     * 计算A*道路路径（完整版本）
+     * <p>
+     * 使用A*算法在起点和终点之间寻找最优道路路径。
+     * 算法考虑多个因素：
+     * <ul>
+     *   <li>高度差：陡峭地形增加成本</li>
+     *   <li>地形稳定性：周围高度变化大的位置成本高</li>
+     *   <li>生物群系：水域（河流、海洋）增加成本</li>
+     *   <li>海平面：在海平面高度放置道路增加成本</li>
+     * </ul>
+     * </p>
+     * <p>
+     * 算法步骤：
+     * <ol>
+     *   <li>将起点和终点对齐到网格</li>
+     *   <li>初始化开放集和关闭集</li>
+     *   <li>使用优先队列按f值排序</li>
+     *   <li>扩展当前最优节点的邻居</li>
+     *   <li>重建路径并生成道路段</li>
+     * </ol>
+     * </p>
+     * 
+     * @param start 起点坐标
+     * @param end 终点坐标
+     * @param width 道路宽度（方块数）
+     * @param serverWorld 服务器世界
+     * @param maxSteps 最大搜索步数（防止无限循环）
+     * @param maxHeightDifference 最大允许高度差（方块数）
+     * @param maxTerrainStability 最大地形稳定性值
+     * @param ignoreWater 是否忽略水域成本（用于跨海连接）
+     * @return 道路段列表，如果未找到路径则返回空列表
+     */
     public static List<Records.RoadSegmentPlacement> calculateAStarRoadPath(
             BlockPos start, BlockPos end, int width, ServerLevel serverWorld, int maxSteps,
             int maxHeightDifference, int maxTerrainStability, boolean ignoreWater
@@ -96,26 +211,25 @@ public class RoadPathCalculator {
                 boolean isWater = biomeHolder.is(BiomeTags.IS_RIVER)
                         || biomeHolder.is(BiomeTags.IS_OCEAN)
                         || biomeHolder.is(BiomeTags.IS_DEEP_OCEAN);
-                // 水域成本：50 * 8 = 400（与原项目一致）
-                // 如果绕路成本更高（距离远、高度差大），仍会选择穿过水域
-                // 手动模式且忽略水域时，水域成本为 0（用于跨海连接）
-                int biomeCost = (isWater && !ignoreWater) ? 50 : 0;
+                // 水域成本：如果绕路成本更高，仍会选择穿过水域
+                // 手动模式且忽略水域时，水域成本为0（用于跨海连接）
+                int biomeCost = (isWater && !ignoreWater) ? WATER_BIOME_COST : 0;
                 int elevation = Math.abs(y - current.pos.getY());
                 if (elevation > maxHeightDifference) {
                     continue;
                 }
                 int offsetSum = Math.abs(Math.abs(offset[0])) + Math.abs(offset[1]);
-                double stepCost = (offsetSum == 2 * NEIGHBOR_DISTANCE) ? 1.5 : 1;
+                double stepCost = (offsetSum == 2 * NEIGHBOR_DISTANCE) ? DIAGONAL_COST_MULTIPLIER : 1;
                 int terrainStabilityCost = calculateTerrainStability(neighborPos, y, serverWorld);
                 if (terrainStabilityCost > maxTerrainStability) {
                     continue;
                 }
                 int yLevelCost = y == serverWorld.getSeaLevel() ? 20 : 0;
                 double tentativeG = current.gScore + stepCost
-                        + elevation * 40
-                        + biomeCost * 8
-                        + yLevelCost * 8
-                        + terrainStabilityCost * 16;
+                        + elevation * ELEVATION_COST_MULTIPLIER
+                        + biomeCost * BIOME_COST_MULTIPLIER
+                        + yLevelCost * SEA_LEVEL_COST_MULTIPLIER
+                        + terrainStabilityCost * TERRAIN_STABILITY_MULTIPLIER;
 
                 Node neighbor = allNodes.get(neighborPos);
                 if (neighbor == null || tentativeG < neighbor.gScore) {
@@ -138,11 +252,24 @@ public class RoadPathCalculator {
         return Collections.emptyList();
     }
 
+    /**
+     * 启发式函数：估算从位置a到位置b的成本
+     * <p>
+     * 使用曼哈顿距离的变体，考虑对角线移动的优化。
+     * 这个估算值必须小于等于实际成本（admissible heuristic），
+     * 以保证A*算法找到最优路径。
+     * </p>
+     * 
+     * @param a 起始位置
+     * @param b 目标位置
+     * @return 估算的成本值
+     */
     private static double heuristic(BlockPos a, BlockPos b) {
         int dx = a.getX() - b.getX();
         int dz = a.getZ() - b.getZ();
-        double dxzApprox = Math.abs(dx) + Math.abs(dz) - 0.6 * Math.min(Math.abs(dx), Math.abs(dz));
-        return dxzApprox * 30;
+        // 曼哈顿距离 - 对角线优化
+        double dxzApprox = Math.abs(dx) + Math.abs(dz) - HEURISTIC_DIAGONAL_FACTOR * Math.min(Math.abs(dx), Math.abs(dz));
+        return dxzApprox * HEURISTIC_DISTANCE_MULTIPLIER;
     }
 
     private static int calculateTerrainStability(BlockPos neighborPos, int y, ServerLevel serverWorld) {

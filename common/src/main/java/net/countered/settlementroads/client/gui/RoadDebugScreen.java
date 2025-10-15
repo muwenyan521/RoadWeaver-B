@@ -117,7 +117,7 @@ public class RoadDebugScreen extends Screen {
                 Component.translatable("gui.roadweaver.config"),
                 button -> {
                     if (this.minecraft != null) {
-                        this.minecraft.setScreen(ClothConfigScreen.createConfigScreen(this));
+                        this.minecraft.setScreen(net.countered.settlementroads.client.ConfigScreenFactory.createConfigScreen(this));
                     }
                 })
                 .bounds(configButtonX, configButtonY, configButtonW, configButtonH)

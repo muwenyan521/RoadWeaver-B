@@ -7,16 +7,16 @@ import net.countered.settlementroads.config.fabric.FabricModConfig;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
+/**
+ * Fabric端的Cloth Config配置界面
+ */
 public class ClothConfigScreen {
     
     public static Screen createConfigScreen(Screen parent) {
         ConfigBuilder builder = ConfigBuilder.create()
                 .setParentScreen(parent)
                 .setTitle(Component.translatable("config.roadweaver.title"))
-                .setSavingRunnable(() -> {
-                    // 配置会自动保存到文件
-                    FabricModConfig.save();
-                });
+                .setSavingRunnable(FabricModConfig::save);
         
         ConfigEntryBuilder entryBuilder = builder.entryBuilder();
         
@@ -26,7 +26,7 @@ public class ClothConfigScreen {
         
         structures.addEntry(entryBuilder.startStrList(
                 Component.translatable("config.roadweaver.structureToLocate"),
-                FabricModConfig.getStructuresToLocate())
+                new java.util.ArrayList<>(FabricModConfig.getStructuresToLocate()))
                 .setTooltip(Component.translatable("config.roadweaver.structureToLocate.tooltip"))
                 .setExpanded(true)
                 .setSaveConsumer(FabricModConfig::setStructuresToLocate)

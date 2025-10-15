@@ -1,25 +1,96 @@
-# Ignore runtime outputs and build artifacts
-/run/
-/build/
-/.gradle/
+# ===================================
+# Gradle 构建输出
+# ===================================
+.gradle/
+build/
+out/
+bin/
 
 # 子项目构建产物
-/fabric/build/
-/fabric/run/
-/fabric/.gradle/
-/neoforge/build/
-/neoforge/run/
-/neoforge/.gradle/
-/neoforge/bin/
-/forge/build/
-/forge/run/
-/forge/.gradle/
-
-# Common module build outputs
 /common/build/
 /common/.gradle/
+/common/bin/
 
-# Legacy nested project snapshot (kept for reference, excluded from VCS and build)
+/fabric/build/
+/fabric/.gradle/
+/fabric/bin/
+/fabric/run/
+
+/forge/build/
+/forge/.gradle/
+/forge/bin/
+/forge/run/
+
+# ===================================
+# Minecraft 模组开发
+# ===================================
+run/
+logs/
+*.log
+
+# Architectury 转换器
+.architectury-transformer/
+
+# ===================================
+# Eclipse IDE
+# ===================================
+.classpath
+.project
+.settings/
+.metadata/
+.factorypath
+*.launch
+
+# ===================================
+# IntelliJ IDEA
+# ===================================
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# ===================================
+# Visual Studio Code
+# ===================================
+.vscode/
+*.code-workspace
+
+# ===================================
+# 操作系统生成的文件
+# ===================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.directory
+
+# ===================================
+# 临时文件和备份
+# ===================================
+*.tmp
+*.bak
+*.swp
+*.swo
+*~.nib
+*.orig
+*.rej
+
+# ===================================
+# 项目特定
+# ===================================
+# 遗留嵌套项目快照（保留作为参考，从VCS和构建中排除）
 /RoadWeaver/
 /RoadWeaver/**
-common/.gradle/.architectury-transformer/debug.log
+
+# 本地配置文件
+local.properties
+gradle-local.properties

@@ -3,6 +3,8 @@ package net.countered.settlementroads.config.fabric;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.fabricmc.loader.api.FabricLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,6 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class FabricModConfig {
+    private static final Logger LOGGER = LoggerFactory.getLogger("roadweaver");
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("roadweaver.json");
     
@@ -114,7 +117,7 @@ public class FabricModConfig {
                     save();
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                LOGGER.error("Failed to load config file: {}", CONFIG_PATH, e);
             }
         } else {
             // 初始化默认
@@ -130,7 +133,7 @@ public class FabricModConfig {
             Files.createDirectories(CONFIG_PATH.getParent());
             Files.writeString(CONFIG_PATH, GSON.toJson(data));
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error("Failed to save config file: {}", CONFIG_PATH, e);
         }
     }
     
