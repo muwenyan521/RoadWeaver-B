@@ -84,6 +84,8 @@ public class ModEventHandler {
             // 清理延迟计数器和队列
             worldInitDelay.remove(worldKey);
             StructureConnector.clearQueueForWorld(level);
+            // 清理虚拟结构记录
+            VirtualStructureManager.clearVirtualStructures(worldKey);
         });
 
         // 服务器 Tick（遍历所有世界）

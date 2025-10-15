@@ -1,0 +1,35 @@
+RoadWeaver
+Copyright (c) 2025 shiroha-233
+
+This project includes code derived from the following open source projects:
+
+================================================================================
+
+RoadArchitect
+Copyright (c) 2024 Shadscure
+Licensed under the Apache License, Version 2.0
+
+This project incorporates concepts and code from RoadArchitect (https://github.com/Shadscure/RoadArchitect),
+specifically:
+
+1. A* Pathfinding Algorithm (PathFinder.java)
+   - Used in: common/src/main/java/net/countered/settlementroads/features/roadlogic/RoadPathCalculator.java
+   - Derived from: modules/common/src/main/java/net/oxcodsnet/roadarchitect/util/PathFinder.java
+   - Core algorithm structure, cost calculation system, and heuristic functions
+
+2. Cost Calculation Constants
+   - Elevation cost multiplier (40.0)
+   - Biome-based penalties (water, ocean, deep ocean)
+   - Diagonal movement cost calculations
+
+3. Grid-based Pathfinding Approach
+   - 8-directional neighbor offsets
+   - Grid alignment and snapping mechanisms
+
+The original Apache 2.0 license can be found at:
+http://www.apache.org/licenses/LICENSE-2.0
+
+================================================================================
+
+This software includes dependencies licensed under various open source licenses.
+Please see the respective dependency documentation for more information.

@@ -1,9 +1,39 @@
+/*
+ * This file contains code derived from RoadArchitect
+ * Copyright (c) 2024 Shadscure
+ * Licensed under the Apache License, Version 2.0
+ * 
+ * Original source: https://github.com/Shadscure/RoadArchitect
+ * Original file: modules/common/src/main/java/net/oxcodsnet/roadarchitect/util/PathFinder.java
+ * 
+ * Modifications:
+ * - Adapted for Minecraft 1.20.1 Architectury project structure
+ * - Integrated with RoadWeaver's configuration system
+ * - Added manual mode with configurable parameters
+ * - Simplified grid system (NEIGHBOR_DISTANCE = 4 vs GRID_STEP = 4)
+ * - Added support for cross-water pathfinding
+ * 
+ * Copyright (c) 2025 shiroha-233 (RoadWeaver modifications)
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package net.countered.settlementroads.features.roadlogic;
+
 import net.countered.settlementroads.config.ConfigProvider;
 import net.countered.settlementroads.config.IModConfig;
 import net.countered.settlementroads.helpers.Records;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BiomeTags;

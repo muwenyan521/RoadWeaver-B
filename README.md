@@ -52,9 +52,19 @@ Example:
 - The author finds Countered's Settlement Roads too limited in scope, while RoadArchitect currently impacts performance more. The goal is to enable diverse, beautiful roadside builds and explore experimental ideas—hence this standalone project.And also created a version that natively supports Forge。
 
 ### 🙏 Acknowledgments (References & Licenses)
-This project references and is inspired by:
-- RoadArchitect (Apache-2.0): https://github.com/Shadscure/RoadArchitect
-- settlement-roads-new (CC0-1.0): https://github.com/Coun7ered/settlement-roads-new
+This project incorporates code and concepts from the following open source projects:
+
+**RoadArchitect** (Apache-2.0)  
+https://github.com/Shadscure/RoadArchitect  
+- A* pathfinding algorithm implementation (PathFinder.java → RoadPathCalculator.java)
+- Cost calculation system (elevation, biome, terrain stability)
+- Grid-based pathfinding approach
+
+See the `NOTICE` file for detailed attribution and license information.
+
+---
+
+**Note**: This project's package name (`net.countered.settlementroads`) is inspired by Countered's Settlement Roads mod, but does not use code from that project. The core pathfinding implementation is derived from RoadArchitect.
 
 ---
 
@@ -103,9 +113,19 @@ RoadWeaver 能在世界中的结构（如村庄、前哨站等）之间自动生
 - 作者认为 Countered's Settlement Roads 的功能偏少，RoadArchitect 在当前阶段对性能影响较大；同时作者希望在道路上看到各类精美建筑，并实现一些更大胆的玩法点子，因此决定开启独立项目以探索这些方向，并且制作了原生支持forge的版本。
 
 ### 🙏 致谢（参考与许可）
-本项目参考了以下开源项目（感谢其工作与启发）：
-- RoadArchitect（Apache-2.0）：https://github.com/Shadscure/RoadArchitect
-- settlement-roads-new（CC0-1.0）：https://github.com/Coun7ered/settlement-roads-new
+本项目借鉴了以下开源项目的代码和概念：
+
+**RoadArchitect**（Apache-2.0）  
+https://github.com/Shadscure/RoadArchitect  
+- A*寻路算法实现（PathFinder.java → RoadPathCalculator.java）
+- 成本计算系统（高度、生物群系、地形稳定性）
+- 基于网格的寻路方法
+
+详细归属和许可信息请参见 `NOTICE` 文件。
+
+---
+
+**说明**：本项目的包名（`net.countered.settlementroads`）受到Countered's Settlement Roads模组的启发，但并未使用该项目的代码。核心寻路实现来自RoadArchitect。
 
 ---
 

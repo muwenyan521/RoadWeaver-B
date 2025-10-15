@@ -4,6 +4,7 @@
     "package": "net.countered.settlementroads.mixin",
     "compatibilityLevel": "JAVA_17",
     "mixins": [
+        "StructurePlacementMixin"
     ],
     "client": [
         "CreateWorldScreenMixin"

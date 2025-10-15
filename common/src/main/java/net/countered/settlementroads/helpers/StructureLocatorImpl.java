@@ -203,6 +203,15 @@ public final class StructureLocatorImpl {
             for (Records.StructureInfo structure : pending) {
                 knownLocations.add(structure.pos());
                 structureInfos.add(structure);
+                
+                // 通知虚拟结构管理器：检查是否需要生成虚拟结构
+                if (structure.structureId() != null) {
+                    VirtualStructureManager.onStructureGenerated(
+                        level, 
+                        structure.structureId(), 
+                        structure.pos()
+                    );
+                }
             }
             
             // 保存到数据库

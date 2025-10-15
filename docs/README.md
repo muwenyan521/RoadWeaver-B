@@ -28,6 +28,9 @@
 - **[MST_ROAD_PLANNING.md](./MST_ROAD_PLANNING.md)**  
   最小生成树道路规划 - Kruskal算法在道路网络中的应用
 
+- **[LICENSE_ATTRIBUTION.md](./LICENSE_ATTRIBUTION.md)** 📜  
+  许可证归属说明 - 第三方代码使用和Apache 2.0许可证遵守情况
+
 ### 📝 更新日志
 
 - **[CHANGELOG.md](./CHANGELOG.md)**  
