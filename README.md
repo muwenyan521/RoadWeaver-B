@@ -125,9 +125,5 @@ https://github.com/Shadscure/RoadArchitect
 
 ---
 
-**说明**：本项目的包名（`net.countered.settlementroads`）受到Countered's Settlement Roads模组的启发，但并未使用该项目的代码。核心寻路实现来自RoadArchitect。
-
----
-
 让 RoadWeaver 为你的 Minecraft 世界编织出美丽的道路网络！  
 Let RoadWeaver weave beautiful road networks for your Minecraft world! 🛤️✨
