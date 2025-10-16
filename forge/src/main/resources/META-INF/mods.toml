@@ -11,7 +11,7 @@ config = "roadweaver.mixins.json"
 modId = "roadweaver"
 version = "${mod_version}"
 displayName = "RoadWeaver"
-authors = "Countered"
+authors = "shiroha233"
 description = '''Automatically generates roads between structures like villages'''
 logoFile = "icon.png"
 
@@ -39,15 +39,7 @@ side = "BOTH"
 
 [[dependencies.roadweaver]]
 modId = "cloth_config"
-mandatory = false
+mandatory = true
 versionRange = "[11.0,)"
 ordering = "NONE"
 side = "CLIENT"
-
-# Architectury API 已内嵌，不需要外部依赖
-# [[dependencies.roadweaver]]
-# modId = "architectury"
-# mandatory = true
-# versionRange = "[9.0,10.0)"
-# ordering = "AFTER"
-# side = "BOTH"

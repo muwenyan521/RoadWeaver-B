@@ -13,7 +13,7 @@ allprojects {
 	apply plugin: 'architectury-plugin'
 	apply plugin: 'maven-publish'
 	
-	group = 'net.countered.settlementroads'
+	group = 'net.shiroha233.roadweaver'
 	version = '1.0.5'
 	
 	repositories {

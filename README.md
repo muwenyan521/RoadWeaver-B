@@ -64,7 +64,7 @@ See the `NOTICE` file for detailed attribution and license information.
 
 ---
 
-**Note**: This project's package name (`net.countered.settlementroads`) is inspired by Countered's Settlement Roads mod, but does not use code from that project. The core pathfinding implementation is derived from RoadArchitect.
+**Note**: This project's package name (`net.shiroha233.roadweaver`) is inspired by Countered's Settlement Roads mod, but does not use code from that project. The core pathfinding implementation is derived from RoadArchitect.
 
 ---
 

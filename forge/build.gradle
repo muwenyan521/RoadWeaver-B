@@ -59,11 +59,11 @@ jar {
 	manifest {
 		attributes([
 			'Specification-Title'     : 'RoadWeaver',
-			'Specification-Vendor'    : 'Countered',
+			'Specification-Vendor'    : 'shiroha233',
 			'Specification-Version'   : '1',
 			'Implementation-Title'    : project.name,
 			'Implementation-Version'  : project.version,
-			'Implementation-Vendor'   : 'Countered',
+			'Implementation-Vendor'   : 'shiroha233',
 			'MixinConfigs'            : 'roadweaver.mixins.json'
 		])
 	}
@@ -95,7 +95,7 @@ tasks.named('processResources', ProcessResources).configure {
         mod_id: 'roadweaver',
         mod_name: 'RoadWeaver',
         mod_version: project.version,
-        mod_authors: 'Countered',
+        mod_authors: 'shiroha233',
         mod_description: 'Automatically generates roads between structures'
     ]
 
