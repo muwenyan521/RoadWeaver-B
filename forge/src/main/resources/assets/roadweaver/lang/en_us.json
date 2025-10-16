@@ -27,14 +27,7 @@
 
   "gui.roadweaver.common.on": "ON",
   "gui.roadweaver.common.off": "OFF",
-  "gui.roadweaver.debug_map.manual_mode": "Manual Mode: %s",
 
-  "toast.roadweaver.manual_mode_on": "Manual connect mode enabled",
-  "toast.roadweaver.manual_mode_off": "Manual connect mode disabled",
-  "toast.roadweaver.manual_pick_start": "Picked start: %s, %s",
-  "toast.roadweaver.manual_cancelled": "Selection cancelled",
-  "toast.roadweaver.manual_multiplayer_not_supported": "Manual connect is not supported in multiplayer yet",
-  "toast.roadweaver.manual_created": "Connection created (PLANNED)",
   "toast.roadweaver.teleport_confirm": "Click again to teleport to %s, %s",
 
   "config.roadweaver.title": "RoadWeaver Configuration",
@@ -42,7 +35,6 @@
   "config.roadweaver.category.pregeneration": "Pre-Generation",
   "config.roadweaver.category.roads": "Roads",
   "config.roadweaver.category.decorations": "Decorations",
-  "config.roadweaver.category.manual": "Manual Mode Settings",
 
   "config.roadweaver.structureToLocate": "Structure to locate",
   "config.roadweaver.structureToLocate.tooltip": "Enter one structure or tag per line. Examples: #minecraft:village, minecraft:village_plains, modid:custom_structure. Tags (#namespace:path) and direct IDs are supported.",
@@ -85,13 +77,6 @@
   "config.roadweaver.placeBenches.tooltip": "Generate bench decorations along roads to provide resting spots",
   "config.roadweaver.placeGloriettes": "Generate Gloriettes",
   "config.roadweaver.placeGloriettes.tooltip": "Generate gloriette decorations along roads to enhance road scenery",
-
-  "config.roadweaver.manualMaxHeightDifference": "Manual Mode Max Height Difference",
-  "config.roadweaver.manualMaxHeightDifference.tooltip": "Maximum height difference allowed in manual connect mode. More aggressive than normal mode, used for retrying failed roads. Default: 8",
-  "config.roadweaver.manualMaxTerrainStability": "Manual Mode Terrain Stability",
-  "config.roadweaver.manualMaxTerrainStability.tooltip": "Terrain stability threshold in manual connect mode. More lenient than normal mode to improve success rate. Default: 8",
-  "config.roadweaver.manualIgnoreWater": "Manual Mode Ignore Water",
-  "config.roadweaver.manualIgnoreWater.tooltip": "When enabled, manual connections will ignore water biome costs, allowing roads to go directly through oceans and rivers. Useful for cross-sea connections. Default: OFF",
 
   "sign.roadweaver.distance.next_location": "Next Location",
   "sign.roadweaver.distance.welcome": "Welcome",

@@ -201,38 +201,6 @@ public class ClothConfigScreen {
                 .setSaveConsumer(ForgeJsonConfig::setPlaceGloriettes)
                 .build());
         
-        // 手动模式配置分类
-        ConfigCategory manual = builder.getOrCreateCategory(
-                Component.translatable("config.roadweaver.category.manual"));
-        
-        manual.addEntry(entryBuilder.startIntField(
-                Component.translatable("config.roadweaver.manualMaxHeightDifference"),
-                ForgeJsonConfig.getManualMaxHeightDifference())
-                .setDefaultValue(8)
-                .setMin(3)
-                .setMax(20)
-                .setTooltip(Component.translatable("config.roadweaver.manualMaxHeightDifference.tooltip"))
-                .setSaveConsumer(ForgeJsonConfig::setManualMaxHeightDifference)
-                .build());
-        
-        manual.addEntry(entryBuilder.startIntField(
-                Component.translatable("config.roadweaver.manualMaxTerrainStability"),
-                ForgeJsonConfig.getManualMaxTerrainStability())
-                .setDefaultValue(8)
-                .setMin(2)
-                .setMax(20)
-                .setTooltip(Component.translatable("config.roadweaver.manualMaxTerrainStability.tooltip"))
-                .setSaveConsumer(ForgeJsonConfig::setManualMaxTerrainStability)
-                .build());
-        
-        manual.addEntry(entryBuilder.startBooleanToggle(
-                Component.translatable("config.roadweaver.manualIgnoreWater"),
-                ForgeJsonConfig.getManualIgnoreWater())
-                .setDefaultValue(false)
-                .setTooltip(Component.translatable("config.roadweaver.manualIgnoreWater.tooltip"))
-                .setSaveConsumer(ForgeJsonConfig::setManualIgnoreWater)
-                .build());
-        
         return builder.build();
     }
 }

@@ -58,7 +58,6 @@ public class DebugDataPacket {
             buf.writeBlockPos(conn.from());
             buf.writeBlockPos(conn.to());
             buf.writeUtf(conn.status().name());
-            buf.writeBoolean(conn.manual());
         }
         
         // 写入道路数据
@@ -99,9 +98,8 @@ public class DebugDataPacket {
             BlockPos from = buf.readBlockPos();
             BlockPos to = buf.readBlockPos();
             String statusStr = buf.readUtf();
-            boolean manual = buf.readBoolean();
             Records.ConnectionStatus status = Records.ConnectionStatus.valueOf(statusStr);
-            connections.add(new Records.StructureConnection(from, to, status, manual));
+            connections.add(new Records.StructureConnection(from, to, status));
         }
         
         // 读取道路数据

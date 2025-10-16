@@ -1,6 +1,6 @@
 package net.shiroha233.roadweaver.client;
 
-import net.shiroha233.roadweaver.client.gui.RoadDebugScreen;
+import net.shiroha233.roadweaver.client.gui.RoadWeaverMapScreen;
 import net.shiroha233.roadweaver.helpers.Records;
 import net.shiroha233.roadweaver.network.DebugDataPacket;
 import net.shiroha233.roadweaver.network.PacketHandler;
@@ -47,7 +47,7 @@ public class SettlementRoadsClient implements ClientModInitializer {
         if (client == null) return;
 
         // 如果已打开则关闭
-        if (client.screen instanceof RoadDebugScreen) {
+        if (client.screen instanceof RoadWeaverMapScreen) {
             client.setScreen(null);
             PacketHandler.clearCachedDebugData(); // 清除缓存
             return;
@@ -64,10 +64,9 @@ public class SettlementRoadsClient implements ClientModInitializer {
                 List<Records.StructureConnection> connections = WorldDataProvider.getInstance().getStructureConnections(world);
                 List<Records.RoadData> roads = WorldDataProvider.getInstance().getRoadDataList(world);
 
-                List<Records.StructureInfo> structureInfos = data != null ? new ArrayList<>(data.structureInfos()) : new ArrayList<>();
-                client.setScreen(new RoadDebugScreen(structureInfos, connections, roads));
+                client.setScreen(new RoadWeaverMapScreen());
             } catch (Exception e) {
-                client.setScreen(new RoadDebugScreen(new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
+                client.setScreen(new RoadWeaverMapScreen());
             }
         } else if (client.player != null && client.getConnection() != null) {
             // 多人游戏：检查是否有管理员权限
@@ -100,10 +99,7 @@ public class SettlementRoadsClient implements ClientModInitializer {
                         if (cachedData != null) {
                             // 数据到达，在主线程打开界面
                             client.execute(() -> {
-                                client.setScreen(new RoadDebugScreen(
-                                    cachedData.getStructureInfos(),
-                                    cachedData.getConnections(),
-                                    cachedData.getRoads()
+                                client.setScreen(new RoadWeaverMapScreen(
                                 ));
                             });
                             return;

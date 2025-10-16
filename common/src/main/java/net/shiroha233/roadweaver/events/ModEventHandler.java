@@ -13,7 +13,6 @@ import net.shiroha233.roadweaver.helpers.Records;
 import net.shiroha233.roadweaver.helpers.StructureConnector;
 import net.shiroha233.roadweaver.helpers.StructureLocator;
 import net.shiroha233.roadweaver.helpers.StructureLocatorImpl;
-import net.shiroha233.roadweaver.helpers.VirtualStructureManager;
 import net.shiroha233.roadweaver.persistence.WorldDataProvider;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.MinecraftServer;
@@ -85,8 +84,6 @@ public class ModEventHandler {
             // 清理延迟计数器和队列
             worldInitDelay.remove(worldKey);
             StructureConnector.clearQueueForWorld(level);
-            // 清理虚拟结构记录
-            VirtualStructureManager.clearVirtualStructures(worldKey);
         });
 
         // 服务器 Tick（遍历所有世界）
@@ -442,7 +439,7 @@ public class ModEventHandler {
             if ((conn.from().equals(structureConnection.from()) && conn.to().equals(structureConnection.to())) ||
                 (conn.from().equals(structureConnection.to()) && conn.to().equals(structureConnection.from()))) {
                 mutableConnections.set(i, new Records.StructureConnection(
-                    conn.from(), conn.to(), Records.ConnectionStatus.FAILED, conn.manual()));
+                    conn.from(), conn.to(), Records.ConnectionStatus.FAILED));
                 dataProvider.setStructureConnections(level, mutableConnections);
                 LOGGER.info("Marked connection as FAILED: {} -> {}", conn.from(), conn.to());
                 break;
@@ -501,8 +498,7 @@ public class ModEventHandler {
                     Records.StructureConnection resetConnection = new Records.StructureConnection(
                             connection.from(),
                             connection.to(),
-                            Records.ConnectionStatus.PLANNED,
-                            connection.manual()
+                            Records.ConnectionStatus.PLANNED
                     );
                     updatedConnections.set(i, resetConnection);
                     StructureConnector.getQueueForWorld(level).add(resetConnection);

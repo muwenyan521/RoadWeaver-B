@@ -100,19 +100,4 @@ public class ForgeModConfigAdapter implements IModConfig {
     public int maxTerrainStability() {
         return ForgeJsonConfig.getMaxTerrainStability();
     }
-
-    @Override
-    public int manualMaxHeightDifference() {
-        return ForgeJsonConfig.getManualMaxHeightDifference();
-    }
-
-    @Override
-    public int manualMaxTerrainStability() {
-        return ForgeJsonConfig.getManualMaxTerrainStability();
-    }
-
-    @Override
-    public boolean manualIgnoreWater() {
-        return ForgeJsonConfig.getManualIgnoreWater();
-    }
 }

@@ -146,15 +146,6 @@ sourceSets {
             exclude 'net/countered/settlementroads/features/RoadFeature.java'
             exclude 'net/countered/settlementroads/events/ModEventHandler.java'
             exclude 'net/countered/settlementroads/features/config/RoadFeatureRegistry.java'
-            
-            // 使用 common 中的 GUI 类（除了平台特定的配置屏幕）
-            exclude 'net/countered/settlementroads/client/gui/GridRenderer.java'
-            exclude 'net/countered/settlementroads/client/gui/MapRenderer.java'
-            exclude 'net/countered/settlementroads/client/gui/RenderUtils.java'
-            exclude 'net/countered/settlementroads/client/gui/RoadDebugScreen.java'
-            exclude 'net/countered/settlementroads/client/gui/UIRenderer.java'
-            // StructureColorManager 已经在 common 中，这里也排除
-            exclude 'net/countered/settlementroads/client/gui/StructureColorManager.java'
         }
         resources {
             // 输出的数据目录

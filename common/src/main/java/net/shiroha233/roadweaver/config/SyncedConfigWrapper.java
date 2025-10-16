@@ -108,19 +108,4 @@ public class SyncedConfigWrapper implements IModConfig {
     public int maxTerrainStability() {
         return ServerConfigHolder.getSynced("maxTerrainStability", localConfig.maxTerrainStability());
     }
-    
-    @Override
-    public int manualMaxHeightDifference() {
-        return ServerConfigHolder.getSynced("manualMaxHeightDifference", localConfig.manualMaxHeightDifference());
-    }
-    
-    @Override
-    public int manualMaxTerrainStability() {
-        return ServerConfigHolder.getSynced("manualMaxTerrainStability", localConfig.manualMaxTerrainStability());
-    }
-    
-    @Override
-    public boolean manualIgnoreWater() {
-        return ServerConfigHolder.getSynced("manualIgnoreWater", localConfig.manualIgnoreWater());
-    }
 }

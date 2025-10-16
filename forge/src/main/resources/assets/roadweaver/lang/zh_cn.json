@@ -27,22 +27,12 @@
 
   "gui.roadweaver.common.on": "开启",
   "gui.roadweaver.common.off": "关闭",
-  "gui.roadweaver.debug_map.manual_mode": "手动连接模式：%s",
-
-  "toast.roadweaver.manual_mode_on": "手动连接模式已开启",
-  "toast.roadweaver.manual_mode_off": "手动连接模式已关闭",
-  "toast.roadweaver.manual_pick_start": "已选择起点: %s, %s",
-  "toast.roadweaver.manual_cancelled": "已取消选择",
-  "toast.roadweaver.manual_multiplayer_not_supported": "多人模式暂未支持手动连接",
-  "toast.roadweaver.manual_created": "已创建连接（PLANNED）",
-  "toast.roadweaver.teleport_confirm": "再次点击传送到 %s, %s",
 
   "config.roadweaver.title": "RoadWeaver 配置",
   "config.roadweaver.category.structures": "结构设置",
   "config.roadweaver.category.pregeneration": "预生成设置",
   "config.roadweaver.category.roads": "道路设置",
   "config.roadweaver.category.decorations": "装饰设置",
-  "config.roadweaver.category.manual": "手动模式设置",
 
   "config.roadweaver.structureToLocate": "要定位的结构",
   "config.roadweaver.structureToLocate.tooltip": "每行输入一个结构或标签。例如：#minecraft:village、minecraft:village_plains、modid:custom_structure。支持结构标签（#命名空间:路径）与直接ID。",
@@ -85,13 +75,6 @@
   "config.roadweaver.placeBenches.tooltip": "在道路旁生成长椅装饰，提供休息场所",
   "config.roadweaver.placeGloriettes": "生成凉亭",
   "config.roadweaver.placeGloriettes.tooltip": "在道路旁生成凉亭装饰，增加道路景观",
-
-  "config.roadweaver.manualMaxHeightDifference": "手动模式最大高度差",
-  "config.roadweaver.manualMaxHeightDifference.tooltip": "手动连接模式下允许的最大高度差。比普通模式更激进，用于重试失败的道路。默认：8",
-  "config.roadweaver.manualMaxTerrainStability": "手动模式地形稳定性",
-  "config.roadweaver.manualMaxTerrainStability.tooltip": "手动连接模式下的地形稳定性阈值。比普通模式更宽松，提高通过率。默认：8",
-  "config.roadweaver.manualIgnoreWater": "手动模式忽略水域",
-  "config.roadweaver.manualIgnoreWater.tooltip": "开启后，手动连接时将忽略水域成本，允许直接穿过海洋和河流。用于跨海连接。默认：关闭",
 
   "sign.roadweaver.distance.next_location": "下个地点",
   "sign.roadweaver.distance.welcome": "欢迎",

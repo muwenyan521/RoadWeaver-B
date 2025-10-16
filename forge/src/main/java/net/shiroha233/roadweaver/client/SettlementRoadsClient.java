@@ -1,7 +1,7 @@
 package net.shiroha233.roadweaver.client;
 
 import net.shiroha233.roadweaver.client.gui.ClothConfigScreen;
-import net.shiroha233.roadweaver.client.gui.RoadDebugScreen;
+import net.shiroha233.roadweaver.client.gui.RoadWeaverMapScreen;
 import net.shiroha233.roadweaver.helpers.Records;
 import net.shiroha233.roadweaver.network.DebugDataPacket;
 import net.shiroha233.roadweaver.network.PacketHandler;
@@ -61,7 +61,7 @@ public class SettlementRoadsClient {
 
     private static void handleDebugMapKey(Minecraft client) {
         // 如果已经打开调试屏幕，关闭它
-        if (client.screen instanceof RoadDebugScreen) {
+        if (client.screen instanceof RoadWeaverMapScreen) {
             client.execute(() -> client.setScreen(null));
             PacketHandler.clearCachedDebugData(); // 清除缓存
             return;
@@ -79,13 +79,10 @@ public class SettlementRoadsClient {
                 List<Records.StructureConnection> connections = WorldDataHelper.getConnectedStructures(world);
                 List<Records.RoadData> roads = WorldDataHelper.getRoadDataList(world);
 
-                List<Records.StructureInfo> structureInfos = structureData != null ?
-                    new ArrayList<>(structureData.structureInfos()) : new ArrayList<>();
-
-                client.execute(() -> client.setScreen(new RoadDebugScreen(structureInfos, connections, roads)));
+                client.execute(() -> client.setScreen(new RoadWeaverMapScreen()));
             } catch (Exception e) {
                 // 如果获取数据失败，打开空屏幕（仍然在渲染线程调度）
-                client.execute(() -> client.setScreen(new RoadDebugScreen(new ArrayList<>(), new ArrayList<>(), new ArrayList<>())));
+                client.execute(() -> client.setScreen(new RoadWeaverMapScreen()));
             }
         } else if (client.player != null && client.getConnection() != null) {
             // 多人游戏：检查是否有管理员权限
@@ -125,10 +122,7 @@ public class SettlementRoadsClient {
                         if (cachedData != null) {
                             // 数据到达，在主线程打开界面
                             client.execute(() -> {
-                                client.setScreen(new RoadDebugScreen(
-                                    cachedData.getStructureInfos(),
-                                    cachedData.getConnections(),
-                                    cachedData.getRoads()
+                                client.setScreen(new RoadWeaverMapScreen(
                                 ));
                             });
                             return;

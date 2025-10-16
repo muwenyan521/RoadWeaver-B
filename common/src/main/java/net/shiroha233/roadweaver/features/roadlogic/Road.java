@@ -47,9 +47,9 @@ public class Road {
         BlockPos start = structureConnection.from();
         BlockPos end = structureConnection.to();
 
-        int maxHeightDiff = structureConnection.manual() ? cfg.manualMaxHeightDifference() : cfg.maxHeightDifference();
-        int maxStability = structureConnection.manual() ? cfg.manualMaxTerrainStability() : cfg.maxTerrainStability();
-        boolean ignoreWater = structureConnection.manual() && cfg.manualIgnoreWater();
+        int maxHeightDiff = cfg.maxHeightDifference();
+        int maxStability = cfg.maxTerrainStability();
+        boolean ignoreWater = false;
 
         List<Records.RoadSegmentPlacement> roadSegmentPlacementList = RoadPathCalculator.calculateAStarRoadPath(
                 start, end, width, serverWorld, maxSteps, maxHeightDiff, maxStability, ignoreWater);
@@ -80,7 +80,7 @@ public class Road {
             Records.StructureConnection conn = mutableConnections.get(i);
             if ((conn.from().equals(structureConnection.from()) && conn.to().equals(structureConnection.to())) ||
                 (conn.from().equals(structureConnection.to()) && conn.to().equals(structureConnection.from()))) {
-                mutableConnections.set(i, new Records.StructureConnection(conn.from(), conn.to(), newStatus, conn.manual()));
+                mutableConnections.set(i, new Records.StructureConnection(conn.from(), conn.to(), newStatus));
                 dataProvider.setStructureConnections(serverWorld, mutableConnections);
                 break;
             }

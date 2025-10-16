@@ -102,11 +102,6 @@ public class ServerConfigHolder {
         map.put("maxHeightDifference", config.maxHeightDifference());
         map.put("maxTerrainStability", config.maxTerrainStability());
         
-        // 手动模式配置
-        map.put("manualMaxHeightDifference", config.manualMaxHeightDifference());
-        map.put("manualMaxTerrainStability", config.manualMaxTerrainStability());
-        map.put("manualIgnoreWater", config.manualIgnoreWater());
-        
         return map;
     }
 }
