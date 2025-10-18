@@ -12,6 +12,8 @@ import net.shiroha233.roadweaver.client.gui.core.MapViewport;
 import net.shiroha233.roadweaver.client.gui.layers.*;
 import net.shiroha233.roadweaver.helpers.Records;
 import net.shiroha233.roadweaver.persistence.WorldDataProvider;
+import com.mojang.blaze3d.platform.InputConstants;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -305,6 +307,30 @@ public class RoadWeaverMapScreen extends Screen {
             }
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+    
+    @Override
+    public void tick() {
+        // 在屏幕打开时，同步物理键盘状态到移动相关按键，保持移动可用
+        if (minecraft == null || minecraft.options == null) return;
+        long window = minecraft.getWindow().getWindow();
+        var opts = minecraft.options;
+        
+        boolean w = InputConstants.isKeyDown(window, GLFW.GLFW_KEY_W);
+        boolean a = InputConstants.isKeyDown(window, GLFW.GLFW_KEY_A);
+        boolean s = InputConstants.isKeyDown(window, GLFW.GLFW_KEY_S);
+        boolean d = InputConstants.isKeyDown(window, GLFW.GLFW_KEY_D);
+        boolean space = InputConstants.isKeyDown(window, GLFW.GLFW_KEY_SPACE);
+        boolean shift = InputConstants.isKeyDown(window, GLFW.GLFW_KEY_LEFT_SHIFT);
+        boolean ctrl = InputConstants.isKeyDown(window, GLFW.GLFW_KEY_LEFT_CONTROL);
+        
+        opts.keyUp.setDown(w);
+        opts.keyLeft.setDown(a);
+        opts.keyDown.setDown(s);
+        opts.keyRight.setDown(d);
+        opts.keyJump.setDown(space);
+        opts.keyShift.setDown(shift);
+        opts.keySprint.setDown(ctrl);
     }
     
     private void refreshData() {
