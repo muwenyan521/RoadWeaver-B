@@ -27,14 +27,7 @@
 
   "gui.roadweaver.common.on": "ON",
   "gui.roadweaver.common.off": "OFF",
-  "gui.roadweaver.debug_map.manual_mode": "Manual Mode: %s",
 
-  "toast.roadweaver.manual_mode_on": "Manual connect mode enabled",
-  "toast.roadweaver.manual_mode_off": "Manual connect mode disabled",
-  "toast.roadweaver.manual_pick_start": "Picked start: %s, %s",
-  "toast.roadweaver.manual_cancelled": "Selection cancelled",
-  "toast.roadweaver.manual_multiplayer_not_supported": "Manual connect is not supported in multiplayer yet",
-  "toast.roadweaver.manual_created": "Connection created (PLANNED)",
   "toast.roadweaver.teleport_confirm": "Click again to teleport to %s, %s",
 
   "config.roadweaver.title": "RoadWeaver Configuration",
@@ -42,7 +35,6 @@
   "config.roadweaver.category.pregeneration": "Pre-Generation",
   "config.roadweaver.category.roads": "Roads",
   "config.roadweaver.category.decorations": "Decorations",
-  "config.roadweaver.category.manual": "Manual Mode Settings",
 
   "config.roadweaver.structureToLocate": "Structure to locate",
   "config.roadweaver.structureToLocate.tooltip": "Enter one structure or tag per line. Examples: #minecraft:village, minecraft:village_plains, modid:custom_structure. Tags (#namespace:path) and direct IDs are supported.",
@@ -55,6 +47,12 @@
   "config.roadweaver.maxConcurrentRoadGeneration.tooltip": "Maximum number of roads that can be generated simultaneously. Lower values reduce performance impact but slow down road generation. Default: 3",
   "config.roadweaver.structureSearchTriggerDistance": "Structure Search Trigger Distance",
   "config.roadweaver.structureSearchTriggerDistance.tooltip": "Number of chunks to load before triggering new structure search. Range 150-1500, lower values search more frequently. Default: 500",
+  "config.roadweaver.structureBatchSize": "Structure Batch Size",
+  "config.roadweaver.structureBatchSize.tooltip": "Number of structures to accumulate before adding them to road planning. Higher values prevent distant structures from connecting first, creating more organized road networks. Range 1-50, Default: 5",
+  "config.roadweaver.structureSearchThreads": "Structure Search Threads",
+  "config.roadweaver.structureSearchThreads.tooltip": "Number of threads for parallel structure searching. Higher values speed up structure discovery but use more CPU. Requires server restart to take effect. Range 1-8, Default: 3",
+  "config.roadweaver.enableAsyncStructureSearch": "Enable Async Structure Search",
+  "config.roadweaver.enableAsyncStructureSearch.tooltip": "Enable multi-threaded asynchronous structure searching. When disabled, structure search runs on main thread (may cause lag). Requires server restart to take effect. Default: true",
 
   "config.roadweaver.averagingRadius": "Averaging radius",
   "config.roadweaver.averagingRadius.tooltip": "Amount of terrain averaging done for artificial roads. Higher values create smoother roads but may look unnatural. Default: 1",
@@ -80,15 +78,13 @@
   "config.roadweaver.placeGloriettes": "Generate Gloriettes",
   "config.roadweaver.placeGloriettes.tooltip": "Generate gloriette decorations along roads to enhance road scenery",
 
-  "config.roadweaver.manualMaxHeightDifference": "Manual Mode Max Height Difference",
-  "config.roadweaver.manualMaxHeightDifference.tooltip": "Maximum height difference allowed in manual connect mode. More aggressive than normal mode, used for retrying failed roads. Default: 8",
-  "config.roadweaver.manualMaxTerrainStability": "Manual Mode Terrain Stability",
-  "config.roadweaver.manualMaxTerrainStability.tooltip": "Terrain stability threshold in manual connect mode. More lenient than normal mode to improve success rate. Default: 8",
-  "config.roadweaver.manualIgnoreWater": "Manual Mode Ignore Water",
-  "config.roadweaver.manualIgnoreWater.tooltip": "When enabled, manual connections will ignore water biome costs, allowing roads to go directly through oceans and rivers. Useful for cross-sea connections. Default: OFF",
-
   "sign.roadweaver.distance.next_location": "Next Location",
   "sign.roadweaver.distance.welcome": "Welcome",
   "sign.roadweaver.distance.traveller": "traveller",
-  "sign.roadweaver.distance.separator": "----------"
+  "sign.roadweaver.distance.separator": "----------",
+
+  "roadweaver.debug_map.no_permission": "You don't have permission to open the debug map (requires admin permission)",
+  "roadweaver.debug_map.multiplayer_not_supported": "Debug map is not supported on multiplayer servers yet",
+  "roadweaver.debug_map.loading": "Loading debug data...",
+  "roadweaver.debug_map.timeout": "Failed to load debug data, please try again"
 }

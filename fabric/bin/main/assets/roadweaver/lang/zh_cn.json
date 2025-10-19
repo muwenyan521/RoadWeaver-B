@@ -27,22 +27,12 @@
 
   "gui.roadweaver.common.on": "开启",
   "gui.roadweaver.common.off": "关闭",
-  "gui.roadweaver.debug_map.manual_mode": "手动连接模式：%s",
-
-  "toast.roadweaver.manual_mode_on": "手动连接模式已开启",
-  "toast.roadweaver.manual_mode_off": "手动连接模式已关闭",
-  "toast.roadweaver.manual_pick_start": "已选择起点: %s, %s",
-  "toast.roadweaver.manual_cancelled": "已取消选择",
-  "toast.roadweaver.manual_multiplayer_not_supported": "多人模式暂未支持手动连接",
-  "toast.roadweaver.manual_created": "已创建连接（PLANNED）",
-  "toast.roadweaver.teleport_confirm": "再次点击传送到 %s, %s",
 
   "config.roadweaver.title": "RoadWeaver 配置",
   "config.roadweaver.category.structures": "结构设置",
   "config.roadweaver.category.pregeneration": "预生成设置",
   "config.roadweaver.category.roads": "道路设置",
   "config.roadweaver.category.decorations": "装饰设置",
-  "config.roadweaver.category.manual": "手动模式设置",
 
   "config.roadweaver.structureToLocate": "要定位的结构",
   "config.roadweaver.structureToLocate.tooltip": "每行输入一个结构或标签。例如：#minecraft:village、minecraft:village_plains、modid:custom_structure。支持结构标签（#命名空间:路径）与直接ID。",
@@ -55,6 +45,12 @@
   "config.roadweaver.maxConcurrentRoadGeneration.tooltip": "同时生成的道路任务数量上限。数值越小性能占用越低，但道路生成速度会变慢。默认：3",
   "config.roadweaver.structureSearchTriggerDistance": "结构搜寻触发距离",
   "config.roadweaver.structureSearchTriggerDistance.tooltip": "每加载多少个区块后触发一次新结构搜寻。范围150-1500，数值越小搜寻越频繁。默认：500",
+  "config.roadweaver.structureBatchSize": "结构批量累积大小",
+  "config.roadweaver.structureBatchSize.tooltip": "累积多少个结构后再统一加入道路规划。数值越大越能防止远距离结构先连接，创建更有序的道路网络。范围1-50，默认：5",
+  "config.roadweaver.structureSearchThreads": "结构搜索线程数",
+  "config.roadweaver.structureSearchThreads.tooltip": "并行结构搜索的线程池大小。数值越大搜索越快但消耗更多CPU。需要重启服务器才能生效。范围1-8，默认：3",
+  "config.roadweaver.enableAsyncStructureSearch": "启用异步结构搜索",
+  "config.roadweaver.enableAsyncStructureSearch.tooltip": "启用多线程异步结构搜索。禁用时结构搜索在主线程执行（可能导致卡顿）。需要重启服务器才能生效。默认：true",
 
   "config.roadweaver.averagingRadius": "地形平均半径",
   "config.roadweaver.averagingRadius.tooltip": "人工道路的地形平滑程度。数值越大越平滑，但可能不自然。默认：1",
@@ -80,15 +76,13 @@
   "config.roadweaver.placeGloriettes": "生成凉亭",
   "config.roadweaver.placeGloriettes.tooltip": "在道路旁生成凉亭装饰，增加道路景观",
 
-  "config.roadweaver.manualMaxHeightDifference": "手动模式最大高度差",
-  "config.roadweaver.manualMaxHeightDifference.tooltip": "手动连接模式下允许的最大高度差。比普通模式更激进，用于重试失败的道路。默认：8",
-  "config.roadweaver.manualMaxTerrainStability": "手动模式地形稳定性",
-  "config.roadweaver.manualMaxTerrainStability.tooltip": "手动连接模式下的地形稳定性阈值。比普通模式更宽松，提高通过率。默认：8",
-  "config.roadweaver.manualIgnoreWater": "手动模式忽略水域",
-  "config.roadweaver.manualIgnoreWater.tooltip": "开启后，手动连接时将忽略水域成本，允许直接穿过海洋和河流。用于跨海连接。默认：关闭",
-
   "sign.roadweaver.distance.next_location": "下个地点",
   "sign.roadweaver.distance.welcome": "欢迎",
   "sign.roadweaver.distance.traveller": "旅行者",
-  "sign.roadweaver.distance.separator": "----------"
+  "sign.roadweaver.distance.separator": "----------",
+
+  "roadweaver.debug_map.no_permission": "你没有权限打开调试地图（需要管理员权限）",
+  "roadweaver.debug_map.multiplayer_not_supported": "多人服务器暂不支持调试地图功能",
+  "roadweaver.debug_map.loading": "正在加载调试数据...",
+  "roadweaver.debug_map.timeout": "加载调试数据超时，请重试"
 }

@@ -16,16 +16,16 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"net.countered.settlementroads.SettlementRoads"
+			"net.shiroha233.roadweaver.SettlementRoads"
 		],
 		"client": [
-			"net.countered.settlementroads.client.SettlementRoadsClient"
+			"net.shiroha233.roadweaver.client.SettlementRoadsClient"
 		],
 		"fabric-datagen": [
-			"net.countered.settlementroads.SettlementRoadsDataGenerator"
+			"net.shiroha233.roadweaver.SettlementRoadsDataGenerator"
 		],
 		"modmenu": [
-			"net.countered.settlementroads.client.ModMenuIntegration"
+			"net.shiroha233.roadweaver.client.ModMenuIntegration"
 		]
 	},
 	"mixins": [
