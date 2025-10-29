@@ -1,0 +1,100 @@
+{
+  "category.roadweaver": "RoadWeaver",
+
+  "gui.roadweaver.config": "Config",
+  "gui.roadweaver.config_button": "RoadWeaver Config",
+
+  "gui.roadweaver.common.on": "ON",
+  "gui.roadweaver.common.off": "OFF",
+
+  "toast.roadweaver.teleport_confirm": "Click again to teleport to %s, %s",
+
+  "config.roadweaver.title": "RoadWeaver Configuration",
+  "config.roadweaver.enable_prediction": "Enable Structure Prediction",
+  "config.roadweaver.enable_prediction.tooltip": "Predict structure locations based on world seed, filtered by whitelist/blacklist.",
+  "config.roadweaver.radius_chunks": "Search Radius (chunks)",
+  "config.roadweaver.radius_chunks.tooltip": "Prediction radius centered at spawn, in chunks.",
+  "config.roadweaver.biome_prefilter": "Enable Biome Prefilter",
+  "config.roadweaver.biome_prefilter.tooltip": "Prefilter by allowed biomes of selected structures to reduce false positives and checks.",
+  "config.roadweaver.category.structure_filters": "Structure Filters",
+  "config.roadweaver.whitelist": "Whitelist (structures/tags/wildcards)",
+  "config.roadweaver.whitelist.tooltip": "Allowed structures or tags. Supports direct IDs (minecraft:village_plains), tags (#minecraft:village), and wildcards (mvs:houses/*).",
+  "config.roadweaver.blacklist": "Blacklist (structures/tags/wildcards)",
+  "config.roadweaver.blacklist.tooltip": "Blocked structures or tags. Supports wildcards like namespace:path/*.",
+
+  "gui.roadweaver.map.title": "Road Map",
+  "gui.roadweaver.map.legend.structures": "Structures",
+  "gui.roadweaver.map.legend.planned": "Planned",
+  "gui.roadweaver.map.legend.generating": "Generating",
+  "gui.roadweaver.map.legend.completed": "Completed",
+  "gui.roadweaver.map.legend.failed": "Failed",
+
+  "key.categories.roadweaver": "RoadWeaver",
+  "key.roadweaver.open_map": "Open Map",
+  "gui.roadweaver.map.grid.scale.chunks_blocks": "Per cell: %s chunks (%s blocks)",
+  "gui.roadweaver.map.grid.scale.blocks": "Per cell: %s blocks",
+  "gui.roadweaver.map.coord": "(%s, %s)",
+
+  "config.roadweaver.category.road_planning": "Road Planning",
+  "config.roadweaver.initial_plan_radius_chunks": "Initial Plan Radius (chunks)",
+  "config.roadweaver.initial_plan_radius_chunks.tooltip": "At new world start, build network around spawn within this radius (in chunks).",
+  "config.roadweaver.dynamic_plan_enabled": "Enable Dynamic Planning",
+  "config.roadweaver.dynamic_plan_enabled.tooltip": "Periodically plan around players as new structures enter the configured radius.",
+  "config.roadweaver.dynamic_plan_radius_chunks": "Dynamic Plan Radius (chunks)",
+  "config.roadweaver.dynamic_plan_radius_chunks.tooltip": "Radius around each player (in chunks) to include structures in planning.",
+
+  "config.roadweaver.category.road_generation": "Road Generation",
+  
+  "config.roadweaver.allow_artificial": "Allow Artificial Roads",
+  "config.roadweaver.allow_artificial.tooltip": "If enabled, the mod will pave road surfaces. Disable to prevent paving (useful for planning or markers only).",
+  "config.roadweaver.place_waypoints": "Place Waypoints Only (no paving)",
+  "config.roadweaver.place_waypoints.tooltip": "Only place waypoints/markers instead of paving the road surface.",
+  "config.roadweaver.averaging_radius": "Height Averaging Radius",
+  "config.roadweaver.averaging_radius.tooltip": "Smooth the target Y by averaging nearby samples. Larger values reduce bumps but may flatten details.",
+  "config.roadweaver.road_width": "Road Width",
+  "config.roadweaver.road_width.tooltip": "Specify road width (in blocks).",
+  "config.roadweaver.lamp_interval": "Lamp Interval (segments)",
+  "config.roadweaver.lamp_interval.tooltip": "Place a lamp/marker every N segments; larger values place fewer lamps.",
+  
+  "config.roadweaver.generation_threads": "Generation Threads",
+  "config.roadweaver.generation_threads.tooltip": "Number of worker threads used for asynchronous road generation.",
+  "config.roadweaver.a_star_step": "A* Sampling Step (blocks)",
+  "config.roadweaver.a_star_step.tooltip": "Grid step between sampled neighbors for A*. Larger values reduce nodes and improve performance but may reduce path fidelity. Default 16.",
+  "config.roadweaver.max_concurrent_generations": "Max Concurrent Generations",
+  "config.roadweaver.max_concurrent_generations.tooltip": "Cap the number of roads generating in parallel.",
+
+  "gui.roadweaver.map.menu.teleport": "Teleport here",
+  "gui.roadweaver.map.teleport.success": "Teleported",
+  "gui.roadweaver.map.teleport.success_pos": "Teleported to (%s, %s, %s)",
+  "gui.roadweaver.map.teleport.denied": "No permission to teleport",
+  "gui.roadweaver.sign.next_location": "Next Location",
+  "gui.roadweaver.sign.welcome": "Welcome",
+  "gui.roadweaver.sign.traveller": "Traveler",
+
+  "config.roadweaver.dynamic_plan_stride_chunks": "Dynamic Plan Stride (chunks)",
+  "config.roadweaver.dynamic_plan_stride_chunks.tooltip": "Step size (in chunks) for triggering dynamic planning as players move; larger stride triggers less frequently.",
+  "config.roadweaver.planning_algorithm": "Planning Algorithm",
+  "config.roadweaver.planning_algorithm.tooltip": "Choose the primary edge algorithm for road network planning.",
+  "config.roadweaver.planning_algorithm.option.knn": "K-Nearest Neighbors",
+  "config.roadweaver.planning_algorithm.option.delaunay": "Delaunay Triangulation",
+  "config.roadweaver.planning_algorithm.option.rng": "Relative Neighborhood Graph (RNG)",
+
+  "config.roadweaver.planning_algorithm_delaunay": "Use Delaunay Triangulation",
+  "config.roadweaver.planning_algorithm_delaunay.tooltip": "When enabled, plan primary edges with Delaunay triangulation; otherwise use K-Nearest Neighbors.",
+  "config.roadweaver.planning_algorithm_knn": "Use K-Nearest Neighbors",
+  "config.roadweaver.planning_algorithm_knn.tooltip": "Plan primary edges with KNN (sparse, local connections).",
+  "config.roadweaver.planning_algorithm_rng": "Use Relative Neighborhood Graph",
+  "config.roadweaver.planning_algorithm_rng.tooltip": "Plan primary edges with RNG (sparser than Delaunay and Gabriel).",
+
+  "config.roadweaver.category.gen_surface": "Surface & Paving",
+  "config.roadweaver.category.gen_performance": "Performance",
+
+  "gui.roadweaver.initgen.title": "RoadWeaver Initial Generation",
+  "gui.roadweaver.initgen.summary": "Total: %s  Planned: %s  Generating: %s  Done: %s  Failed: %s",
+  "gui.roadweaver.initgen.progress": "Progress: %s/%s (%s%%)",
+  "adv.roadweaver.road_first_step_1.title": "North-South roads? Gotcha—East-West too!",
+  "adv.roadweaver.road_first_step_1.desc": "Step on a RoadWeaver-paved road for the first time.",
+  "adv.roadweaver.road_first_step_2.title": "The Journey Begins",
+  "adv.roadweaver.road_first_step_2.desc": "A thousand miles begin with a single step."
+}
+

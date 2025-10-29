@@ -1,16 +1,14 @@
 {
     "required": true,
     "minVersion": "0.8",
-    "package": "net.countered.settlementroads.mixin",
+    "package": "net.shiroha233.roadweaver.mixin",
     "compatibilityLevel": "JAVA_17",
     "mixins": [
+        "MinecraftServerMixin"
     ],
     "client": [
-        "CreateWorldScreenMixin"
-    ],
-    "server": [
-        "chunk.ChunkHolderMixin",
-        "chunk.ChunkMapMixin"
+        "CreateWorldScreenMixin",
+        "LevelLoadingScreenMixin"
     ],
     "injectors": {
         "defaultRequire": 1
