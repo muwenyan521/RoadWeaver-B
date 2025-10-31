@@ -10,6 +10,7 @@ import net.shiroha233.roadweaver.config.ConfigService;
 import net.shiroha233.roadweaver.config.ModConfig;
 import net.shiroha233.roadweaver.helpers.Records;
 import net.shiroha233.roadweaver.persistence.WorldDataProvider;
+import net.shiroha233.roadweaver.features.roadlogic.DynamicAStarPathfinder;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
