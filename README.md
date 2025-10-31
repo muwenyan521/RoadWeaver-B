@@ -1,109 +1,35 @@
-# 🛤️ RoadWeaver
+项目已经过初步重构
+1.本项目依旧建立在Countered's Settlement Roads的基础上，并已获得原作者的支持。
+2.结构搜寻器：抛弃原版指令搜寻，改用依据地图种子和噪声进行反推，能一下推算出大量结构点。添加了结构标签黑白名单。新搜寻器的优点：几乎不占用任何性能，且可随意添加任意数量的结构标签，兼容大部分第三方结构和地形模组。缺点：有小概率遇到假结构点。
+3.路网规划器：提供了KNN(最近邻)、Delaunay(三角剖分)、RNG(随机邻域图)三种路网规划算法。各自特点：
+KNN：经过微调后，路网非常稀疏，类似树状结构，缺点是路网连接性较差。
+Delaunay：路网非常密集，类似蜘蛛网状结构，缺点是太过密集。
+RNG：路网介于两者之间，呈网格状结构。（最推荐）
+4.寻路算法：A\*算法，可调整步长（4-128），步长越低，精度越高，速度越慢，推荐步长为（8-16），可配置同时生成数量和线程池数量（默认都为3），强烈推荐搭配reterraforged等地形模组使用，平滑的地形能有效降低寻路成本，提高生成速度。
+5.地图完全重构：按"H"键即可打开地图，采用中世纪地图风格。
+6.道路铺设：添加地形切削和填补功能，避免峡谷和陡坡导致的道路铺设异常。
+7.模组依赖前置：Cloth Config API
+8.装饰系统：正在开发中...
 
-自动在结构之间编织道路的 Minecraft 模组  
-Automatically weave roads between structures in Minecraft
+常见问题：
+1.
+问：出生在村庄道路中断？
+答：已实现新建世界的阻塞功能，会先加载玩家设置的初始规划半径，但是是单线程的，所以不要设置的太大，否则很慢。
+2.
+问：那tp会导致道路生成中断吗？
+答：依然会，因为还没实现区块生成阻塞。
+3.
+问：新版性能咋样，还会掉tps吗？
+答：旧版卡顿掉tps和容易崩溃的原因就是因为使用的原版指令搜寻，结构标签添加的越多，搜的越慢，并且会严重阻塞游戏主线程，重构后已完全抛弃该机制，所以几乎不会占用主线程，性能大幅提升，但不要为道路生成规划过多线程数，避免掉帧。
+4.
+问：地图传送还会卡地里吗？
+答：不会，地图传送已改为先采样目标点高度，再进行传送，所以不会卡地里，并且为传送功能添加了使用权限限制，非作弊模式不可使用。
+5.
+问：1.21.X版本呢？
+答：待重构的1.20.1版本完善后，再进行1.21.X的版本移植。
+6.
+问：兼容性？
+答：模组并未修改原版机制，所以理论上兼容性不成问题，之前的版本容易崩溃还是因为搜索机制的原因，我测试过两个大型整合包，乌托邦和ATM9，报错倒没有，但是有的模组添加了很多奇奇怪怪的地形模组，导致地形非常混乱，可能会影响道路生成速度。
 
-[中文](#中文) | [English](#english)
+目前模组仍在完善中，现在也只是打好基础，还未开始添加更多功能，敬请期待。
 
----
-
-<a name="english"></a>
-## 📖 Introduction (Features)
-RoadWeaver automatically generates beautiful road networks between structures (e.g., villages, outposts), focusing on practical, stable, and visually pleasing roads.
-
-### ✨ Core Features
-- 🗺️ Intelligent Path Generation: A* pathfinding to avoid steep or dangerous areas; terrain/biome/stability-aware routing; supports E-W/N-S/diagonal directions
-- 🎨 Road Types: Artificial roads (stone bricks/slabs), natural roads (dirt/gravel), biome-adaptive materials
-- 🏮 Decoration System: Lampposts (redstone lamps with day/night auto control), intermittent fences, distance signs, wayfinding; large decorations (swings, benches, gazebos) with random placement
-- 🧭 Visual Debugging: Road network map; status colors (planned/generating/completed/failed); interactions (drag/zoom/click-to-teleport); statistics for counts, length, and states
-- 🚀 Performance: Multi-threaded async generation with concurrency control; height/terrain caching to reduce redundant computations
-- 📚 Multi-Structure Support （1.0.2 or later）
-
-### 🗺️ Roadmap
-- More decorations? Enrich roadside and pathway ornamentation
-- Link more structure types? Support broader vanilla/modded structure connectivity
-- Link biomes? Strategy-level connections across biome regions
-- More landmark buildings? High-quality scenic builds along roads
-- Journey events? Lightweight encounters while traveling
-- Custom links? Player/datapack-defined connection rules
-
-### 📚 Multi-Structure Support（1.0.2 or later）
-Now supports path-formatted structure IDs (e.g., `mvs:houses/azelea_house`) and wildcard matching:
-- `mvs:houses/*` - Matches all houses from MVS
-- `mvs:*` - Matches all MVS structures
-
-Example:
-```json
-{
-  "structuresToLocate": [
-    "#minecraft:village",
-    "mvs:houses/*",
-    "mvs:shops/*"
-  ]
-}
-```
-
-### ⚠️ Notes
-- The higher the "structures to locate on world load" value, the longer new world creation will take, but the initial road network completeness increases. Adjust based on your hardware and needs.
-
-### ❓ Why another mod?
-- The author finds Countered's Settlement Roads too limited in scope, while RoadArchitect currently impacts performance more. The goal is to enable diverse, beautiful roadside builds and explore experimental ideas—hence this standalone project.And also created a version that natively supports Forge。
-
-### 🙏 Acknowledgments (References & Licenses)
-This project references and is inspired by:
-- RoadArchitect (Apache-2.0): https://github.com/Shadscure/RoadArchitect
-- settlement-roads-new (CC0-1.0): https://github.com/Coun7ered/settlement-roads-new
-
----
-
-<a name="中文"></a>
-## 📖 简介（功能介绍）
-RoadWeaver 能在世界中的结构（如村庄、前哨站等）之间自动生成美观的道路网络，专注"生成好看、实用、稳定的道路"。
-
-### ✨ 核心功能
-- 🗺️ 智能路径生成：A* 寻路算法，避开陡峭与危险区域；根据地形高度、生物群系与地面稳定性调整路线；支持东西/南北/对角线方向
-- 🎨 道路类型：人工道路（石砖、石板）、自然道路（泥土、砂砾）、按生物群系自适应材料
-- 🏮 装饰系统：路灯（红石灯与昼夜自动控制）、间断式栏杆、距离标志、路标指引；大型点缀（秋千、长椅、凉亭）随机生成
-- 🧭 可视化调试：道路网络地图；状态颜色（计划/生成/完成/失败）；交互（拖拽、缩放、点击传送）；统计道路数量、长度与状态
-- 🚀 性能优化：多线程异步生成并发控制（最高128线程）；高度与地形缓存减少重复计算
-- 📚 多结构同时链接支持（1.0.2版本以上）
-
-### 🗺️ 未来更新计划（Roadmap）
-- 更多装饰？引入更丰富的道路与路边装饰元素
-- 链接多种结构？支持更多原版/模组结构类型互联√
-- 链接群系？在群系层级建立策略性连接
-- 更多精美建筑？在道路沿线生成高质量景观建筑
-- 路途事件？在旅行途中触发小型事件或遭遇
-- 自定义链接？允许玩家/数据包定义特定连接规则
-
-### 📚 多结构支持（1.0.2版本以上）
-现在支持路径格式的结构ID（例如 `mvs:houses/azelea_house`）和通配符匹配：
-- `mvs:houses/*` - 匹配所有MVS房屋
-- `mvs:*` - 匹配所有MVS结构
-
-示例配置：
-```json
-{
-  "structuresToLocate": [
-    "#minecraft:village",
-    "mvs:houses/*",
-    "mvs:shops/*"
-  ]
-}
-```
-
-### ⚠️ 注意事项（Notes）
-- 设置中"加载世界时定位的结构数量"越多，创建新世界所需时间越久，但道路网络的初始完整度也更高。请根据设备性能与需求权衡。
-
-### ❓ 有类似的模组为什么还要做？（Why another mod?）
-- 作者认为 Countered's Settlement Roads 的功能偏少，RoadArchitect 在当前阶段对性能影响较大；同时作者希望在道路上看到各类精美建筑，并实现一些更大胆的玩法点子，因此决定开启独立项目以探索这些方向，并且制作了原生支持forge的版本。
-
-### 🙏 致谢（参考与许可）
-本项目参考了以下开源项目（感谢其工作与启发）：
-- RoadArchitect（Apache-2.0）：https://github.com/Shadscure/RoadArchitect
-- settlement-roads-new（CC0-1.0）：https://github.com/Coun7ered/settlement-roads-new
-
----
-
-让 RoadWeaver 为你的 Minecraft 世界编织出美丽的道路网络！  
-Let RoadWeaver weave beautiful road networks for your Minecraft world! 🛤️✨

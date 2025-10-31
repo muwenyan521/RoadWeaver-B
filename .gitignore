@@ -1,61 +1,67 @@
-# --------------------------------------------------------------------------------------------------
-# Minecraft 多平台模组开发项目 .gitignore 最终优化版
-# --------------------------------------------------------------------------------------------------
 
-# 操作系统/版本控制系统文件
-.DS_Store             # macOS 目录服务存储文件
-Thumbs.db             # Windows 缩略图缓存
-.gitattributes
-.github/
 .gradle/
-**/.factorypath
+build/
+out/
+bin/
 
-# 构建工具输出和缓存
-**/build/               # Gradle/通用构建输出目录
-**/bin/                 # 编译后的类文件
-**/.gradle/             # Gradle 缓存目录
-**/run/                 # 运行时输出和日志
-**/logs/                # 常见的日志目录
-**/.cache/
-**/gradle-wrapper.jar
-**/gradlew
-**/gradlew.bat
 
-# IntelliJ IDEA 配置和输出
-/.idea/
-*.iws
-*.iml
-*.ipr
-/out/
+/common/build/
+/common/.gradle/
+/common/bin/
+/common/run/
 
-# VS Code 配置
-.vscode/
+/fabric/build/
+/fabric/.gradle/
+/fabric/bin/
+/fabric/run/
 
-# Eclipse 配置
+/forge/build/
+/forge/.gradle/
+/forge/bin/
+/forge/run/
+
+run/
+logs/
+*.log
+
+**/.architectury-transformer/
 .classpath
 .project
 .settings/
+.metadata/
+.factorypath
 *.launch
-*.prefs
 
-# 特定构建工具和框架缓存
-*/settings/
-*/.architectury-transformer/
+.idea/
+*.iml
+*.iws
+*.ipr
 
-# 模组加载器子项目构建产物
-/fabric/build/
-/fabric/run/
-/fabric/.gradle/
 
-/forge/build/
-/forge/run/
-/forge/.gradle/
-/forge/bin/
+.vscode/
+*.code-workspace
 
-# Common module 构建产物
-/common/build/
-/common/.gradle/
 
-# 额外的或遗留的项目
-/RoadWeaver/
-/RoadWeaver/**
+.DS_Store
+.AppleDouble
+.LSOverride
+
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+*~
+.directory
+
+*.tmp
+*.bak
+*.swp
+*.swo
+*~.nib
+*.orig
+*.rej
+
+local.properties
+gradle-local.properties
+

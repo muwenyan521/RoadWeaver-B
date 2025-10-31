@@ -8,25 +8,8 @@ architectury {
 }
 
 loom {
-    // Forge 配置
     forge {
-        // 数据生成配置
-        dataGen {
-            mod "roadweaver"
-        }
-        
-        // Mixin 配置
         mixinConfig "roadweaver.mixins.json"
-    }
-
-    // 数据生成运行配置
-    runs {
-        data {
-            data()
-            programArgs "--all", "--mod", "roadweaver"
-            programArgs "--output", file("src/generated/resources").absolutePath
-            programArgs "--existing", file("src/main/resources").absolutePath
-        }
     }
 }
 
@@ -59,12 +42,11 @@ jar {
 	manifest {
 		attributes([
 			'Specification-Title'     : 'RoadWeaver',
-			'Specification-Vendor'    : 'Countered',
+			'Specification-Vendor'    : 'shiroha233',
 			'Specification-Version'   : '1',
 			'Implementation-Title'    : project.name,
 			'Implementation-Version'  : project.version,
-			'Implementation-Vendor'   : 'Countered',
-			'MixinConfigs'            : 'roadweaver.mixins.json'
+			'Implementation-Vendor'   : 'shiroha233'
 		])
 	}
 }
@@ -95,7 +77,7 @@ tasks.named('processResources', ProcessResources).configure {
         mod_id: 'roadweaver',
         mod_name: 'RoadWeaver',
         mod_version: project.version,
-        mod_authors: 'Countered',
+        mod_authors: 'shiroha233',
         mod_description: 'Automatically generates roads between structures'
     ]
 
@@ -141,33 +123,11 @@ components.java {
 sourceSets {
     main {
         java {
-            // 使用 common 中的 RoadFeatureConfig，避免重复类定义
-            exclude 'net/countered/settlementroads/features/config/RoadFeatureConfig.java'
-            exclude 'net/countered/settlementroads/features/RoadFeature.java'
-            // 使用 common 中的事件处理器
-            exclude 'net/countered/settlementroads/events/ModEventHandler.java'
-            // 使用 common 中的统一注册（避免与平台侧实现重复、方法签名不一致）
-            exclude 'net/countered/settlementroads/features/config/RoadFeatureRegistry.java'
+            // Avoid JPMS split-package: keep top-level network package only in common
+            exclude 'net/shiroha233/roadweaver/network/ClientNetBridgeImpl.java'
         }
         resources {
-            // 输出的数据目录
-            srcDir 'src/generated/resources'
-            // Use common data-driven configured/placed features to avoid duplication
-            exclude 'data/roadweaver/worldgen/configured_feature/road_feature.json'
-            exclude 'data/roadweaver/worldgen/placed_feature/road_feature_placed.json'
+            exclude 'assets/roadweaver/lang/*.json'
         }
     }
-}
-
-// Maven 发布
-publishing {
-	publications {
-		create("mavenJava", MavenPublication) {
-			artifactId = "${rootProject.name}-forge"
-			from components.java
-		}
-	}
-	repositories {
-		// 添加发布仓库
-	}
 }
