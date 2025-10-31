@@ -162,12 +162,12 @@ public final class DynamicAStarPathfinder {
     private static boolean isPathAffected(List<Records.RoadSegmentPlacement> path, Set<BlockPos> changedBlocks) {
         for (Records.RoadSegmentPlacement segment : path) {
             // 检查路径点本身
-            if (changedBlocks.contains(segment.position())) {
+            if (changedBlocks.contains(segment.middlePos())) {
                 return true;
             }
             
             // 检查路径宽度区域
-            for (BlockPos widthPos : segment.widthPositions()) {
+            for (BlockPos widthPos : segment.positions()) {
                 if (changedBlocks.contains(widthPos)) {
                     return true;
                 }

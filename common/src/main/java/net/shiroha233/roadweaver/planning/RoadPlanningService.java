@@ -19,8 +19,6 @@ public final class RoadPlanningService {
 
     private static final ConcurrentHashMap<Level, Set<Long>> PLANNED_TILES = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<Level, java.util.concurrent.ConcurrentHashMap<Long, Long>> PLANNED_TILE_CENTERS = new ConcurrentHashMap<>();
-    private static final PathCache PATH_CACHE = new PathCache(1000, 300000L); // 1000条路径，5分钟TTL
-    private static final IncrementalMST INCREMENTAL_MST = new IncrementalMST();
 
     public static void initialPlan(ServerLevel level) {
         if (!Level.OVERWORLD.equals(level.dimension())) return;
@@ -80,8 +78,7 @@ public final class RoadPlanningService {
         
         if (cfg.useOptimizedPlanning()) {
             // 使用优化的混合规划算法
-            primaryEdges = OptimizedPlanner.planOptimized(points, 2048, 
-                cfg.planningAlgorithm(), cfg.useGabrielConstraint(), cfg.useAngleConstraint());
+            primaryEdges = OptimizedPlanner.hybridPlan(points, 2048, 35.0);
         } else {
             // 回退到原有算法
             if (cfg.planningAlgorithm() == ModConfig.PlanningAlgorithm.DELAUNAY) {
@@ -101,7 +98,15 @@ public final class RoadPlanningService {
         // 使用增量MST更新现有连接
         List<Records.StructureConnection> updatedEdges;
         if (cfg.useIncrementalMST() && existing != null && !existing.isEmpty()) {
-            updatedEdges = INCREMENTAL_MST.incrementalAdd(points, primaryEdges, existing);
+            // 对于每个新点，使用增量MST添加
+            List<Records.StructureConnection> currentEdges = new ArrayList<>(existing);
+            for (BlockPos newPoint : points) {
+                if (!containsPoint(existing, newPoint)) {
+                    currentEdges = IncrementalMST.incrementalAdd(
+                        getAllPoints(currentEdges), currentEdges, newPoint, 2048);
+                }
+            }
+            updatedEdges = currentEdges;
         } else {
             updatedEdges = primaryEdges;
         }
@@ -127,7 +132,8 @@ public final class RoadPlanningService {
         }
         
         // 清除相关区域的路径缓存
-        PATH_CACHE.clearRegion(minBlockX, minBlockZ, maxBlockX, maxBlockZ);
+        PathCache.clearPathsInArea(new BlockPos((minBlockX + maxBlockX) / 2, 0, (minBlockZ + maxBlockZ) / 2), 
+                                 Math.max(maxBlockX - minBlockX, maxBlockZ - minBlockZ) / 2);
     }
 
     private static List<Records.StructureConnection> mergeConnections(List<Records.StructureConnection> existing,
@@ -176,10 +182,10 @@ public final class RoadPlanningService {
     }
 
     public static List<BlockPos> findPath(ServerLevel level, BlockPos start, BlockPos end) {
-        String cacheKey = PATH_CACHE.generateKey(start, end);
-        List<BlockPos> cachedPath = PATH_CACHE.get(cacheKey);
+        // 使用PathCache的静态方法
+        List<Records.RoadSegmentPlacement> cachedPath = PathCache.getCachedPath(start, end, 3); // 默认宽度3
         if (cachedPath != null) {
-            return cachedPath;
+            return convertToBlockPosList(cachedPath);
         }
 
         WorldDataProvider provider = WorldDataProvider.getInstance();
@@ -188,19 +194,19 @@ public final class RoadPlanningService {
             return Collections.emptyList();
         }
 
-        List<BlockPos> path = DynamicAStarPathfinder.findPath(start, end, connections);
+        List<BlockPos> path = BasicAStarPathfinder.findPath(start, end, connections);
         if (!path.isEmpty()) {
-            PATH_CACHE.put(cacheKey, path);
+            PathCache.cachePath(start, end, 3, convertToRoadSegmentPlacements(path));
         }
         return path;
     }
 
     public static void clearPathCache() {
-        PATH_CACHE.clear();
+        PathCache.clearAll();
     }
 
     public static PathCache.CacheStats getCacheStats() {
-        return PATH_CACHE.getStats();
+        return PathCache.getStats();
     }
 
     public static void removeStructure(ServerLevel level, BlockPos structurePos) {
@@ -208,11 +214,51 @@ public final class RoadPlanningService {
         List<Records.StructureConnection> existing = provider.getStructureConnections(level);
         if (existing == null) return;
 
-        List<Records.StructureConnection> updated = INCREMENTAL_MST.incrementalRemove(structurePos, existing);
+        // 获取剩余节点
+        List<BlockPos> remainingNodes = getAllPoints(existing);
+        remainingNodes.remove(structurePos);
+
+        List<Records.StructureConnection> updated = IncrementalMST.incrementalRemove(
+            remainingNodes, existing, structurePos, 2048);
+        
         if (updated.size() != existing.size()) {
             provider.setStructureConnections(level, updated);
-            PATH_CACHE.clearRegion(structurePos.getX() - 1000, structurePos.getZ() - 1000, 
-                                 structurePos.getX() + 1000, structurePos.getZ() + 1000);
+            PathCache.clearPathsInArea(structurePos, 1000);
         }
+    }
+
+    // 辅助方法
+    private static boolean containsPoint(List<Records.StructureConnection> edges, BlockPos point) {
+        for (Records.StructureConnection edge : edges) {
+            if (edge.from().equals(point) || edge.to().equals(point)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static List<BlockPos> getAllPoints(List<Records.StructureConnection> edges) {
+        Set<BlockPos> points = new HashSet<>();
+        for (Records.StructureConnection edge : edges) {
+            points.add(edge.from());
+            points.add(edge.to());
+        }
+        return new ArrayList<>(points);
+    }
+
+    private static List<BlockPos> convertToBlockPosList(List<Records.RoadSegmentPlacement> placements) {
+        List<BlockPos> result = new ArrayList<>();
+        for (Records.RoadSegmentPlacement placement : placements) {
+            result.add(placement.position());
+        }
+        return result;
+    }
+
+    private static List<Records.RoadSegmentPlacement> convertToRoadSegmentPlacements(List<BlockPos> path) {
+        List<Records.RoadSegmentPlacement> result = new ArrayList<>();
+        for (BlockPos pos : path) {
+            result.add(new Records.RoadSegmentPlacement(pos, 3, Records.RoadSegmentType.STRAIGHT));
+        }
+        return result;
     }
 }

@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class PathCache {
     private PathCache() {}
 
-    private static final ConcurrentHashMap<PathKey, List<Records.RoadSegmentPlacement>> CACHE = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<PathKey, CacheEntry> CACHE = new ConcurrentHashMap<>();
     private static final int MAX_CACHE_SIZE = 1000;
     private static final long CACHE_TTL_MS = 5 * 60 * 1000; // 5分钟
 

@@ -156,11 +156,6 @@ public final class ModConfig {
         if (tunnelClearHeight < 2) tunnelClearHeight = 2;
         if (tunnelClearHeight > 16) tunnelClearHeight = 16;
         
-        // 增量MST更新与寻路优化配置校验
-        if (useOptimizedPlanning == null) useOptimizedPlanning = true;
-        if (useIncrementalMST == null) useIncrementalMST = true;
-        if (useGabrielConstraint == null) useGabrielConstraint = true;
-        if (useAngleConstraint == null) useAngleConstraint = true;
         
     }
 
