@@ -11,6 +11,7 @@ import net.shiroha233.roadweaver.helpers.Records;
 import net.shiroha233.roadweaver.persistence.WorldDataProvider;
 import net.shiroha233.roadweaver.planning.PlanningUtils;
 import net.shiroha233.roadweaver.config.ConfigService;
+import net.shiroha233.roadweaver.config.ModConfig;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -103,6 +104,11 @@ public final class RoadGenerationService {
     }
 
     public static void tick(ServerLevel level) {
+        // 检查维度是否在允许列表中
+        if (!isDimensionAllowed(level)) {
+            return;
+        }
+        
         refreshQueue(level);
         ConcurrentLinkedQueue<Records.StructureConnection> q = QUEUES.computeIfAbsent(level, l -> new ConcurrentLinkedQueue<>());
         if (q.isEmpty()) return;
@@ -146,6 +152,11 @@ public final class RoadGenerationService {
     }
 
     private static void refreshQueue(ServerLevel level) {
+        // 检查维度是否在允许列表中
+        if (!isDimensionAllowed(level)) {
+            return;
+        }
+        
         WorldDataProvider provider = WorldDataProvider.getInstance();
         List<Records.StructureConnection> list = provider.getStructureConnections(level);
         if (list == null) return;
@@ -246,5 +257,31 @@ public final class RoadGenerationService {
         }
         if (best != null && q.remove(best)) return best;
         return q.poll();
+    }
+
+    private static boolean isDimensionAllowed(ServerLevel level) {
+        ModConfig config = ConfigService.get();
+        if (config.dimensionSelectors().isEmpty()) {
+            return true; // 如果没有配置维度选择器，允许所有维度
+        }
+        
+        String dimensionName = level.dimension().location().toString();
+        
+        // 检查精确匹配
+        if (config.dimensionSelectors().contains(dimensionName)) {
+            return true;
+        }
+        
+        // 检查通配符匹配
+        for (String selector : config.dimensionSelectors()) {
+            if (selector.contains("*")) {
+                String pattern = selector.replace("*", ".*");
+                if (dimensionName.matches(pattern)) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
     }
 }

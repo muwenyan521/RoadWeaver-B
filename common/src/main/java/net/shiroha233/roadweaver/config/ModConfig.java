@@ -16,11 +16,11 @@ public final class ModConfig {
     private List<String> structureBlacklist;
 
     // 路网规划配置
-    private int initialPlanRadiusChunks;      // 新建世界后以出生点为中心的初始规划半径（区块）
-    private boolean dynamicPlanEnabled;       // 是否启用基于玩家的动态增量规划
-    private int dynamicPlanRadiusChunks;      // 玩家为中心的动态规划半径（区块）
-    private int dynamicPlanStrideChunks;      // 动态规划触发步进（区块），用于判定玩家移动到新网格时触发
-    private PlanningAlgorithm planningAlgorithm; // 路网连边算法
+    private int initialPlanRadiusChunks;
+    private boolean dynamicPlanEnabled;
+    private int dynamicPlanRadiusChunks;
+    private int dynamicPlanStrideChunks;
+    private PlanningAlgorithm planningAlgorithm;
 
     // 道路生成配置
     private boolean allowArtificial;
@@ -28,7 +28,7 @@ public final class ModConfig {
     private int averagingRadius;
     private int generationThreads;
     private int maxConcurrentGenerations;
-    private int aStarStep;                 // A* 采样步长（方块）
+    private int aStarStep;
 
     private int roadWidth;         
     private int lampInterval;      
@@ -40,6 +40,29 @@ public final class ModConfig {
     private boolean useIncrementalMST;
     private boolean useGabrielConstraint;
     private boolean useAngleConstraint;
+
+    private List<String> dimensionSelectors;
+    private boolean terrainAnalyzerEnabled;
+    private int terrainRoughRadius;
+    private int terrainRoughStride;
+    private int terrainRangeThreshold;
+    private double terrainPenaltyScale;
+    private boolean preferLandOverWater;
+    private double waterStepPenalty;
+    private int coastAvoidBufferBlocks;
+    private double coastProximityPenalty;
+    private List<String> forbiddenBiomeSelectors;
+    private int forbiddenBiomeBufferBlocks;
+    private double forbiddenBiomeProximityPenalty;
+    private boolean acceptPartialPaths;
+    private double partialProgressThreshold;
+    private boolean debugVerboseLogs;
+    private boolean debugPipelineProfiler;
+    
+    // 生物群系样式配置
+    private List<LampPostConfigEntry> lampPostOverrides;
+    private List<RoadStyleConfigEntry> roadStyleOverrides;
+    private List<RoadStyleConfigEntry> bopRoadStyleOverrides;
     
 
     public ModConfig() {
@@ -77,6 +100,35 @@ public final class ModConfig {
         this.useIncrementalMST = true;
         this.useGabrielConstraint = true;
         this.useAngleConstraint = true;
+
+        this.dimensionSelectors = new ArrayList<>();
+        this.dimensionSelectors.add("minecraft:overworld");
+        
+        this.terrainAnalyzerEnabled = true;
+        this.terrainRoughRadius = 8;
+        this.terrainRoughStride = 4;
+        this.terrainRangeThreshold = 12;
+        this.terrainPenaltyScale = 1.5;
+        
+        this.preferLandOverWater = true;
+        this.waterStepPenalty = 240.0;
+        this.coastAvoidBufferBlocks = 8;
+        this.coastProximityPenalty = 80.0;
+        
+        this.forbiddenBiomeSelectors = new ArrayList<>();
+        this.forbiddenBiomeBufferBlocks = 8;
+        this.forbiddenBiomeProximityPenalty = 160.0;
+        
+        this.acceptPartialPaths = true;
+        this.partialProgressThreshold = 0.8;
+        
+        this.debugVerboseLogs = false;
+        this.debugPipelineProfiler = false;
+        
+        // 生物群系样式配置默认值
+        this.lampPostOverrides = new ArrayList<>();
+        this.roadStyleOverrides = new ArrayList<>();
+        this.bopRoadStyleOverrides = new ArrayList<>();
     }
 
     public boolean villagePredictionEnabled() {
@@ -156,7 +208,38 @@ public final class ModConfig {
         if (tunnelClearHeight < 2) tunnelClearHeight = 2;
         if (tunnelClearHeight > 16) tunnelClearHeight = 16;
         
+        if (dimensionSelectors == null) dimensionSelectors = new ArrayList<>();
+        if (dimensionSelectors.isEmpty()) dimensionSelectors.add("minecraft:overworld");
         
+        if (terrainRoughRadius < 1) terrainRoughRadius = 8;
+        if (terrainRoughRadius > 32) terrainRoughRadius = 32;
+        if (terrainRoughStride < 1) terrainRoughStride = 4;
+        if (terrainRoughStride > terrainRoughRadius) terrainRoughStride = terrainRoughRadius;
+        if (terrainRangeThreshold < 1) terrainRangeThreshold = 12;
+        if (terrainRangeThreshold > 64) terrainRangeThreshold = 64;
+        if (terrainPenaltyScale < 0.1) terrainPenaltyScale = 0.1;
+        if (terrainPenaltyScale > 10.0) terrainPenaltyScale = 10.0;
+        
+        if (waterStepPenalty < 0.0) waterStepPenalty = 0.0;
+        if (waterStepPenalty > 1000.0) waterStepPenalty = 1000.0;
+        if (coastAvoidBufferBlocks < 0) coastAvoidBufferBlocks = 0;
+        if (coastAvoidBufferBlocks > 64) coastAvoidBufferBlocks = 64;
+        if (coastProximityPenalty < 0.0) coastProximityPenalty = 0.0;
+        if (coastProximityPenalty > 1000.0) coastProximityPenalty = 1000.0;
+        
+        if (forbiddenBiomeSelectors == null) forbiddenBiomeSelectors = new ArrayList<>();
+        if (forbiddenBiomeBufferBlocks < 0) forbiddenBiomeBufferBlocks = 0;
+        if (forbiddenBiomeBufferBlocks > 64) forbiddenBiomeBufferBlocks = 64;
+        if (forbiddenBiomeProximityPenalty < 0.0) forbiddenBiomeProximityPenalty = 0.0;
+        if (forbiddenBiomeProximityPenalty > 1000.0) forbiddenBiomeProximityPenalty = 1000.0;
+        
+        if (partialProgressThreshold < 0.0) partialProgressThreshold = 0.0;
+        if (partialProgressThreshold > 1.0) partialProgressThreshold = 1.0;
+        
+        // 生物群系样式配置字段校验
+        if (lampPostOverrides == null) lampPostOverrides = new ArrayList<>();
+        if (roadStyleOverrides == null) roadStyleOverrides = new ArrayList<>();
+        if (bopRoadStyleOverrides == null) bopRoadStyleOverrides = new ArrayList<>();
     }
 
     // 初始规划半径
@@ -197,11 +280,11 @@ public final class ModConfig {
     public int aStarStep() { return aStarStep; }
     public void setAStarStep(int v) { this.aStarStep = v; }
 
-    // 新增：道路宽度（0=自动）
+    // 道路宽度（0=自动）
     public int roadWidth() { return roadWidth; }
     public void setRoadWidth(int v) { this.roadWidth = v; }
 
-    // 新增：路灯间隔（段）
+    // 路灯间隔（段）
     public int lampInterval() { return lampInterval; }
     public void setLampInterval(int v) { this.lampInterval = v; }
 
@@ -229,5 +312,76 @@ public final class ModConfig {
 
     public boolean useAngleConstraint() { return useAngleConstraint; }
     public void setUseAngleConstraint(boolean v) { this.useAngleConstraint = v; }
+
+    // 新增配置字段方法
+    public List<String> dimensionSelectors() { return dimensionSelectors; }
+    public void setDimensionSelectors(List<String> v) { 
+        this.dimensionSelectors = v == null ? new ArrayList<>() : new ArrayList<>(v); 
+    }
+
+    public boolean terrainAnalyzerEnabled() { return terrainAnalyzerEnabled; }
+    public void setTerrainAnalyzerEnabled(boolean v) { this.terrainAnalyzerEnabled = v; }
+
+    public int terrainRoughRadius() { return terrainRoughRadius; }
+    public void setTerrainRoughRadius(int v) { this.terrainRoughRadius = v; }
+
+    public int terrainRoughStride() { return terrainRoughStride; }
+    public void setTerrainRoughStride(int v) { this.terrainRoughStride = v; }
+
+    public int terrainRangeThreshold() { return terrainRangeThreshold; }
+    public void setTerrainRangeThreshold(int v) { this.terrainRangeThreshold = v; }
+
+    public double terrainPenaltyScale() { return terrainPenaltyScale; }
+    public void setTerrainPenaltyScale(double v) { this.terrainPenaltyScale = v; }
+
+    public boolean preferLandOverWater() { return preferLandOverWater; }
+    public void setPreferLandOverWater(boolean v) { this.preferLandOverWater = v; }
+
+    public double waterStepPenalty() { return waterStepPenalty; }
+    public void setWaterStepPenalty(double v) { this.waterStepPenalty = v; }
+
+    public int coastAvoidBufferBlocks() { return coastAvoidBufferBlocks; }
+    public void setCoastAvoidBufferBlocks(int v) { this.coastAvoidBufferBlocks = v; }
+
+    public double coastProximityPenalty() { return coastProximityPenalty; }
+    public void setCoastProximityPenalty(double v) { this.coastProximityPenalty = v; }
+
+    public List<String> forbiddenBiomeSelectors() { return forbiddenBiomeSelectors; }
+    public void setForbiddenBiomeSelectors(List<String> v) { 
+        this.forbiddenBiomeSelectors = v == null ? new ArrayList<>() : new ArrayList<>(v); 
+    }
+
+    public int forbiddenBiomeBufferBlocks() { return forbiddenBiomeBufferBlocks; }
+    public void setForbiddenBiomeBufferBlocks(int v) { this.forbiddenBiomeBufferBlocks = v; }
+
+    public double forbiddenBiomeProximityPenalty() { return forbiddenBiomeProximityPenalty; }
+    public void setForbiddenBiomeProximityPenalty(double v) { this.forbiddenBiomeProximityPenalty = v; }
+
+    public boolean acceptPartialPaths() { return acceptPartialPaths; }
+    public void setAcceptPartialPaths(boolean v) { this.acceptPartialPaths = v; }
+
+    public double partialProgressThreshold() { return partialProgressThreshold; }
+    public void setPartialProgressThreshold(double v) { this.partialProgressThreshold = v; }
+
+    public boolean debugVerboseLogs() { return debugVerboseLogs; }
+    public void setDebugVerboseLogs(boolean v) { this.debugVerboseLogs = v; }
+
+    public boolean debugPipelineProfiler() { return debugPipelineProfiler; }
+    public void setDebugPipelineProfiler(boolean v) { this.debugPipelineProfiler = v; }
     
+    // 生物群系样式配置字段方法
+    public List<LampPostConfigEntry> lampPostOverrides() { return lampPostOverrides; }
+    public void setLampPostOverrides(List<LampPostConfigEntry> v) { 
+        this.lampPostOverrides = v == null ? new ArrayList<>() : new ArrayList<>(v); 
+    }
+    
+    public List<RoadStyleConfigEntry> roadStyleOverrides() { return roadStyleOverrides; }
+    public void setRoadStyleOverrides(List<RoadStyleConfigEntry> v) { 
+        this.roadStyleOverrides = v == null ? new ArrayList<>() : new ArrayList<>(v); 
+    }
+    
+    public List<RoadStyleConfigEntry> bopRoadStyleOverrides() { return bopRoadStyleOverrides; }
+    public void setBopRoadStyleOverrides(List<RoadStyleConfigEntry> v) { 
+        this.bopRoadStyleOverrides = v == null ? new ArrayList<>() : new ArrayList<>(v); 
+    }
 }
