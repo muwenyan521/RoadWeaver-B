@@ -194,11 +194,13 @@ public final class RoadPlanningService {
             return Collections.emptyList();
         }
 
-        List<BlockPos> path = BasicAStarPathfinder.findPath(start, end, connections);
-        if (!path.isEmpty()) {
-            PathCache.cachePath(start, end, 3, convertToRoadSegmentPlacements(path));
+        List<Records.RoadSegmentPlacement> pathPlacements = DynamicAStarPathfinder.calculateDynamicPath(start, end, 3, level, 10000);
+        if (pathPlacements != null && !pathPlacements.isEmpty()) {
+            List<BlockPos> path = convertToBlockPosList(pathPlacements);
+            PathCache.cachePath(start, end, 3, pathPlacements);
+            return path;
         }
-        return path;
+        return Collections.emptyList();
     }
 
     public static void clearPathCache() {
@@ -249,7 +251,7 @@ public final class RoadPlanningService {
     private static List<BlockPos> convertToBlockPosList(List<Records.RoadSegmentPlacement> placements) {
         List<BlockPos> result = new ArrayList<>();
         for (Records.RoadSegmentPlacement placement : placements) {
-            result.add(placement.position());
+            result.add(placement.middlePos());
         }
         return result;
     }
@@ -257,7 +259,9 @@ public final class RoadPlanningService {
     private static List<Records.RoadSegmentPlacement> convertToRoadSegmentPlacements(List<BlockPos> path) {
         List<Records.RoadSegmentPlacement> result = new ArrayList<>();
         for (BlockPos pos : path) {
-            result.add(new Records.RoadSegmentPlacement(pos, 3, Records.RoadSegmentType.STRAIGHT));
+            List<BlockPos> widthPositions = new ArrayList<>();
+            widthPositions.add(pos);
+            result.add(new Records.RoadSegmentPlacement(pos, widthPositions));
         }
         return result;
     }

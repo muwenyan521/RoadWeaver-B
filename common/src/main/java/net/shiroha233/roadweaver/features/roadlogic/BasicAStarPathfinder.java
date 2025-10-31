@@ -10,7 +10,7 @@ import net.shiroha233.roadweaver.helpers.Records;
 import net.shiroha233.roadweaver.config.ConfigService;
 import java.util.*;
 
-final class BasicAStarPathfinder {
+public final class BasicAStarPathfinder {
     private BasicAStarPathfinder() {}
     
     private static final double ORTHO_STEP_COST = 1.0;//基础步进成本，数值越大越偏好直线路径
