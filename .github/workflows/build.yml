@@ -30,9 +30,6 @@ jobs:
       - name: build
         run: ./gradlew build
 
-      - name: List generated JARs
-        run: find . -name "*.jar" -exec ls -lh {} \;
-
       - name: capture build artifacts
         if: ${{ matrix.java == '21' }}
         uses: actions/upload-artifact@v4

@@ -11,10 +11,7 @@ import net.shiroha233.roadweaver.config.ModConfig;
 import net.shiroha233.roadweaver.helpers.Records;
 import net.shiroha233.roadweaver.persistence.WorldDataProvider;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class RoadPlanningService {
@@ -22,6 +19,8 @@ public final class RoadPlanningService {
 
     private static final ConcurrentHashMap<Level, Set<Long>> PLANNED_TILES = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<Level, java.util.concurrent.ConcurrentHashMap<Long, Long>> PLANNED_TILE_CENTERS = new ConcurrentHashMap<>();
+    private static final PathCache PATH_CACHE = new PathCache(1000, 300000L); // 1000条路径，5分钟TTL
+    private static final IncrementalMST INCREMENTAL_MST = new IncrementalMST();
 
     public static void initialPlan(ServerLevel level) {
         if (!Level.OVERWORLD.equals(level.dimension())) return;
@@ -76,19 +75,36 @@ public final class RoadPlanningService {
         }
         if (points.size() < 2) return;
 
+        ModConfig cfg = ConfigService.get();
         List<Records.StructureConnection> primaryEdges;
-        ModConfig cfg0 = ConfigService.get();
-        if (cfg0.planningAlgorithm() == ModConfig.PlanningAlgorithm.DELAUNAY) {
-            primaryEdges = DelaunayPlanner.planDelaunay(points, 2048);
-        } else if (cfg0.planningAlgorithm() == ModConfig.PlanningAlgorithm.RNG) {
-            primaryEdges = RNGPlanner.planRNG(points, 2048);
+        
+        if (cfg.useOptimizedPlanning()) {
+            // 使用优化的混合规划算法
+            primaryEdges = OptimizedPlanner.planOptimized(points, 2048, 
+                cfg.planningAlgorithm(), cfg.useGabrielConstraint(), cfg.useAngleConstraint());
         } else {
-            primaryEdges = KNNPlanner.planKNN(points, 2, 2048, 1.8, 40.0, 2);
+            // 回退到原有算法
+            if (cfg.planningAlgorithm() == ModConfig.PlanningAlgorithm.DELAUNAY) {
+                primaryEdges = DelaunayPlanner.planDelaunay(points, 2048);
+            } else if (cfg.planningAlgorithm() == ModConfig.PlanningAlgorithm.RNG) {
+                primaryEdges = RNGPlanner.planRNG(points, 2048);
+            } else {
+                primaryEdges = KNNPlanner.planKNN(points, 2, 2048, 1.8, 40.0, 2);
+            }
         }
+        
         if (primaryEdges.isEmpty()) return;
 
         WorldDataProvider provider = WorldDataProvider.getInstance();
         List<Records.StructureConnection> existing = provider.getStructureConnections(level);
+
+        // 使用增量MST更新现有连接
+        List<Records.StructureConnection> updatedEdges;
+        if (cfg.useIncrementalMST() && existing != null && !existing.isEmpty()) {
+            updatedEdges = INCREMENTAL_MST.incrementalAdd(points, primaryEdges, existing);
+        } else {
+            updatedEdges = primaryEdges;
+        }
 
         HashSet<BlockPos> inRect = new HashSet<>(points);
         ArrayList<Records.StructureConnection> existingInRect = new ArrayList<>();
@@ -99,16 +115,19 @@ public final class RoadPlanningService {
         }
 
         ArrayList<Records.StructureConnection> base = new ArrayList<>(existingInRect);
-        base.addAll(primaryEdges);
+        base.addAll(updatedEdges);
 
         List<Records.StructureConnection> bridges = KNNPlanner.connectComponents(points, base, 1536, 35.0, 3);
 
-        ArrayList<Records.StructureConnection> incoming = new ArrayList<>(primaryEdges);
+        ArrayList<Records.StructureConnection> incoming = new ArrayList<>(updatedEdges);
         incoming.addAll(bridges);
         List<Records.StructureConnection> merged = mergeConnections(existing, incoming);
         if (merged.size() != existing.size()) {
             provider.setStructureConnections(level, merged);
         }
+        
+        // 清除相关区域的路径缓存
+        PATH_CACHE.clearRegion(minBlockX, minBlockZ, maxBlockX, maxBlockZ);
     }
 
     private static List<Records.StructureConnection> mergeConnections(List<Records.StructureConnection> existing,
@@ -154,5 +173,46 @@ public final class RoadPlanningService {
     public static int getDynamicPlanRadiusChunks() {
         ModConfig cfg = ConfigService.get();
         return Math.max(1, cfg.dynamicPlanRadiusChunks());
+    }
+
+    public static List<BlockPos> findPath(ServerLevel level, BlockPos start, BlockPos end) {
+        String cacheKey = PATH_CACHE.generateKey(start, end);
+        List<BlockPos> cachedPath = PATH_CACHE.get(cacheKey);
+        if (cachedPath != null) {
+            return cachedPath;
+        }
+
+        WorldDataProvider provider = WorldDataProvider.getInstance();
+        List<Records.StructureConnection> connections = provider.getStructureConnections(level);
+        if (connections == null || connections.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<BlockPos> path = DynamicAStarPathfinder.findPath(start, end, connections);
+        if (!path.isEmpty()) {
+            PATH_CACHE.put(cacheKey, path);
+        }
+        return path;
+    }
+
+    public static void clearPathCache() {
+        PATH_CACHE.clear();
+    }
+
+    public static PathCache.CacheStats getCacheStats() {
+        return PATH_CACHE.getStats();
+    }
+
+    public static void removeStructure(ServerLevel level, BlockPos structurePos) {
+        WorldDataProvider provider = WorldDataProvider.getInstance();
+        List<Records.StructureConnection> existing = provider.getStructureConnections(level);
+        if (existing == null) return;
+
+        List<Records.StructureConnection> updated = INCREMENTAL_MST.incrementalRemove(structurePos, existing);
+        if (updated.size() != existing.size()) {
+            provider.setStructureConnections(level, updated);
+            PATH_CACHE.clearRegion(structurePos.getX() - 1000, structurePos.getZ() - 1000, 
+                                 structurePos.getX() + 1000, structurePos.getZ() + 1000);
+        }
     }
 }

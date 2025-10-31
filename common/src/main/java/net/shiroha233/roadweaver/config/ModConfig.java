@@ -35,6 +35,12 @@ public final class ModConfig {
     private boolean tunnelEnabled;
     private int tunnelClearHeight;
     
+    // 增量MST更新与高级寻路优化配置
+    private boolean useOptimizedPlanning;
+    private boolean useIncrementalMST;
+    private boolean useGabrielConstraint;
+    private boolean useAngleConstraint;
+    
 
     public ModConfig() {
         this.villagePredictionEnabled = true;
@@ -65,6 +71,12 @@ public final class ModConfig {
         this.lampInterval = 32; 
         this.tunnelEnabled = false;
         this.tunnelClearHeight = 5;
+        
+        // 增量MST更新与寻路优化默认配置
+        this.useOptimizedPlanning = true;
+        this.useIncrementalMST = true;
+        this.useGabrielConstraint = true;
+        this.useAngleConstraint = true;
     }
 
     public boolean villagePredictionEnabled() {
@@ -144,6 +156,12 @@ public final class ModConfig {
         if (tunnelClearHeight < 2) tunnelClearHeight = 2;
         if (tunnelClearHeight > 16) tunnelClearHeight = 16;
         
+        // 增量MST更新与寻路优化配置校验
+        if (useOptimizedPlanning == null) useOptimizedPlanning = true;
+        if (useIncrementalMST == null) useIncrementalMST = true;
+        if (useGabrielConstraint == null) useGabrielConstraint = true;
+        if (useAngleConstraint == null) useAngleConstraint = true;
+        
     }
 
     // 初始规划半径
@@ -204,5 +222,17 @@ public final class ModConfig {
     public int tunnelClearHeight() { return tunnelClearHeight; }
     public void setTunnelClearHeight(int v) { this.tunnelClearHeight = v; }
 
+    // 增量MST更新与寻路优化配置方法
+    public boolean useOptimizedPlanning() { return useOptimizedPlanning; }
+    public void setUseOptimizedPlanning(boolean v) { this.useOptimizedPlanning = v; }
+
+    public boolean useIncrementalMST() { return useIncrementalMST; }
+    public void setUseIncrementalMST(boolean v) { this.useIncrementalMST = v; }
+
+    public boolean useGabrielConstraint() { return useGabrielConstraint; }
+    public void setUseGabrielConstraint(boolean v) { this.useGabrielConstraint = v; }
+
+    public boolean useAngleConstraint() { return useAngleConstraint; }
+    public void setUseAngleConstraint(boolean v) { this.useAngleConstraint = v; }
     
 }
